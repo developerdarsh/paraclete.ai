@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://mapsite.io/ed309c1a-2dc6-41bd-b38d-2e2fad31fe13/sitemap.xml
