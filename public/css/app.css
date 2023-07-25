@@ -21165,7 +21165,7 @@ i.video-icon {
 .chat-main-container {
   min-width: 800px;
   min-height: 500px;
-  max-height: 750px;
+  /* max-height: 750px; */
   display: flex;
   overflow: hidden;
   box-sizing: border-box;
@@ -21700,4 +21700,7 @@ i.video-icon {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
+}
+#audioPlayer{
+  display: block !important;
 }

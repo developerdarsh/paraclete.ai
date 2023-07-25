@@ -498,6 +498,10 @@ Route::group(['prefix' => 'user', 'middleware' => ['verified', '2fa.verify', 'ro
         Route::post('/chat/rename', 'rename');
         Route::post('/chat/delete', 'delete');
         Route::get('/chats/{code}', 'view');
+        Route::post('/chat/save-audio', 'saveAudio');
+        Route::post('/chat/audio-convert', 'audioConvert');
+        Route::get('chat/audioPlayerEleven', 'audioPlayerEleven');
+        Route::post('text-to-speech', 'textToSpeech')->name('text-to-speech');
     });
 
     // USER VIDEO ROUTES

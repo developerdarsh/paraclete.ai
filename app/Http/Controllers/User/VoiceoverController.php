@@ -236,7 +236,6 @@ class VoiceoverController extends Controller
                     return response()->json(["error" => __("Unsupported audio file extension was selected")], 422);
                 } 
 
-
                 switch ($voice->vendor) {
                     case 'azure':
                             if (request('format') != 'wav') {
@@ -421,10 +420,6 @@ class VoiceoverController extends Controller
                 return response()->json(["error" => __('Total characters of your text is more than allowed. Please decrese the length of your text.')], 422);
             }
 
-
-            // dump((Auth::user()->available_chars + Auth::user()->available_chars_prepaid));
-            // dd($total_characters);
-            
 
             if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
                 return response()->json(["error" => __("Not enough available characters to process")], 422);

@@ -2,6 +2,53 @@
 @section('css')
 	<!-- Sweet Alert CSS -->
 	<link href="{{URL::asset('plugins/sweetalert/sweetalert2.min.css')}}" rel="stylesheet" />
+	<style>
+	.audio_search a{
+		padding:0px 5px;
+		
+	}
+    #audioPlayer{
+        display: block;
+    }
+	.audio_search .fa{
+		font-size:1.3rem;
+		cursor:pointer;
+	}
+
+	.chats-input-b .form-group {
+		position: relative;
+		display: flex;
+		flex-wrap: inherit;
+		align-items: center;
+		flex-direction: row;
+		width: 100%;
+     }
+	 .chats-input-b .input-group-btn {
+   		 position: relative;
+	 }
+	 .chats-input-b .microphone-voice {
+	    margin: 0px 10px !IMPORTANT;
+	}
+	.chats-input-b .microphone-voice i {
+		width: 40px;
+		height: 40px;
+		line-height: 40px;
+		background: #7111ef;
+		color: #ffffff;
+		font-size: 18px;
+		text-align: center;
+		border-radius: 100%;
+	}
+	.chats-input-b .microphone-voice .active:after {
+		content: '';
+		width: 12px;
+		height: 12px;
+		background: red;
+		position: absolute;
+		border-radius: 100%;
+		top: 2px;
+	}
+	</style>
 @endsection
 
 @section('page-header')
@@ -91,18 +138,32 @@
 					<div class="card-footer mb-8">
 						<div class="row">						
 							<div class="col-sm-12">	
+                                <div class='d-flex justify-content-between'>
 								<div class="form-check form-switch">
 									<input class="form-check-input" type="checkbox" id="web_access_button">
 									<label class="form-check-label" for="web-access-button">Web access</label>
-								</div>
-								<div class="input-box mb-0">								
-									<div class="input-group file-browser">							    
-										<input type="message" class="form-control @error('message') is-danger @enderror border-right-0" style="margin-right: 80px;" id="message" name="message" placeholder="{{ __('Enter your question here...') }}">
+                                </div>
+								<div class="form-check form-switch d-flex">
+									
+                                    <div class="audio_search">
+									<input type="hidden" id="isAudioSearch" value="0">
+									<audio id="audioPlayer" style="visibility:hidden;" controls></audio>
+									<p id="status"></p>
+                                    </div>
+                                    
+                                </div>
+                                </div>
+                               <div class="input-box chats-input-b mb-0">								
+									<div class="form-group file-browser">							    
+										<input type="message" class="form-control @error('message') is-danger @enderror" id="message" name="message" placeholder="{{ __('Enter your question here...') }}">
+										<div class="microphone-voice"> <a id="record-button"><i class="fa-regular fa-microphone"></i></a>
+										</div>
 										<label class="input-group-btn">
 											<button class="btn btn-primary special-btn" id="chat-button">
 												{{ __('Send') }}
 											</button>
 										</label>
+										
 									</div> 
 									@error('message')
 										<p class="text-danger">{{ $errors->first('message') }}</p>
@@ -135,9 +196,9 @@
 
 	// Process deault chat message	
 	$(document).ready(function() {
+		$('#audio-player').hide();
 		$(".chat-sidebar-message").first().focus().trigger('click');
-
-		let check_messages = document.querySelectorAll('.chat-sidebar-message').length;
+        let check_messages = document.querySelectorAll('.chat-sidebar-message').length;
 		if (check_messages == 0) {
 			let id = makeid(10);
 			$('#chat-container').html('');
@@ -305,29 +366,31 @@
 		
 		main_form.addEventListener("submit", event => {
 			var webAccessBtn = $("#web_access_button").prop('checked') ? 1 : 0;
+			var audioSearchBtn = $("#isAudioSearch").val();
             event.preventDefault();
 			const message = input_text.value;
 			if (!message) return;
 
 			appendMessage(user_avatar, "right", message);
 			input_text.value = "";
-			process(message , webAccessBtn)
+			$('#audioPlayer').css('visibility','hidden');
+			process(message , webAccessBtn, audioSearchBtn)
 		});
 
 	});
 
 
 	// Send chat message
-	function process(message,webAccessBtn) {
+	function process(message,webAccessBtn, audioSearchBtn) {
 		msgerSendBtn.disabled = true
 		let formData = new FormData();
 		formData.append('message', message);
 		formData.append('webAccessBtn', webAccessBtn);
 		formData.append('chat_code', chat_code);
 		formData.append('message_code', active_id);
+		formData.append('audioSearchBtn', audioSearchBtn);
+		
 		let code = makeid(10);
-
-	
 		
 		appendMessage(bot_avatar, "left", "", code);
 		
@@ -361,10 +424,24 @@
 				};
 				eventSource.onmessage = function (e) {
 					if (e.data == "[DONE]") {
-						msgerSendBtn.disabled = false
+                        msgerSendBtn.disabled = false
 						eventSource.close();
 				        loadChat(active_id);
-
+						if( $('#isAudioSearch').val() == '1'){
+							$('#preloader').show();
+                            fetch("/user/chat/audio-convert", { 
+								headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+								method: 'post',
+								 body: formData
+							 })
+                            .then(function(response){
+								return response.text();
+							})
+							.then(function(result){
+								const parsedResult = JSON.parse(result);
+								ConvertaudioPlayer(parsedResult.data, parsedResult.voice_code);
+							})
+                        }
 					} else {
 						let txt = JSON.parse(e.data).choices[0].delta.content
 						if (txt !== undefined) {
@@ -375,13 +452,11 @@
 				};
 				eventSource.onerror = function (e) {
 					msgerSendBtn.disabled = false
-					console.log(e);
 					eventSource.close();
 				};
 				
 			})
 			.catch(function (error) {
-				console.log(error);
 				msgerSendBtn.disabled = false
 			});
 
@@ -405,7 +480,6 @@
 
 			})	
 			.catch(function (error) {
-				console.log(error);
 				msgerSendBtn.disabled = false
 			});
 	}
@@ -475,7 +549,6 @@
 					processData: false,
 					contentType: false,
 					success: function (data) {
-						console.log(data)
 						if (data['status'] == 'success') {
 							Swal.fire('{{ __('Chat Deleted') }}', '{{ __('Chat history has been successfully deleted') }}', 'success');	
 							$("#" + active_id).remove();	
@@ -571,7 +644,6 @@
 		return root.querySelector(selector);
 	}
 
-	// Generate a random value
 	function makeid(length) {
 		let result = '';
 		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -593,7 +665,6 @@
         $('.chat-sidebar-container').toggleClass('extend');
     });
 
-	// Check if it is a json
 	function isJson(str) {
 		try {
 			JSON.parse(str);
@@ -603,5 +674,106 @@
 		return true;
 	}
 
+const recordButton = document.getElementById('record-button');
+const statusElement = document.getElementById('status');
+
+let mediaRecorder;
+let audioChunks = [];
+
+recordButton.addEventListener('click', toggleRecording);
+
+function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+	stopRecording();
+  } else {
+    $('#isAudioSearch').val(1);
+    startRecording();
+  }
+}
+
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(function (stream) {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.addEventListener('dataavailable', function (event) {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener('stop', function () {
+        const audioBlob = new Blob(audioChunks);
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recorded_audio.wav');
+        fetch('/user/chat/save-audio', {
+            headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.response) {
+              $('#message').val(data.response.text);
+              $('#chat-button').click();
+            } else {
+              console.log('Error saving audio');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+
+        audioChunks = [];
+      });
+
+      mediaRecorder.start();
+      recordButton.innerHTML = '<i class="fa-solid fa-stop active"></i>';
+    })
+    .catch(function (error) {
+      console.error('Error:', error);
+    });
+}
+
+function stopRecording() {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
+    recordButton.innerHTML = '<i class="fa-regular fa-microphone"></i>';
+  }
+}
+
+function ConvertaudioPlayer(text,code){
+	const url = (code === 0) ? "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream" : "https://api.elevenlabs.io/v1/text-to-speech/TxGEqnHWrfWFTfGW9XjX/stream";
+	fetch(url, {
+		method: 'POST',
+		headers: {
+			'Accept': '*/*',
+			'Xi-Api-Key': 'd2babf9c40d755b3190831cb00b3950c',
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			text: text,
+			model_id: 'eleven_monolingual_v1',
+			voice_settings: {
+			stability: 0,
+			similarity_boost: 0,
+			style: 1,
+			use_speaker_boost: true
+			}
+		})
+	})
+  	.then(response => response.blob())
+  	.then(blob => {
+		$('#preloader').hide(); 
+		$('#audioPlayer').css('visibility','inherit');  
+		const audioUrl = URL.createObjectURL(blob);
+		const audioPlayer = document.getElementById('audioPlayer');
+		audioPlayer.src = audioUrl;
+		audioPlayer.play();
+  	})
+  	.catch(error => {
+    	console.error('Error:', error);
+  	});
+}
+    
 </script>
 @endsection

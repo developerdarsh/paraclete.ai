@@ -54,7 +54,20 @@
               </div>					
           
             </div>
-          
+			<div class="gender-select-b d-flex">
+				<div class="form-check me-4">
+					<input value="1" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" @if($chat->voice_code == '1') checked @endif>
+					<label class="form-check-label" for="flexRadioDefault1">
+						Male
+					</label>
+				</div>
+				<div class="form-check">
+					<input value="0" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" @if($chat->voice_code == '0') checked @endif>
+					<label class="form-check-label" for="flexRadioDefault2">
+						Female
+					</label>
+				</div>   
+			</div>
             <div class="col-md-12 col-sm-12 mt-2 mb-4 pl-0">
               <div class="form-group">
                 <label class="custom-switch">

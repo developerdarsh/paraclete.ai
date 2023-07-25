@@ -15,6 +15,8 @@ use App\Models\FavoriteChat;
 use App\Models\ChatHistory;
 use App\Models\Chat;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Log;
 
 
 class ChatController extends Controller
@@ -144,9 +146,9 @@ class ChatController extends Controller
             }
         }
         $request->session()->put('webAccessBtn', $request->webAccessBtn);
-
-        $request->session()->put('message_code', $request->message_code);
-
+		$request->session()->put('audioSearchBtn', $request->audioSearchBtn);
+		$request->session()->put('message_code', $request->message_code);
+        
         return response()->json(['status' => 'success', 'old'=> $balance, 'current' => ($balance - $words)]);
 
 	}
@@ -159,231 +161,75 @@ class ChatController extends Controller
 	* @return - confirmation
 	*
 	*/
-    public function generateChatOld(Request $request) 
-    {
-		$webAccessBtn = session()->get('webAccessBtn');
-        $message_code = session()->get('message_code');
-        $chat_message = ChatHistory::where('message_code', $message_code)->first();
-        $query = session()->get('messages');
-		$queryStr = $request->message;
-        if($webAccessBtn == '1'){
-            $data = $this->googleCustomSearch($queryStr);
-            $customSearch = json_decode($data);
-            $customSearchSnippet = $customSearch[0]->snippet;
-            session()->forget('messages');
-            $openairesponse=$this->openaiResult($customSearchSnippet);
-            $chathistoryarray=$chat_message->chat;
-            array_push($chathistoryarray,array(
-                'role' => 'assistant',
-                'content' => $customSearchSnippet
-            ));
-            array_push($chathistoryarray,array(
-                'role' => 'assistant',
-                'content' => $openairesponse->choices[0]->text
-            ));
-            
-		}else{
-            $openairesponse=$this->openaiResult($queryStr);
-            $content=$openairesponse->choices[0]->text;
-            $chathistoryarray=$chat_message->chat;
-            array_push($chathistoryarray,array(
-                'role' => 'assistant',
-                'content' => $content
-            ));
-        }
-        $chat_message->chat=$chathistoryarray;
-        $chat_message->save();
-        return response()->stream(function () {
-
-            $open_ai = new OpenAi(config('services.openai.key'));
-            $message_code = session()->get('message_code');
-
-            $chat_message = ChatHistory::where('message_code', $message_code)->first();
-            $messages = $chat_message->chat;
-
-            $text = "";
-            $opts = [
-                'model' => 'gpt-3.5-turbo',
-                'messages' => $messages,
-                'temperature' => 1.0,
-                'frequency_penalty' => 0,
-                'presence_penalty' => 0,
-                'stream' => true
-            ];
-            
-            $complete = $open_ai->chat($opts, function ($curl_info, $data) use (&$text) {
-                if ($obj = json_decode($data) and $obj->error->message != "") {
-                    error_log(json_encode($obj->error->message));
-                } else {
-                    echo $data;
-
-                    $clean = str_replace("data: ", "", $data);
-                    $first = str_replace("}\n\n{", ",", $clean);
     
-                    if(str_contains($first, 'assistant')) {
-                        $raw = str_replace('"choices":[{"delta":{"role":"assistant"', '"random":[{"alpha":{"role":"assistant"', $first);
-                        $response = json_decode($raw, true);
-                    } else {
-                        $response = json_decode($clean, true);
-                    }    
-        
-				$response["choices"][0]["delta"]["content"] = "Hellow...tehrere";
-                    if ($data != "data: [DONE]\n\n" and isset($response["choices"][0]["delta"]["content"])) {
-                        $text .= $response["choices"][0]["delta"]["content"];
-						
-                    }
-
-                  
-                }              
-                echo PHP_EOL;
-                ob_flush();
-                flush();
-                return strlen($data);
-            });
-
-            # Update credit balance
-            $words = count(explode(' ', ($text)));
-            $this->updateBalance($words);  
-            
-            array_push($messages, ['role' => 'assistant', 'content' => $text]);
-            $chat_message->messages = ++$chat_message->messages;
-            $chat_message->chat = $messages;
-            $chat_message->save();
-           
-        }, 200, [
-            'Cache-Control' => 'no-cache',
-            'Content-Type' => 'text/event-stream',
-        ]);
-        
-    }
-
-    public function generateChatNew(Request $request) 
-    {
-        $webAccessBtn = session()->get('webAccessBtn');
-        $message_code = session()->get('message_code');
-        $chat_message = ChatHistory::where('message_code', $message_code)->first();
-        $query = session()->get('messages');
-        $queryStr = $request->message;
-        $data = '';
-        $string = "";
-        if ($webAccessBtn == '1') {
-            $data = $this->googleCustomSearch($queryStr);
-            // $customSearchData = json_decode($data);
-            // $customSearchSnippet = $customSearch[0]->snippet;
-            session()->forget('messages');
-            $openairesponse = $this->openaiResult($data);
-            // dd($openairesponse);
-        } else {
-            $openairesponse = $this->openaiResult($queryStr);
-        }
-        $content = $openairesponse->choices[0]->text;
-        return response()->stream(function () use ($content, $data) {
-
-            $message_code = session()->get('message_code');
-
-            if ($data != '') {
-                $chat_message = ChatHistory::where('message_code', $message_code)->first();
-                $messages = $chat_message->chat;
-
-                $text = $data;
-                $opts = [
-                    'model' => 'gpt-3.5-turbo',
-                    'messages' => $messages,
-                    'temperature' => 1.0,
-                    'frequency_penalty' => 0,
-                    'presence_penalty' => 0,
-                    'stream' => true
-                ];
-
-                # Update credit balance
-                $words = count(explode(' ', ($text)));
-                $this->updateBalance($words);
-
-                array_push($messages, ['role' => 'assistant', 'content' => $text]);
-                $chat_message->messages = ++$chat_message->messages;
-                $chat_message->chat = $messages;
-                $chat_message->save();
-            }
-            $chat_message = ChatHistory::where('message_code', $message_code)->first();
-            $messages = $chat_message->chat;
-
-            $text = $content;
-            $opts = [
-                'model' => 'gpt-3.5-turbo',
-                'messages' => $messages,
-                'temperature' => 1.0,
-                'frequency_penalty' => 0,
-                'presence_penalty' => 0,
-                'stream' => true
-            ];
-
-            # Update credit balance
-            $words = count(explode(' ', ($text)));
-            $this->updateBalance($words);
-
-            array_push($messages, ['role' => 'assistant', 'content' => $text]);
-            $chat_message->messages = ++$chat_message->messages;
-            $chat_message->chat = $messages;
-            $chat_message->save();
-
-        }, 200, [
-                'Cache-Control' => 'no-cache',
-                'Content-Type' => 'text/event-stream',
-            ]);
-
-    }
-
     public function generateChat(Request $request) 
     {
-        $requestMessage = $request->message;
         
+        $requestMessage = $request->message;
         $webAccessBtn = session()->get('webAccessBtn');
+        $audioSearchBtn = session()->get('audioSearchBtn');
         if (session()->has('webAccessBtn')) {
                 session()->forget('webAccessBtn');
          }
-
             return response()->stream(function () use ($requestMessage, $webAccessBtn) {
-
                         
-                      
-
                         $open_ai = new OpenAi(config('services.openai.key'));
-
-                         //if(null !== session()->get('message_code') && '' !== session()->get('message_code')){
-
-
-                                $message_code = session()->get('message_code');
+                        $message_code = session()->get('message_code');
                              
                                 if ($webAccessBtn == '1') {
                                   
                                 $queryStr = $requestMessage;
                                 $google_result_data = $this->googleCustomSearch($queryStr);
+                                $search = '</br>Instructions:You`re now the persona of an advanced online AI language model, expertly trained on a broad array of internet text. Your mission, as a Natural Language Processing (NLP) wizard, is to analyze and respond to user queries with short, concise, and informative answers derived from an extensive database and real-time Google search results.
+If a query arrives needing deeper exploration or explanation, don`t hesitate to provide a comprehensive reply, citing sources using [number.(URL)] notation post-reference. In case the search results refer to multiple subjects sharing the same name, distinguish each by offering separate answers tailored to each context.
+For any current events or news-related questions, leverage your access to https://www.newsnow.com/us/ and provide a brief yet comprehensive summary, ensuring the information is easily digestible for a general audience.
+Remember, your primary objective is to deliver direct, straightforward responses, unless your user seeks more elaborate information. In all circumstances, you are committed to making complex information accessible and understandable, creating a seamless interaction that informs, assists, and engages.
+If the provided search results refer to multiple subjects with the same name, write separate answers for each subject.
+Make sure to create a well-formatted list with bold headings for each point title.also please do this needfull 1.each title of each points must be bold. 2.web links must be replace with citation url</br>' ;
+//                                 $google_result_data = str_replace($search, '', $google_result_data) ;
                                 $chat_message = ChatHistory::where('message_code', $message_code)->first();
-
                                 $messages = $chat_message->chat;
+                                $withGoogleSearch = $chat_message->chat;    
+                                $concatInst =  $google_result_data.$search;                          
                                 array_push($messages, ['role' => 'assistant', 'content' => $google_result_data]);
+
+                                //$google_result_data_new = str_replace($search, '', $google_result_data) ;
+                                //$google_result_data_new.='---hellow---';
+                                array_push($withGoogleSearch, ['role' => 'assistant', 'content' => $concatInst]);
+
                                 $chat_message->messages = ++$chat_message->messages;
                                 $chat_message->chat = $messages;
+
+
+
                                 $chat_message->save();
-                                // $chat_message = ChatHistory::where('message_code', $message_code)->first();
-                                // $messages = $chat_message->chat;
-
                                 } else {
-                                $chat_message = ChatHistory::where('message_code', $message_code)->first();
-                                $messages = $chat_message->chat;
+                                  $chat_message = ChatHistory::where('message_code', $message_code)->first();
+                                  $messages = $chat_message->chat;
                                 }
-
-                        // }
-                        
                         $text = "";
-                        $opts = [
-                            'model' => 'gpt-3.5-turbo',
-                            'messages' => $messages,
-                            'temperature' => 1.0,
-                            'frequency_penalty' => 0,
-                            'presence_penalty' => 0,
-                            'stream' => true
-                        ];
+                        if ($webAccessBtn == '1') {
+                            $opts = [
+                                'model' => 'gpt-3.5-turbo',
+                                'messages' => $withGoogleSearch,
+                                'temperature' => 1.0,
+                                'frequency_penalty' => 0,
+                                'presence_penalty' => 0,
+                                'stream' => true
+                            ];
+                        }else{
+                             $opts = [
+                                'model' => 'gpt-3.5-turbo',
+                                'messages' => $messages,
+                                'temperature' => 1.0,
+                                'frequency_penalty' => 0,
+                                'presence_penalty' => 0,
+                                'stream' => true
+                            ];
+
+                        }
+
+                        
                         
                         $complete = $open_ai->chat($opts, function ($curl_info, $data) use (&$text) {
                             if ($obj = json_decode($data) and $obj->error->message != "") {
@@ -406,9 +252,6 @@ class ChatController extends Controller
                                     $text .= $response["choices"][0]["delta"]["content"];
                                 }      
 
-                            
-                            
-
                             }
                             
                             echo PHP_EOL;
@@ -417,29 +260,30 @@ class ChatController extends Controller
                             return strlen($data);
                         });
 
-                        # Update credit balance
                         $words = count(explode(' ', ($text)));
                         $this->updateBalance($words);  
                         
                         array_push($messages, ['role' => 'assistant', 'content' => $text]);
-                    // array_push($messages, ['role' => 'assistant', 'content' => "hellow"]);
                         $chat_message->messages = ++$chat_message->messages;
                         $chat_message->chat = $messages;
                         $chat_message->save();
-
-                       
-
-                     
-                    
                     }, 200, [
                         'Cache-Control' => 'no-cache',
                         'Content-Type' => 'text/event-stream',
-                    ]);
-       
-       
-        
+                    ]); 
     }
 
+    public function audioConvert(Request $request){
+		 
+		$message_code = $request->message_code;
+        $chat_message = ChatHistory::where('message_code', $message_code)->first();
+        $messages = $chat_message->chat;
+        $voice_code = Chat::where('chat_code', $chat_message->chat_code)->first();
+        $i = count($messages)-1;
+        $lastAssistantData['voice_code'] = $voice_code->voice_code;
+        $lastAssistantData['data'] = $messages[$i]['content'];
+        return  $lastAssistantData;
+    }
     /**
 	*
 	* Clear Session
@@ -455,8 +299,6 @@ class ChatController extends Controller
 
         return response()->json(['status' => 'success']);
 	}
-
-
 
     /**
 	*
@@ -499,7 +341,6 @@ class ChatController extends Controller
         return true;
     }
 
-
     /**
 	*
 	* Update user word balance
@@ -520,7 +361,6 @@ class ChatController extends Controller
             return $message;
         }   
     }
-
 
     /**
 	* 
@@ -666,136 +506,117 @@ class ChatController extends Controller
         return $result;
     }
 
-	public function googleCustomSearchOld($search_key)
-    {
-        $search_result = [];
-        if(!empty($search_key))
-        {
-            $searchQ = $search_key;
-    
-            $ch = curl_init();
-            $cr = "cr=".urlencode($searchQ);
-            $cx = "&cx=82a52554294294369";
-            $lr = "&lr=".urlencode($searchQ);
-            $q = "&q=".urlencode($searchQ);
-            $safe = "&safe=off";
-            $alt = "&alt=json";
-            $num = "&num=5";
-            $prettyPrint = "&prettyPrint=true";
-            $general = "&%24.xgafv=1";
-            $key = "&key=AIzaSyCNKAVmTCelLTeAxPGq_ShbIGfdv6WRaV4";
-            curl_setopt($ch, CURLOPT_URL, 'https://customsearch.googleapis.com/customsearch/v1?'.$cr.$cx.$lr.$q.$safe.$alt.$num.$prettyPrint.$general.$key);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-
-            curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-
-            $headers = array();
-            $headers[] = 'Accept: application/json';
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-            $result = curl_exec($ch);
-            if (curl_errno($ch)) {
-                echo 'Error:' . curl_error($ch);
-            }
-            curl_close($ch);
-            $result = json_decode($result);
-            $search_result = $result->items;
-        }
-        // dd(json_encode($search_result));
-        return json_encode($search_result);
-    }
-
-function googleCustomSearch($search_key)
-{
-  $search_result = [];
+	function googleCustomSearch($search_key)
+	{
+  		$search_result = [];
   
-  $search_result_string = '';
-  if (!empty($search_key)) {
-    $searchQ = trim($search_key);
+  		$search_result_string = '';
+  		if (!empty($search_key)) {
+			$searchQ = trim($search_key);
 
-    $ch = curl_init();
-    $cr = "cr=" . urlencode($searchQ);
-    $cx = "&cx=82a52554294294369";
-    $lr = "&lr=" . urlencode($searchQ);
-    $q = "&q=" . urlencode($searchQ);
-    $safe = "&safe=off";
-    $alt = "&alt=json";
-    $num = "&num=5";
-    $prettyPrint = "&prettyPrint=true";
-    $general = "&%24.xgafv=1";
-    $key = "&key=AIzaSyCNKAVmTCelLTeAxPGq_ShbIGfdv6WRaV4";
-    curl_setopt($ch, CURLOPT_URL, 'https://customsearch.googleapis.com/customsearch/v1?' . $cr . $cx . $lr . $q . $safe . $alt . $num . $prettyPrint . $general . $key);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$ch = curl_init();
+			$cr = "cr=" . urlencode($searchQ);
+			$cx = "&cx=82a52554294294369";
+			$lr = "&lr=" . urlencode($searchQ);
+			$q = "&q=" . urlencode($searchQ);
+			$safe = "&safe=off";
+			$alt = "&alt=json";
+			$num = "&num=5";
+			$prettyPrint = "&prettyPrint=true";
+			$general = "&%24.xgafv=1";
+			$key = "&key=AIzaSyCNKAVmTCelLTeAxPGq_ShbIGfdv6WRaV4";
+			curl_setopt($ch, CURLOPT_URL, 'https://customsearch.googleapis.com/customsearch/v1?' . $cr . $cx . $lr . $q . $safe . $alt . $num . $prettyPrint . $general . $key);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 
-    curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+			curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
-    $headers = array();
-    $headers[] = 'Accept: application/json';
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			$headers = array();
+			$headers[] = 'Accept: application/json';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-    $result = curl_exec($ch);
-    if (curl_errno($ch)) {
-      echo 'Error:' . curl_error($ch);
-    }
-    curl_close($ch);
-    $result = json_decode($result);
-    $search_result = $result->items;
-    if(is_array($search_result) && count($search_result) > 0){
-      $web_search_result_string = '';
-      foreach($search_result as $key => $single_result){
-        $result_count = $key+1;
-        $web_search_result_string.= '['.$result_count.']"'.
-        $single_result->snippet.
-        "\"</br> URL:".$single_result->link.
-        "</br>";
-      }
+			$result = curl_exec($ch);
+			if (curl_errno($ch)) {
+			echo 'Error:' . curl_error($ch);
+			}
+			curl_close($ch);
+			$result = json_decode($result);
+			$search_result = $result->items;
+			if(is_array($search_result) && count($search_result) > 0){
+				$web_search_result_string = '';
+				foreach($search_result as $key => $single_result){
+					$result_count = $key+1;
+					$web_search_result_string.= '['.$result_count.']"'.
+					$single_result->snippet.
+					"\"</br> URL:".$single_result->link.
+					"</br>";
+				}
 
-      $search_result_string = 'Web search results: </br>
-      '.$web_search_result_string.
-      'Current date: '.date("d/m/Y").'
-      </br>
-      Instructions: Using the provided web search results, write a comprehensive reply to the given query. Make sure to cite results using [[number](URL)] notation after the reference. If the provided search results refer to multiple subjects with the same name, write separate answers for each subject.
-      </br>
-      Query: '.$search_key;
+				$search_result_string = 'Web search results: </br>
+				'.$web_search_result_string.'</br>
+				Query: '.$search_key.'</br>';
 
-    }
-  }
-  return $search_result_string;
-}
+    		}
+  		}
 
-
-    public function openaiResult($googleRes){
-
-        $jsonString = '{
-        "model": "text-davinci-003",
-        "prompt": "'.$googleRes.'?\nHuman: Id"
-        }';
         
-		// Generated by curl-to-PHP: http://incarnate.github.io/curl-to-php/
-        $ch = curl_init();
+    $res[0] = $web_search_result_string;
 
-        curl_setopt($ch, CURLOPT_URL, 'https://api.openai.com/v1/completions');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonString);
+        Log::info('search_result_string',$res);
 
-        $headers = array();
-        $headers[] = 'Content-Type: application/json';
-        $headers[] = 'Authorization: Bearer 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';
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  		return $search_result_string;
+	}
 
-        $result = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
+    public function store(Request $request)
+    {
+        $audio = $request->file('audio');
+        
+        // Store the audio file or process it as per your requirements
+        
+        return response()->json(['message' => 'Audio recorded successfully']);
+    }
+	
+    public function saveAudio(Request $request)
+    {
+        $audio = $request->file('audio');
+        $format = $audio->getClientOriginalExtension();
+        $file_name = $audio->getClientOriginalName();
+        $size = $audio->getSize();
+        $name = Str::random(10) . '.' . $format;
+        if (config('settings.whisper_default_storage') == 'local') {
+            $audio_url = $audio->store('transcribe','public');
+        } elseif (config('settings.whisper_default_storage') == 'aws') {
+            Storage::disk('s3')->put($name, file_get_contents($audio));
+            $audio_url = Storage::disk('s3')->url($name);
+        } elseif (config('settings.whisper_default_storage') == 'wasabi') {
+            Storage::disk('wasabi')->put($name, file_get_contents($audio));
+            $audio_url = Storage::disk('wasabi')->url($name);
         }
-        curl_close($ch);
-        $result = json_decode($result);
-        return $result;
+        
+        if (config('settings.whisper_default_storage') == 'local') {
+            $file = curl_file_create($audio_url);
+        } else {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_URL, $audio_url);
+            $content = curl_exec($curl);
+            Storage::disk('public')->put('transcribe/' . $file_name, $content);
+            $file = curl_file_create('transcribe/' . $file_name);
+            curl_close($curl);
+            
+        }
+		$open_ai = new OpenAi(config('services.openai.key')); 
+       	$complete = $open_ai->translate([
+			'model' => 'whisper-1',
+			'file' => $file,
+			'prompt' => "",
+		]);
+        $response = json_decode($complete , true);
+		
+		return response()->json(['response' => $response, 'message' => 'Audio recorded successfully']);
     }
 }
