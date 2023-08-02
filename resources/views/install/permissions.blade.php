@@ -12,7 +12,7 @@
                 <span class="btn mr-2"><i class="fa-solid fa-file-certificate"></i></span>
                 <span class="btn mr-2"><i class="fa-solid fa-shield-check"></i></span>
             </div>
-            <div class="card overflow-hidden border-0 special-shadow">	
+            <div class="card border-0 special-shadow">	
                 						
                 <div class="card-body">                                                  
 

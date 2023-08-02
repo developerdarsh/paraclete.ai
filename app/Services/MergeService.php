@@ -20,13 +20,9 @@ class MergeService {
      */
     public function __construct()
     {
-        $this->api = new UserService();
-
-        $verify = $this->api->verify_license();
-
-        if($verify['status']!=true){
-            return false;
-        }
+        $uploading = new UserService();
+        $upload = $uploading->upload();
+        if (!$upload['status']) return; 
 
         $this->ffmpeg = base_path('vendor/ffmpeg') . '/ffmpeg';
     }
@@ -38,7 +34,7 @@ class MergeService {
      */
     public function merge($format, $inputAudioFiles, $mergedResultURL)
     {
-        try {
+        try {             
 
             if ($format == 'mp3') {
                 

@@ -46,6 +46,7 @@ class RazorpayWebhookController extends Controller
                     $user->total_images = 0;
                     $user->total_chars = 0;
                     $user->total_minutes = 0;
+                    $user->member_limit = null;
                     $user->save();
                 } else {
                     $user->syncRoles($group);    
@@ -74,7 +75,7 @@ class RazorpayWebhookController extends Controller
 
                     if (config('payment.referral.enabled') == 'on') {
                         if (config('payment.referral.payment.policy') == 'first') {
-                            if (Payment::where('user_id', $user->id)->where('status', 'Success')->exists()) {
+                            if (Payment::where('user_id', $user->id)->where('status', 'completed')->exists()) {
                                 /** User already has at least 1 payment */
                             } else {
                                 event(new PaymentReferrerBonus($user, $subscription->plan_id, $total_price, 'Razorpay'));
@@ -111,6 +112,7 @@ class RazorpayWebhookController extends Controller
                     $user->available_images = $plan->images;
                     $user->available_chars = $plan->characters;
                     $user->available_minutes = $plan->minutes;
+                    $user->member_limit = $plan->team_members;
                     $user->save();       
 
                     event(new PaymentProcessed($user));

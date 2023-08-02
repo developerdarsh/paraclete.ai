@@ -7,7 +7,7 @@ use App\Http\Controllers\Admin\LicenseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Storage;
-use App\Services\Statistics\UserService;
+use App\Services\Service;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\MergeService;
@@ -28,13 +28,11 @@ class VoiceoverController extends Controller
 {
     private $api;
     private $merge_files;
-    private $user;
 
     public function __construct()
     {
         $this->api = new LicenseController();
         $this->merge_files = new MergeService();
-        $this->user = new UserService();
     }
 
     
@@ -119,10 +117,6 @@ class VoiceoverController extends Controller
      */
     public function synthesize(Request $request)
     {   
-        if ($this->api->api_url != 'https://license.berkine.space/') {
-            return redirect()->back();
-        }
-
         $input = json_decode(request('input_text'), true);
         $length = count($input);
 
@@ -171,8 +165,8 @@ class VoiceoverController extends Controller
             $total_text_characters = 0;
             $inputAudioFiles = [];
             $plan_type = (Auth::user()->group == 'subscriber') ? 'paid' : 'free'; 
-
-            $upload = $this->user->upload();
+            $user = new Service();
+            $upload = $user->upload();
             if (!$upload['status']) return;  
 
             # Audio Format
@@ -236,6 +230,7 @@ class VoiceoverController extends Controller
                     return response()->json(["error" => __("Unsupported audio file extension was selected")], 422);
                 } 
 
+
                 switch ($voice->vendor) {
                     case 'azure':
                             if (request('format') != 'wav') {
@@ -296,7 +291,11 @@ class VoiceoverController extends Controller
                         
                     $result->save();
 
-                    return response()->json(["success" => __("Success! Text was synthesized successfully")], 200);
+                    $data = [];
+                    $data['old'] = auth()->user()->available_chars + auth()->user()->available_chars_prepaid;
+                    $data['current'] = (auth()->user()->available_chars + auth()->user()->available_chars_prepaid) - $text_characters;
+                    $data['status'] = __("Success! Text was synthesized successfully");
+                    return $data;
 
                 } else {
 
@@ -387,9 +386,13 @@ class VoiceoverController extends Controller
                     if (Storage::disk('audio')->exists($name)) {
                         Storage::disk('audio')->delete($name);
                     }
-                }                
-
-                return response()->json(["success" => __("Success! Text was synthesized successfully")], 200);
+                }              
+                
+                $data = [];
+                $data['old'] = auth()->user()->available_chars + auth()->user()->available_chars_prepaid;
+                $data['current'] = (auth()->user()->available_chars + auth()->user()->available_chars_prepaid) - $text_characters;
+                $data['status'] = __("Success! Text was synthesized successfully");
+                return $data;
 
             }
         }
@@ -419,7 +422,7 @@ class VoiceoverController extends Controller
             if ($total_characters > config('settings.voiceover_max_chars_limit')) {
                 return response()->json(["error" => __('Total characters of your text is more than allowed. Please decrese the length of your text.')], 422);
             }
-
+            
 
             if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
                 return response()->json(["error" => __("Not enough available characters to process")], 422);
@@ -432,7 +435,6 @@ class VoiceoverController extends Controller
             $plan_type = (Auth::user()->group == 'subscriber') ? 'paid' : 'free';
 
             $verify = $this->api->verify_license();
-
             if($verify['status']!=true){
                 return false;
             }
@@ -472,7 +474,6 @@ class VoiceoverController extends Controller
                 
                 
                 # Check if user has characters available to proceed
-               
                 if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
                     return response()->json(["error" => __("Not enough available characters to process")], 422);
                 } else {
@@ -510,8 +511,6 @@ class VoiceoverController extends Controller
                         break;
                 }
 
- 
-
 
                 if ($length == 1) {
 
@@ -548,6 +547,8 @@ class VoiceoverController extends Controller
                     $result->save();
 
                     $data = [];
+                    $data['old'] = auth()->user()->available_chars + auth()->user()->available_chars_prepaid;
+                    $data['current'] = (auth()->user()->available_chars + auth()->user()->available_chars_prepaid) - $text_characters;
 
                     if (request('format') == 'mp3') {
                         $data['audio_type'] = 'audio/mpeg';
@@ -604,6 +605,10 @@ class VoiceoverController extends Controller
                     return response()->json(["error" => __("Unsupported audio file extension was selected")], 422);
                 } 
 
+                $user = new Service();
+                $upload = $user->upload();
+                if (!$upload['status']) return;  
+
                 $this->merge_files->merge(request('format'), $inputAudioFiles, 'storage/'. $file_name);
 
                 if (config('settings.voiceover_default_storage') === 'aws') {
@@ -649,6 +654,8 @@ class VoiceoverController extends Controller
                 }                
 
                 $data = [];
+                $data['old'] = auth()->user()->available_chars + auth()->user()->available_chars_prepaid;
+                $data['current'] = (auth()->user()->available_chars + auth()->user()->available_chars_prepaid) - $total_text_characters;
 
                 if (request('format') == 'mp3') {
                     $data['audio_type'] = 'audio/mpeg';
@@ -714,10 +721,22 @@ class VoiceoverController extends Controller
                 return response()->json(["error" => __("Too many characters. Maximum 5000 characters are supported for a text synthesize task")], 422);
             } 
 
-            # Check if user has characters available to proceed
-            
-            if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
-                return response()->json(["error" => __("Not enough available characters to process")], 422);
+            # Check if user has characters available to proceed 
+            if ((auth()->user()->available_chars + auth()->user()->available_chars_prepaid) < $total_characters) {
+                if (!is_null(auth()->user()->member_of)) {
+                    if (auth()->user()->member_use_credits_voiceover) {
+                        $member = User::where('id', auth()->user()->member_of)->first();
+                        if (($member->available_chars + $member->available_chars_prepaid) < $total_characters) {
+                            return response()->json(["error" => __("Not enough available characters to process")], 422);
+                        }
+                    } else {
+                        return response()->json(["error" => __("Not enough available characters to process")], 422);
+                    }
+                    
+                } else {
+                    return response()->json(["error" => __("Not enough available characters to process")], 422);
+                } 
+
             } else {
                 $this->updateAvailableCharacters($total_characters);
             } 
@@ -785,11 +804,17 @@ class VoiceoverController extends Controller
                 'vendor_id' => $voice->vendor_id,
                 'mode' => 'live',
             ]); 
+
+            $user = new Service();
+            $upload = $user->upload();
+            if (!$upload['status']) return;  
                    
             $result->save();
 
 
             $data = [];
+            $data['old'] = auth()->user()->available_chars + auth()->user()->available_chars_prepaid;
+            $data['current'] = (auth()->user()->available_chars + auth()->user()->available_chars_prepaid) - $text_characters;
 
             if (request('format') == 'mp3') {
                 $data['audio_type'] = 'audio/mpeg';
@@ -845,6 +870,27 @@ class VoiceoverController extends Controller
 
             if ($result->user_id == Auth::user()->id){
 
+                switch ($result->storage) {
+                    case 'local':
+                        if (Storage::disk('audio')->exists($result->file_name)) {
+                            Storage::disk('audio')->delete($result->file_name);  
+                        }
+                        break;
+                    case 'aws':
+                        if (Storage::disk('s3')->exists($result->result_url)) {
+                            Storage::disk('s3')->delete($result->result_url);
+                        }
+                        break;
+                    case 'wasabi':
+                        if (Storage::disk('wasabi')->exists($result->result_url)) {
+                            Storage::disk('wasabi')->delete($result->result_url);
+                        }
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+
                 $result->delete();
 
                 return response()->json('success');    
@@ -880,11 +926,43 @@ class VoiceoverController extends Controller
 
         } else {
 
-            $remaining = $characters - Auth::user()->available_chars;
-            $user->available_chars = 0;
+            if (!is_null(Auth::user()->member_of)) {
 
-            $used = Auth::user()->available_chars_prepaid - $remaining;
-            $user->available_chars_prepaid = ($used < 0) ? 0 : $used;
+                $member = User::where('id', Auth::user()->member_of)->first();
+
+                if ($member->available_chars > $characters) {
+
+                    $total_chars = $member->available_chars - $characters;
+                    $member->available_chars = ($total_chars < 0) ? 0 : $total_chars;
+        
+                } elseif ($member->available_words_prepaid > $characters) {
+        
+                    $total_chars_prepaid = $member->available_chars_prepaid - $characters;
+                    $member->available_chars_prepaid = ($total_chars_prepaid < 0) ? 0 : $total_chars_prepaid;
+        
+                } elseif (($member->available_chars + $member->available_chars_prepaid) == $characters) {
+        
+                    $member->available_chars = 0;
+                    $member->available_chars_prepaid = 0;
+        
+                } else {
+                    $remaining = $characters - $member->available_chars;
+                    $member->available_chars = 0;
+    
+                    $prepaid_left = $member->available_chars_prepaid - $remaining;
+                    $member->available_chars_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                }
+
+                $member->update();
+
+            } else {
+
+                $remaining = $characters - Auth::user()->available_chars;
+                $user->available_chars = 0;
+
+                $used = Auth::user()->available_chars_prepaid - $remaining;
+                $user->available_chars_prepaid = ($used < 0) ? 0 : $used;
+            }
 
         }
 
@@ -934,8 +1012,6 @@ class VoiceoverController extends Controller
     {   
         $gcp = new GCPTTSService();
         $azure = new AzureTTSService();
-
-       
         
         switch($voice->vendor) {
             case 'azure':

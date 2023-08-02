@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('audio_type')->nullable();
             $table->string('description')->nullable();
             $table->string('storage')->nullable()->comment('local|wasabi|aws');
-            $table->unsignedDecimal('length', 15, 3)->nullable();
+            $table->decimal('length', 15, 3)->nullable();
             $table->string('plan_type')->nullable()->comment('free|paid');
             $table->string('size')->nullable();
             $table->string('file_name')->nullable();

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('vendor_id')->comment('azure_nrl|gcp_nrl');
             $table->boolean('enabled')->default(0);
-            $table->double('cost')->comment('cost per char');
+            $table->float('cost')->comment('cost per char');
             $table->timestamps();
         });
     }

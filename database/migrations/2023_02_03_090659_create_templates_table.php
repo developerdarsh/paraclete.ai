@@ -21,10 +21,12 @@ return new class extends Migration
             $table->string('template_code');  
             $table->boolean('status')->default(true); 
             $table->boolean('professional')->default(false); 
+            $table->boolean('new')->default(false); 
             $table->string('type')->default('original');
             $table->string('group'); 
             $table->string('slug'); 
             $table->string('package')->nullable()->default('all');
+            $table->longText('fields')->nullable(); 
             $table->timestamps();
         });
     }

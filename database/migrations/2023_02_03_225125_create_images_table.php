@@ -19,8 +19,11 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->longText('description')->nullable();
             $table->longText('image')->nullable();
+            $table->string('storage')->nullable();
+            $table->string('image_name')->nullable();
             $table->string('resolution')->nullable();
             $table->string('plan_type')->comment('free|paid')->default('free');
+            $table->dateTime('expires_at')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

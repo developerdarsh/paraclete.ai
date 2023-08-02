@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
             $table->string('created_by');
-            $table->string('url')->nullable();
+            $table->longText('url')->nullable();
             $table->longText('title');
             $table->string('status');
             $table->longText('keywords')->nullable();

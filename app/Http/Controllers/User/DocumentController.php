@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use App\Models\VoiceoverResult;
 use App\Models\Workbook;
@@ -44,7 +45,7 @@ class DocumentController extends Controller
                     ->addColumn('custom-title', function($row){
                         $custom = '<div class="d-flex">
                                     <div class="mr-2">' . $row['icon'] . '</div>
-                                    <div><a class="font-weight-bold" href="'. route("user.documents.show", $row["id"] ). '">'.ucfirst($row["title"]).'</a><br><span class="text-muted">'.ucfirst($row["template_name"]).'</span><div>
+                                    <div><a class="font-weight-bold document-title" href="'. route("user.documents.show", $row["id"] ). '">'.ucfirst($row["title"]).'</a><br><span class="text-muted">'.ucfirst($row["template_name"]).'</span><div>
                                     </div>'; 
                         return $custom;
                     })
@@ -246,7 +247,7 @@ class DocumentController extends Controller
                     ->addColumn('custom-title', function($row){
                         $custom = '<div class="d-flex">
                                     <div class="mr-2 flex"><i class="fa-solid fa-square-code blog-icon"></i></div>
-                                    <div class="mt-1"><a class="font-weight-bold" href="'. route("user.documents.code.show", $row["id"] ). '">'.ucfirst($row["title"]).'</a><div>
+                                    <div class="mt-1"><a class="font-weight-bold document-title" href="'. route("user.documents.code.show", $row["id"] ). '">'.ucfirst($row["title"]).'</a><div>
                                     </div>'; 
                         return $custom;
                     })
@@ -429,8 +430,8 @@ class DocumentController extends Controller
 
                 switch ($result->storage) {
                     case 'local':
-                        if (Storage::exists($result->result_url)) {
-                            Storage::delete($result->result_url);
+                        if (Storage::disk('audio')->exists($result->file_name)) {
+                            Storage::disk('audio')->delete($result->file_name);  
                         }
                         break;
                     case 'aws':
@@ -479,8 +480,8 @@ class DocumentController extends Controller
 
                 switch ($transcript->storage) {
                     case 'local':
-                        if (Storage::exists($transcript->url)) {
-                            Storage::delete($transcript->url);
+                        if (File::exists(public_path($transcript->url))) {
+                            File::delete(public_path($transcript->url));
                         }
                         break;
                     case 'aws':

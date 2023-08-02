@@ -26,6 +26,7 @@ class CustomTemplateController extends Controller
                     $actionBtn = '<div>      
                                     <a href="'. route("admin.davinci.custom.show", $row["id"] ). '"><i class="fa fa-edit table-action-buttons view-action-button" title="Edit Template"></i></a>      
                                     <a class="changeButton" id="' . $row["id"] . '"  type="' . $row['type'] . '" href="#"><i class="fa-solid fa-square-parking table-action-buttons request-action-button" title="Set Template Package"></i></a>
+                                    <a class="newButton" id="' . $row["id"] . '"  type="' . $row['type'] . '" href="#"><i class="fa-solid fa-sparkles table-action-buttons edit-action-button" title="Set as New Template"></i></a>
                                     <a class="activateButton" id="' . $row["id"] . '" type="' . $row['type'] . '" href="#"><i class="fa fa-check table-action-buttons request-action-button" title="Activate Template"></i></a>
                                     <a class="deactivateButton" id="' . $row["id"] . '" type="' . $row['type'] . '" href="#"><i class="fa fa-close table-action-buttons delete-action-button" title="Deactivate Template"></i></a>  
                                     <a class="deleteTemplate" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Template"></i></a> 
@@ -64,12 +65,17 @@ class CustomTemplateController extends Controller
                     }                      
                     return $package;
                 })
+                ->addColumn('custom-new', function($row){
+                    $icon = ($row['new']) ? '<i class="fa-solid fa-circle-check text-success fs-16"></i>' : '<i class="fa-solid fa-circle-xmark fs-16"></i>';
+                    $custom_new = '<span class="font-weight-bold">'.$icon.'</span>';
+                    return $custom_new;
+                })
                 ->addColumn('custom-status', function($row){
                     $status = ($row['status']) ? 'Active' : 'Deactive';
                     $custom_voice = '<span class="cell-box status-'.strtolower($status).'">'. $status.'</span>';
                     return $custom_voice;
                 })
-                ->rawColumns(['actions', 'updated-on', 'custom-name', 'custom-package', 'custom-status'])
+                ->rawColumns(['actions', 'updated-on', 'custom-name', 'custom-package', 'custom-status', 'custom-new'])
                 ->make(true);
                     
         }
@@ -208,17 +214,11 @@ class CustomTemplateController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('actions', function($row){
-                    if ($row['type'] == 'original') {
-                        $actionBtn = '<div>      
-                                        <a class="editButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="Change Category Name"></i></a>      
-                                    </div>';
-                    } else {
-                        $actionBtn = '<div>      
-                                        <a class="editButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="Change Category Name"></i></a>      
-                                        <a class="deleteButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Category"></i></a> 
-                                    </div>';
-                    }
-                    
+                    $actionBtn = '<div>      
+                                    <a class="editButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="Change Category Name"></i></a>          
+                                    <a class="editDescription" id="' . $row["id"] . '" href="#"><i class="fa-solid fa-money-check-pen table-action-buttons view-action-button" title="Update Category Description"></i></a>          
+                                    <a class="deleteButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Category"></i></a> 
+                                </div>';     
                     return $actionBtn;
                 })
                 ->addColumn('updated-on', function($row){
@@ -244,7 +244,7 @@ class CustomTemplateController extends Controller
 
 
     /**
-     * Update the description.
+     * Update the name.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -256,6 +256,24 @@ class CustomTemplateController extends Controller
             $template = Category::where('id', request('id'))->firstOrFail();
             
             $template->update(['name' => request('name')]);
+            return  response()->json('success');
+        } 
+    }
+
+
+    /**
+     * Update the description.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function description(Request $request)
+    {   
+        if ($request->ajax()) {
+
+            $template = Category::where('id', request('id'))->firstOrFail();
+            
+            $template->update(['description' => request('name')]);
             return  response()->json('success');
         } 
     }

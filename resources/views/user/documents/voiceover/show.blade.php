@@ -13,7 +13,7 @@
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{route('user.dashboard')}}"><i class="fa-solid fa-folder-bookmark mr-2 fs-12"></i>{{ __('AI Panel') }}</a></li>
 				<li class="breadcrumb-item"><a href="{{route('user.documents')}}"> {{ __('Documents') }}</a></li>
-				<li class="breadcrumb-item" aria-current="page"><a href="{{url('#')}}"> {{ __('All Voiceovers') }}</a></li>
+				<li class="breadcrumb-item" aria-current="page"><a href="{{ route('user.documents.voiceovers')}}"> {{ __('All Voiceovers') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="{{ url('#') }}"> {{ __('View Result') }}</a></li>
 			</ol>
 		</div>
@@ -89,7 +89,7 @@
 							<div id="user-result">																
 								<div class="text-center user-result-player">
 									<audio class="voice-audio">
-										<source src="@if ($id->storage == 'local') {{ URL::asset('images' . $id->result_url) }} @else {{ $id->result_url }} @endif" type="audio/mpeg">
+										<source src="@if ($id->storage == 'local') {{ URL::asset($id->result_url) }} @else {{ $id->result_url }} @endif" type="audio/mpeg">
 									</audio>	
 								</div>								
 							</div>
@@ -99,11 +99,11 @@
 					<div class="row pt-4">
 						<div class="col-12">
 							<div class="actions-total text-right">
-								<a href="mailto:?subject=Text Synthesize Result&body=@if($id->storage == 'local'){{URL::asset('images' . $id->result_url)}} @else {{$id->result_url}} @endif" class="btn actions-total-buttons" id="actions-email" data-toggle="tooltip" data-placement="top" title="Share via Email"><i class="fa fa-at"></i></a>
-								<a href="https://www.facebook.com/sharer/sharer.php?u=@if($id->storage == 'local'){{URL::asset('images' . $id->result_url)}} @else {{$id->result_url}} @endif&t=Text Synthesize Result" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;" target="_blank" class="btn actions-total-buttons" id="actions-facebook" data-toggle="tooltip" data-placement="top" title="Share in Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-								<a href="http://www.reddit.com/submit?url=@if($id->storage == 'local'){{URL::asset('images' . $id->result_url)}} @else {{$id->result_url}} @endif" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;" target="_blank" class="btn actions-total-buttons" id="actions-reddit" data-toggle="tooltip" data-placement="top" title="Share in Reddit"><i class="fa-brands fa-reddit"></i></a>
-								<a href="https://twitter.com/share?url=@if($id->storage == 'local'){{URL::asset('images' . $id->result_url)}} @else {{$id->result_url}} @endif&text=Text Synthesize Result" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;" target="_blank" class="btn actions-total-buttons" id="actions-twitter" data-toggle="tooltip" data-placement="top" title="Share in Twitter"><i class="fa-brands fa-twitter"></i></a>
-								<a href="" class="btn actions-total-buttons" id="actions-copy" data-link="@if($id->storage == 'local') {{ URL::asset('images' . $id->result_url) }} @else {{ $id->result_url }} @endif" data-toggle="tooltip" data-placement="top" title="Copy Download Link"><i class="fa fa-link"></i></a>	
+								<a href="mailto:?subject=Text Synthesize Result&body=@if($id->storage == 'local'){{URL::asset($id->result_url)}} @else {{$id->result_url}} @endif" class="btn actions-total-buttons" id="actions-email" data-toggle="tooltip" data-placement="top" title="Share via Email"><i class="fa fa-at"></i></a>
+								<a href="https://www.facebook.com/sharer/sharer.php?u=@if($id->storage == 'local'){{URL::asset($id->result_url)}} @else {{$id->result_url}} @endif&t=Text Synthesize Result" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;" target="_blank" class="btn actions-total-buttons" id="actions-facebook" data-toggle="tooltip" data-placement="top" title="Share in Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+								<a href="http://www.reddit.com/submit?url=@if($id->storage == 'local'){{URL::asset($id->result_url)}} @else {{$id->result_url}} @endif" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;" target="_blank" class="btn actions-total-buttons" id="actions-reddit" data-toggle="tooltip" data-placement="top" title="Share in Reddit"><i class="fa-brands fa-reddit"></i></a>
+								<a href="https://twitter.com/share?url=@if($id->storage == 'local'){{URL::asset($id->result_url)}} @else {{$id->result_url}} @endif&text=Text Synthesize Result" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;" target="_blank" class="btn actions-total-buttons" id="actions-twitter" data-toggle="tooltip" data-placement="top" title="Share in Twitter"><i class="fa-brands fa-twitter"></i></a>
+								<a href="" class="btn actions-total-buttons" id="actions-copy" data-link="@if($id->storage == 'local') {{ URL::asset($id->result_url) }} @else {{ $id->result_url }} @endif" data-toggle="tooltip" data-placement="top" title="Copy Download Link"><i class="fa fa-link"></i></a>	
 							</div>
 						</div>
 					</div>

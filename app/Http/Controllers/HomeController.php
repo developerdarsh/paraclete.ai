@@ -52,14 +52,6 @@ class HomeController extends Controller
         return view('home', compact('information', 'blog_exists', 'blogs', 'faq_exists', 'faqs', 'review_exists', 'reviews', 'monthly', 'yearly', 'monthly_subscriptions', 'yearly_subscriptions', 'prepaids', 'prepaid', 'other_templates', 'custom_templates', 'lifetime', 'lifetime_subscriptions'));
     }
 
-    public function isEnabled($func) {
-        return is_callable($func) && false === stripos(ini_get('disable_functions'), $func);
-    }
-    
-    public function phpInfo() 
-    {
-        dd(phpinfo());
-    }
 
     /**
      * Display terms & conditions page

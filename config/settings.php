@@ -24,6 +24,10 @@ return [
 
     'user_support' => env('GENERAL_SETTINGS_USER_SUPPORT'),
 
+    'live_chat' => env('GENERAL_SETTINGS_LIVE_CHAT'),
+
+    'live_chat_link' => env('GENERAL_SETTINGS_LIVE_CHAT_LINK'),
+
     /*
     |--------------------------------------------------------------------------
     | Davinchi Settings
@@ -45,9 +49,10 @@ return [
     'free_tier_words' => env('DAVINCI_SETTINGS_FREE_TIER_WORDS'),
     'free_tier_images' => env('DAVINCI_SETTINGS_FREE_TIER_IMAGES'),
     'image_feature_user' =>env('DAVINCI_SETTINGS_IMAGE_FEATURE_USER'),
+    'image_vendor' =>env('DAVINCI_SETTINGS_IMAGE_SERVICE_VENDOR'),
+    'image_stable_diffusion_engine' =>env('DAVINCI_SETTINGS_IMAGE_STABLE_DIFFUSION_ENGINE'),
     'code_feature_user' =>env('DAVINCI_SETTINGS_CODE_FEATURE_USER'),
     'chat_feature_user' =>env('DAVINCI_SETTINGS_CHAT_FEATURE_USER'),
-    'video_feature_user' =>env('DAVINCI_SETTINGS_VIDEO_FEATURE_USER'),
     'voiceover_feature_user' =>env('DAVINCI_SETTINGS_VOICEOVER_FEATURE_USER'),
     'whisper_feature_user' =>env('DAVINCI_SETTINGS_WHISPER_FEATURE_USER'),
 
@@ -56,6 +61,13 @@ return [
 
     'default_storage' => env('DAVINCI_SETTINGS_DEFAULT_STORAGE'),
     'default_duration' => env('DAVINCI_SETTINGS_DEFAULT_DURATION'),
+
+    'sd_key_usage' => env('DAVINCI_SETTINGS_SD_KEY_USAGE', 'main'),
+    'openai_key_usage' => env('DAVINCI_SETTINGS_OPENAI_KEY_USAGE', 'main'),
+
+
+    'team_members_feature' => env('DAVINCI_SETTINGS_TEAM_MEMBERS_FEATURE'),
+    'team_members_quantity_user' => env('DAVINCI_SETTINGS_TEAM_MEMBERS_QUANTITY'),
 
     /*
     |--------------------------------------------------------------------------

@@ -37,6 +37,7 @@
 										<option value="text-curie-001" @if ( config('settings.default_model_admin')  == 'text-curie-001') selected @endif>{{ __('Curie') }} ({{ __('GPT 3') }})</option>
 										<option value="text-davinci-003" @if ( config('settings.default_model_admin')  == 'text-davinci-003') selected @endif>{{ __('Davinci') }} ({{ __('GPT 3') }})</option>
 										<option value="gpt-3.5-turbo" @if ( config('settings.default_model_admin')  == 'gpt-3.5-turbo') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
+										<option value="gpt-3.5-turbo-16k" @if ( config('settings.default_model_admin')  == 'gpt-3.5-turbo-16k') selected @endif>{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
 										<option value="gpt-4" @if ( config('settings.default_model_admin')  == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>
 										<option value="gpt-4-32k" @if ( config('settings.default_model_admin')  == 'gpt-4-32k') selected @endif>{{ __('GPT 4') }} ({{ __('32K') }})</option>
 									</select>
@@ -100,6 +101,36 @@
 
 							<div class="col-lg-6 col-md-6 col-sm-12">
 								<div class="input-box">	
+									<h6>{{ __('Team Members Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
+									<select id="team-members-feature" name="team-members-feature" data-placeholder="{{ __('Enable/Disable Team Members Feature') }}">			
+										<option value="enable" @if ( config('settings.team_members_feature')  == 'enable') selected @endif>{{ __('Enable') }}</option>
+										<option value="disable" @if ( config('settings.team_members_feature')  == 'disable') selected @endif>{{ __('Disable') }}</option>
+									</select>
+								</div> 						
+							</div>							
+
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="input-box">
+									<h6>{{ __('AI Code Feature') }} <span class="text-muted">({{ __('For User & Subscriber Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+									<select id="code-feature-user" name="code-feature-user" data-placeholder="{{ __('Set AI Code Creation Permission') }}">
+										<option value='allow' @if (config('settings.code_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
+										<option value='deny' @if (config('settings.code_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
+									</select>
+								</div>
+							</div>											
+
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="input-box">
+									<h6>{{ __('AI Chat Feature') }} <span class="text-muted">({{ __('For User & Subscriber Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+									<select id="chat-feature-user" name="chat-feature-user" data-placeholder="{{ __('Set Chat Permission') }}">
+										<option value='allow' @if (config('settings.chat_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
+										<option value='deny' @if (config('settings.chat_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
+									</select>
+								</div>
+							</div>
+							
+							<div class="col-lg-6 col-md-6 col-sm-12">
+								<div class="input-box">	
 									<h6>{{ __('Maximum Result Length') }} <span class="text-muted">({{ __('In Words') }}) ({{ __('For Admin Group') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('OpenAI has a hard limit based on Token limits for each model. Refer to OpenAI documentation to learn more. As a recommended by OpenAI, max result length is capped at 1500 words.') }}"></i></h6>
 									<input type="number" class="form-control @error('max-results-admin') is-danger @enderror" id="max-results-admin" name="max-results-admin" placeholder="Ex: 10" value="{{ config('settings.max_results_limit_admin') }}" required>
 									@error('max-results-admin')
@@ -107,57 +138,6 @@
 									@enderror
 								</div>								
 							</div>
-
-							<div class="col-lg-6 col-md-6 col-sm-12">
-								<div class="input-box">
-									<h6>{{ __('AI Code Feature') }} <span class="text-muted">({{ __('For User Group Only') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="code-feature-user" name="code-feature-user" data-placeholder="{{ __('Set AI Code Creation Permission') }}">
-										<option value='allow' @if (config('settings.code_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
-										<option value='deny' @if (config('settings.code_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
-									</select>
-								</div>
-							</div>				
-
-							<div class="col-lg-6 col-md-6 col-sm-12">
-								<div class="input-box">
-									<h6>{{ __('AI Image Feature') }} <span class="text-muted">({{ __('For User Group Only') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="image-feature-user" name="image-feature-user" data-placeholder="{{ __('Set AI Image Creation Permission') }}">
-										<option value='allow' @if (config('settings.image_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
-										<option value='deny' @if (config('settings.image_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
-									</select>
-								</div>
-							</div>
-
-							<div class="col-lg-6 col-md-6 col-sm-12">
-								<div class="input-box">	
-									<h6>{{ __('Default Storage for AI Images') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									  	<select id="storage" name="default-storage" data-placeholder="{{ __('Set Default Storage for AI Images') }}:">			
-										<option value="local" @if ( config('settings.default_storage')  == 'local') selected @endif>{{ __('Local Server') }}</option>
-										<option value="aws" @if ( config('settings.default_storage')  == 'aws') selected @endif>{{ __('Amazon Web Services') }}</option>
-										<option value="wasabi" @if ( config('settings.default_storage')  == 'wasabi') selected @endif>{{ __('Wasabi Cloud') }}</option>
-									</select>
-								</div>								
-							</div>
-
-							<div class="col-lg-6 col-md-6 col-sm-12">
-								<div class="input-box">	
-									<h6>{{ __('Delete AI Image Results After') }} <span class="text-muted">({{ __('In Days') }}) ({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Default days after which generated AI Images will be deleted, use 0 for never delete. Subscribers can overwrite this baed on their subscription plans') }}"></i></h6>
-									<input type="number" class="form-control @error('default-duration') is-danger @enderror" id="default-duration" name="default-duration" value="{{ config('settings.default_duration') }}" required>
-									@error('default-duration')
-										<p class="text-danger">{{ $errors->first('default-duration') }}</p>
-									@enderror
-								</div>								
-							</div>
-
-							<div class="col-lg-6 col-md-6 col-sm-12">
-								<div class="input-box">
-									<h6>{{ __('AI Chat Feature') }} <span class="text-muted">({{ __('For User Group Only') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="chat-feature-user" name="chat-feature-user" data-placeholder="{{ __('Set Chat Permission') }}">
-										<option value='allow' @if (config('settings.chat_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
-										<option value='deny' @if (config('settings.chat_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
-									</select>
-								</div>
-							</div>		
 						</div>
 
 
@@ -177,6 +157,7 @@
 												<option value="text-curie-001" @if ( config('settings.default_model_user')  == 'text-curie-001') selected @endif>{{ __('Curie') }} ({{ __('GPT 3') }})</option>
 												<option value="text-davinci-003" @if ( config('settings.default_model_user')  == 'text-davinci-003') selected @endif>{{ __('Davinci') }} ({{ __('GPT 3') }})</option>
 												<option value="gpt-3.5-turbo" @if ( config('settings.default_model_user')  == 'gpt-3.5-turbo') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
+												<option value="gpt-3.5-turbo-16k" @if ( config('settings.default_model_user')  == 'gpt-3.5-turbo-16k') selected @endif>{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
 												<option value="gpt-4" @if ( config('settings.default_model_user')  == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>
 												<option value="gpt-4-32k" @if ( config('settings.default_model_user')  == 'gpt-4-32k') selected @endif>{{ __('GPT 4') }} ({{ __('32K') }})</option>
 											</select>
@@ -202,9 +183,9 @@
 											<select id="chats" name="chat-user" data-placeholder="{{ __('Set AI Chat Package Type Access') }}">
 												<option value="all" @if (config('settings.chats_access_user') == 'all') selected @endif>{{ __('All Chat Types') }}</option>
 												<option value="free" @if (config('settings.chats_access_user') == 'free') selected @endif>{{ __('Only Free Chat Types') }}</option>
-												<option value="standard" @if (config('settings.chats_access_user') == 'standard') selected @endif> {{ __('Only Standard Chat Types') }}</option>
-												<option value="professional" @if (config('settings.chats_access_user') == 'professional') selected @endif> {{ __('Only Professional Chat Types') }}</option>																																		
-												<option value="premium" @if (config('settings.chats_access_user') == 'premium') selected @endif> {{ __('Only Premuim Chat Types') }}</option>																																																																																																									
+												<option value="standard" @if (config('settings.chats_access_user') == 'standard') selected @endif> {{ __('Up to Standard Chat Types') }}</option>
+												<option value="professional" @if (config('settings.chats_access_user') == 'professional') selected @endif> {{ __('Up to Professional Chat Types') }}</option>																																		
+												<option value="premium" @if (config('settings.chats_access_user') == 'premium') selected @endif> {{ __('Up to Premium Chat Types') }}</option>																																																																																																									
 											</select>
 										</div>
 									</div>
@@ -266,8 +247,99 @@
 											@enderror
 										</div>								
 									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">	
+											<h6>{{ __('Team Members Quantity') }} <span class="text-muted">({{ __('For User Group') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<input type="number" class="form-control @error('team-members-quantity') is-danger @enderror" id="team-members-quantity" name="team-members-quantity" placeholder="Ex: 5" value="{{ config('settings.team_members_quantity_user') }}">
+										</div> 						
+									</div>
 									
 								</div>	
+							</div>
+						</div>
+
+						<div class="card border-0 special-shadow mb-7">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-sliders text-info fs-14 mr-2"></i>{{ __('Miscellaneous') }}</h6>
+
+								<div class="row">
+									<div class="row">
+										<div class="col-lg-12 col-md-12 col-sm-12">	
+											<div class="input-box">	
+												<h6>{{ __('Sensitive Words Filter') }} <span class="text-muted">({{ __('Comma Seperated') }})</span></h6>							
+												<textarea class="form-control" name="words-filter" rows="6" id="words-filter">{{ $settings->value }}</textarea>	
+											</div>											
+										</div>
+									</div>							
+								</div>
+	
+							</div>
+						</div>
+
+						<div class="card border-0 special-shadow mb-7">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-camera-viewfinder text-info fs-14 mr-2"></i>{{ __('AI Image Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
+
+								<div class="row">
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Image Service Vendor') }} </h6>
+											<select id="image-vendor" name="image-vendor" data-placeholder="{{ __('Set AI Image Service Vendor') }}">
+												<option value='openai' @if (config('settings.image_vendor') == 'openai') selected @endif>{{ __('OpenAI') }}</option>
+												<option value='stable_diffusion' @if (config('settings.image_vendor') == 'stable_diffusion') selected @endif> {{ __('Stable Diffision') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Image Feature') }} <span class="text-muted">({{ __('For User & Subscriber Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="image-feature-user" name="image-feature-user" data-placeholder="{{ __('Set AI Image Creation Permission') }}">
+												<option value='allow' @if (config('settings.image_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
+												<option value='deny' @if (config('settings.image_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+		
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">	
+											<h6>{{ __('Default Storage for AI Images') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+												  <select id="storage" name="default-storage" data-placeholder="{{ __('Set Default Storage for AI Images') }}:">			
+												<option value="local" @if ( config('settings.default_storage')  == 'local') selected @endif>{{ __('Local Server') }}</option>
+												<option value="aws" @if ( config('settings.default_storage')  == 'aws') selected @endif>{{ __('Amazon Web Services') }}</option>
+												<option value="wasabi" @if ( config('settings.default_storage')  == 'wasabi') selected @endif>{{ __('Wasabi Cloud') }}</option>
+											</select>
+										</div>								
+									</div>
+		
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">	
+											<h6>{{ __('Delete AI Image Results After') }} <span class="text-muted">({{ __('In Days') }}) ({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Default days after which generated AI Images will be deleted, use 0 for never delete. Subscribers can overwrite this baed on their subscription plans') }}"></i></h6>
+											<input type="number" class="form-control @error('default-duration') is-danger @enderror" id="default-duration" name="default-duration" value="{{ config('settings.default_duration') }}" required>
+											@error('default-duration')
+												<p class="text-danger">{{ $errors->first('default-duration') }}</p>
+											@enderror
+										</div>								
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Stable Diffusion Engine ID') }} </h6>
+											<select id="stable-diffusion-engine" name="stable-diffusion-engine" data-placeholder="{{ __('Set Stable Diffusion Engine ID') }}">
+												<option value='stable-diffusion-v1-5' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-v1-5') selected @endif>{{ __('Stable Diffusion v1.5') }}</option>
+												<option value='stable-diffusion-512-v2-1' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-512-v2-1') selected @endif> {{ __('Stable Diffusion v2.1') }}</option>																															
+												<option value='stable-diffusion-768-v2-1' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-768-v2-1') selected @endif> {{ __('Stable Diffusion v2.1-768') }}</option>																															
+												<option value='stable-diffusion-xl-beta-v2-2-2' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-beta-v2-2-2') selected @endif> {{ __('Stable Diffusion v2.2.2-XL Beta') }}</option>																															
+												<option value='stable-diffusion-xl-1024-v0-9' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-1024-v0-9') selected @endif> {{ __('SDXL v0.9') }}</option>																															
+											</select>
+										</div>
+									</div>
+		
+								</div>		
 							</div>
 						</div>
 
@@ -280,7 +352,7 @@
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
-											<h6>{{ __('AI Voiceover Feature') }} <span class="text-muted">({{ __('For User Group Only') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('AI Voiceover Feature') }} <span class="text-muted">({{ __('For User & Subscriber Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<select id="voiceover-feature-user" name="voiceover-feature-user" data-placeholder="{{ __('Set AI Voiceover Permission') }}">
 												<option value='allow' @if (config('settings.voiceover_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
 												<option value='deny' @if (config('settings.voiceover_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
@@ -393,7 +465,7 @@
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
-											<h6>{{ __('AI Speech to Text Feature') }} <span class="text-muted">({{ __('For User Group Only') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('AI Speech to Text Feature') }} <span class="text-muted">({{ __('For User & Subscriber Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<select id="whisper-feature-user" name="whisper-feature-user" data-placeholder="{{ __('Set AI Speech to Text Permission') }}">
 												<option value='allow' @if (config('settings.whisper_feature_user') == 'allow') selected @endif>{{ __('Allow') }}</option>
 												<option value='deny' @if (config('settings.whisper_feature_user') == 'deny') selected @endif> {{ __('Deny') }}</option>																															
@@ -447,22 +519,71 @@
 								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/openai-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('OpenAI') }}</h6>
 
 								<div class="row">
-									<div class="col-lg-12 col-md-6 col-sm-12">								
-										<!-- ACCESS KEY -->
-										<div class="input-box">								
-											<h6>{{ __('OpenAI Secret Key') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<div class="form-group">							    
-												<input type="text" class="form-control @error('secret-key') is-danger @enderror" id="secret-key" name="secret-key" value="{{ config('services.openai.key') }}" autocomplete="off">
-												@error('secret-key')
-													<p class="text-danger">{{ $errors->first('secret-key') }}</p>
-												@enderror
-											</div> 
-										</div> <!-- END ACCESS KEY -->
+									<div class="col-lg-12 col-md-6 col-sm-12">
+										<div class="row">								
+											<div class="col-md-6 col-sm-12">
+												<div class="input-box mb-0">								
+													<h6>{{ __('OpenAI Secret Key') }} <span class="text-muted">({{ __('Main API Key') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('secret-key') is-danger @enderror" id="secret-key" name="secret-key" value="{{ config('services.openai.key') }}" autocomplete="off">
+														@error('secret-key')
+															<p class="text-danger">{{ $errors->first('secret-key') }}</p>
+														@enderror
+													</div> 												
+												</div> 
+											</div>
+											<div class="col-md-6 col-sm-12">
+												<div class="input-box mb-0">								
+													<h6>{{ __('Openai API Key Usage Model') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<select id="openai-key-usage" class="mb-0" name="openai-key-usage" data-placeholder="{{ __('Set API Key Usage Model') }}">
+														<option value="main" @if (config('settings.openai_key_usage') == 'main') selected @endif>{{ __('Only Main API Key') }}</option>
+														<option value="random" @if (config('settings.openai_key_usage') == 'random') selected @endif>{{ __('Random API Key') }}</option>																																																																																																									
+													</select>
+												</div> 
+											</div>
+										</div>
+										<a href="{{ route('admin.davinci.configs.keys') }}" class="btn btn-primary mt-3">{{ __('Store additional OpenAI API Keys') }}</a>
 									</div>							
 								</div>
 	
 							</div>
 						</div>		
+
+						<div class="card border-0 special-shadow mb-7">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/stability-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Stable Diffusion') }}</h6>
+
+								<div class="row">
+									<div class="col-lg-12 col-md-6 col-sm-12 no-gutters">
+										<div class="row">							
+											<div class="col-md-6 col-sm-12">
+												<div class="input-box mb-0">								
+													<h6>{{ __('Stable Diffusion API Key') }} <span class="text-muted">({{ __('Main API Key') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('stable-diffusion-key') is-danger @enderror" id="stable-diffusion-key" name="stable-diffusion-key" value="{{ config('services.stable_diffusion.key') }}" autocomplete="off">
+														@error('stable-diffusion-key')
+															<p class="text-danger">{{ $errors->first('stable-diffusion-key') }}</p>
+														@enderror												
+													</div> 
+												</div> 
+											</div>
+											<div class="col-md-6 col-sm-12">
+												<div class="input-box mb-0">								
+													<h6>{{ __('SD API Key Usage Model') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<select id="sd-key-usage" class="mb-0" name="sd-key-usage" data-placeholder="{{ __('Set API Key Usage Model') }}">
+														<option value="main" @if (config('settings.sd_key_usage') == 'main') selected @endif>{{ __('Only Main API Key') }}</option>
+														<option value="random" @if (config('settings.sd_key_usage') == 'random') selected @endif>{{ __('Random API Key') }}</option>																																																																																																									
+													</select>
+												</div> 
+											</div>
+										</div>
+										<a href="{{ route('admin.davinci.configs.keys') }}" class="btn btn-primary mt-3">{{ __('Store additional SD API Keys') }}</a>
+									</div>							
+								</div>
+	
+							</div>
+						</div>	
 						
 						<div class="card border-0 special-shadow mb-7">							
 							<div class="card-body">

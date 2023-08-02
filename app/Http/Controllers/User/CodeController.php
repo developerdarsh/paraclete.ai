@@ -13,17 +13,16 @@ use Orhanerday\OpenAi\OpenAi;
 use App\Models\SubscriptionPlan;
 use App\Models\Code;
 use App\Models\User;
+use App\Models\ApiKey;
 
 
 class CodeController extends Controller
 {
     private $api;
-    private $user;
 
     public function __construct()
     {
         $this->api = new LicenseController();
-        $this->user = new UserService();
     }
 
     /** 
@@ -48,9 +47,16 @@ class CodeController extends Controller
     {
         if ($request->ajax()) {
 
-            $open_ai = new OpenAi(config('services.openai.key'));
+            if (config('settings.openai_key_usage') == 'main') {
+                $open_ai = new OpenAi(config('services.openai.key'));
+            } else {
+                $api_keys = ApiKey::where('engine', 'openai')->where('status', true)->pluck('api_key')->toArray();
+                array_push($api_keys, config('services.openai.key'));
+                $key = array_rand($api_keys, 1);
+                $open_ai = new OpenAi($api_keys[$key]);
+            }
 
-            $verify = $this->user->verify_license();
+            $verify = $this->api->verify_license();
             if($verify['status']!=true){return false;}
 
             # Check if user has access to the template
@@ -59,7 +65,8 @@ class CodeController extends Controller
                     $data['status'] = 'error';
                     $data['message'] = __('AI Code feature is not available for your account, subscribe to get access');
                     return $data;
-                }
+                } 
+
             } elseif (!is_null(auth()->user()->group)) {
                 $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
                 if ($plan) {
@@ -74,9 +81,25 @@ class CodeController extends Controller
             
             # Verify if user has enough credits
             if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < 50) {
-                $data['status'] = 'error';
-                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                return $data;
+                if (!is_null(auth()->user()->member_of)) {
+                    if (auth()->user()->member_use_credits_code) {
+                        $member = User::where('id', auth()->user()->member_of)->first();
+                        if (($member->available_words + $member->available_words_prepaid) < 50) {
+                            $data['status'] = 'error';
+                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
+                            return $data;
+                        }
+                    } else {
+                        $data['status'] = 'error';
+                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
+                        return $data;
+                    }
+                    
+                } else {
+                    $data['status'] = 'error';
+                    $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
+                    return $data;
+                } 
             }
 
             if ($request->language != 'html' || $request->language == 'none') {
@@ -105,7 +128,9 @@ class CodeController extends Controller
             ]);
 
             $response = json_decode($complete , true);
-
+            $uploading = new UserService();
+            $upload = $uploading->upload();
+            if (!$upload['status']) return;  
 
             if (isset($response['choices'])) {
 
@@ -154,6 +179,10 @@ class CodeController extends Controller
 	*/
     public function updateBalance($words) {
 
+        $uploading = new UserService();
+        $upload = $uploading->upload();
+        if (!$upload['status']) return;  
+
         $user = User::find(Auth::user()->id);
 
         if (Auth::user()->available_words > $words) {
@@ -173,11 +202,42 @@ class CodeController extends Controller
 
         } else {
 
-            $remaining = $words - Auth::user()->available_words;
-            $user->available_words = 0;
+            if (!is_null(Auth::user()->member_of)) {
 
-            $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-            $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                $member = User::where('id', Auth::user()->member_of)->first();
+
+                if ($member->available_words > $words) {
+
+                    $total_words = $member->available_words - $words;
+                    $member->available_words = ($total_words < 0) ? 0 : $total_words;
+        
+                } elseif ($member->available_words_prepaid > $words) {
+        
+                    $total_words_prepaid = $member->available_words_prepaid - $words;
+                    $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
+        
+                } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
+        
+                    $member->available_words = 0;
+                    $member->available_words_prepaid = 0;
+        
+                } else {
+                    $remaining = $words - $member->available_words;
+                    $member->available_words = 0;
+    
+                    $prepaid_left = $member->available_words_prepaid - $remaining;
+                    $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                }
+
+                $member->update();
+
+            } else {
+                $remaining = $words - Auth::user()->available_words;
+                $user->available_words = 0;
+
+                $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
+                $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+            }
 
         }
 
@@ -232,7 +292,7 @@ class CodeController extends Controller
     {
         if ($request->ajax()) {
 
-            $verify = $this->user->verify_license();
+            $verify = $this->api->verify_license();
             if($verify['status']!=true){return false;}
 
             $image = Image::where('id', request('id'))->first(); 
@@ -271,7 +331,7 @@ class CodeController extends Controller
     {
         if ($request->ajax()) {
 
-            $verify = $this->user->verify_license();
+            $verify = $this->api->verify_license();
             if($verify['status']!=true){return false;}
 
             $image = Image::where('id', request('id'))->first(); 

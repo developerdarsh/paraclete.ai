@@ -29,7 +29,8 @@ class CustomTemplate extends Model
         'tone',
         'fields',
         'type',
-        'package'
+        'package',
+        'new'
     ];
 
 

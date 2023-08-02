@@ -38,27 +38,18 @@
                     </div>
 
        
-            </div>
+                </div>
 
             
 
-        </div>  
-        <div class="form-group mb-0 text-center">                        
-            <a href="{{ route('install.requirements') }}"  class="btn btn-primary pr-5 pl-5">{{ __('Start Installation') }}</a>                                               
-        </div>
+            </div>  
+            <div class="form-group mb-0 text-center">                        
+                <a href="{{ route('install.requirements') }}"  class="btn btn-primary pr-5 pl-5">{{ __('Start Installation') }}</a>                                               
+            </div>
                   
         </div>
          
     </div>
-    <footer class="footer" id="install-footer">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-12 col-sm-12 fs-10 text-muted text-center">
-                    {{ __('Copyright') }} © {{ date("Y") }} <a href="https://codecanyon.net/user/berkine/portfolio" target="_blank">{{ config('app.name') }}</a>. {{ __('All rights reserved') }}
-                </div>
-            </div>
-        </div>
-    </footer> 
 </div>
 @endsection
 

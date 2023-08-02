@@ -27,6 +27,12 @@ class Subscriber extends Model
         'subscription_id',
         'active_until',
         'frequency',
+        'paddle_cancel_url',
+        'model',
+        'max_tokens',
+        'paystack_customer_code',
+        'paystack_authorization_code',
+        'paystack_email_token',
     ];
 
 
@@ -60,6 +66,7 @@ class Subscriber extends Model
     public function isActive($id)
     {
         $subscription = Subscriber::where('status', 'Active')->where('user_id', $id)->first();
+        \Log::info($subscription);
         if ($subscription) {
             return Carbon::parse($this->active_until)->isPast();
         } 

@@ -17,7 +17,7 @@
 @section('content')	
 	<!-- ALL PAYMENT CONFIGURATIONS -->					
 	<div class="row">
-		<div class="col-lg-8 col-md-12 col-xm-12">
+		<div class="col-lg-9 col-md-12 col-xm-12">
 
 			<form action="{{ route('admin.finance.settings.store') }}" method="POST" enctype="multipart/form-data">
 				@csrf
@@ -77,7 +77,7 @@
 
 						<div class="card border-0 special-shadow">							
 							<div class="card-body">
-								<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-brands fa-cc-paypal fs-16 mr-2"></i>PayPal Payment Gateway <span class="text-primary">({{ __('All Plans') }})</span></h6>
+								<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-brands fa-cc-paypal fs-16 mr-2"></i><span class="text-primary">Paypal</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
 								
 								<div class="row">
 									<div class="col-md-6 col-sm-12 mb-2">
@@ -171,7 +171,7 @@
 						<div class="card overflow-hidden border-0 special-shadow">							
 							<div class="card-body">
 
-								<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-brands fa-cc-stripe fs-16 mr-2"></i>Stripe Payment Gateway <span class="text-primary">({{ __('All Plans') }})</span></h6>
+								<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-brands fa-cc-stripe fs-16 mr-2"></i><span class="text-primary">Stripe</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
 
 								<div class="row">
 									<div class="col-md-6 col-sm-12 mb-2">
@@ -266,7 +266,7 @@
 						<div class="card overflow-hidden border-0 special-shadow">							
 							<div class="card-body">
 
-								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/paystack.svg') }}" alt="Paystack" class="gateway-logo">Paystack Payment Gateway <span class="text-primary">({{ __('All Plans') }})</span></h6>
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/paystack.svg') }}" alt="Paystack" class="gateway-logo"><span class="text-primary">Paystack</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
 
 								<div class="row">
 									<div class="col-md-6 col-sm-12 mb-2">
@@ -349,7 +349,7 @@
 						<div class="card overflow-hidden border-0 special-shadow">							
 							<div class="card-body">
 
-								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/razorpay.svg') }}" alt="Razorpay" class="gateway-logo">Razorpay Payment Gateway <span class="text-primary">({{ __('All Plans') }})</span></h6>
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/razorpay.svg') }}" alt="Razorpay" class="gateway-logo"><span class="text-primary">Razorpay</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
 
 								<div class="row">
 									<div class="col-md-6 col-sm-12 mb-2">
@@ -444,7 +444,7 @@
 						<div class="card overflow-hidden border-0 special-shadow">							
 							<div class="card-body">
 	
-								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/mollie.svg') }}" alt="Mollie" class="gateway-logo gateway-small-logo">Mollie Payment Gateway <span class="text-primary">({{ __('All Plans') }})</span></h6>
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/mollie.svg') }}" alt="Mollie" class="gateway-logo gateway-small-logo"><span class="text-primary">Mollie</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
 	
 								<div class="row">
 									<div class="col-md-6 col-sm-12">
@@ -507,12 +507,237 @@
 	
 							</div>
 						</div>
+
+						<div class="card overflow-hidden border-0 special-shadow">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/flutterwave.svg') }}" alt="Midtrans" class="gateway-logo"><span class="text-primary">Flutterwave</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
+
+								<div class="row">
+									<div class="col-md-6 col-sm-12 mb-2">
+										<div class="form-group">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-flutterwave" class="custom-switch-input" @if (config('services.flutterwave.enable')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Flutterwave Prepaid</span>
+											</label>
+										</div>
+									</div>
+									<div class="col-md-6 col-sm-12">
+										<div class="form-group mb-4">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-flutterwave-subscription" class="custom-switch-input" @if (config('services.flutterwave.subscription')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Flutterwave Subscription</span>
+											</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12">								
+										<!-- ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Flutterwave Puplic Key <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('flutterwave_public_key') is-danger @enderror" id="flutterwave_public_key" name="flutterwave_public_key" value="{{ config('services.flutterwave.public_key') }}" autocomplete="off">
+											</div> 
+											@error('flutterwave_public_key')
+												<p class="text-danger">{{ $errors->first('flutterwave_public_key') }}</p>
+											@enderror
+										</div> <!-- END ACCESS KEY -->
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<!-- SECRET ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Flutterwave Secret Key <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('flutterwave_secret_key') is-danger @enderror" id="flutterwave_secret_key" name="flutterwave_secret_key" value="{{ config('services.flutterwave.secret_key') }}" autocomplete="off">
+											</div> 
+											@error('flutterwave_secret_key')
+												<p class="text-danger">{{ $errors->first('flutterwave_secret_key') }}</p>
+											@enderror
+										</div> <!-- END SECRET ACCESS KEY -->
+									</div>	
+									
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>Flutterwave Webhook URL <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('flutterwave_webhook_url') is-danger @enderror" id="flutterwave_webhook_url" name="flutterwave_webhook_url" value="{{ config('services.flutterwave.webhook_url') }}" autocomplete="off">
+											</div> 
+											@error('flutterwave_webhook_url')
+												<p class="text-danger">{{ $errors->first('flutterwave_webhook_url') }}</p>
+											@enderror
+										</div> 
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>Flutterwave Secret Hash <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('flutterwave_secret_hash') is-danger @enderror" id="flutterwave_secret_hash" name="flutterwave_secret_hash" value="{{ config('services.flutterwave.secret_hash') }}" autocomplete="off">
+											</div> 
+											@error('flutterwave_secret_hash')
+												<p class="text-danger">{{ $errors->first('flutterwave_secret_hash') }}</p>
+											@enderror
+										</div> 
+									</div>
+									
+								</div>
+	
+							</div>
+						</div>
+
+
+						<div class="card overflow-hidden border-0 special-shadow">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/yookassa.svg') }}" alt="Midtrans" class="gateway-logo"><span class="text-primary">Yookassa</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
+
+								<div class="row">
+									<div class="col-md-6 col-sm-12 mb-2">
+										<div class="form-group">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-yookassa" class="custom-switch-input" @if (config('services.yookassa.enable')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Yookassa Prepaid</span>
+											</label>
+										</div>
+									</div>
+									<div class="col-md-6 col-sm-12">
+										<div class="form-group mb-4">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-yookassa-subscription" class="custom-switch-input" @if (config('services.yookassa.subscription')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Yookassa Subscription</span>
+											</label>
+										</div>
+								  </div>
+								</div>
+
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<!-- SECRET ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Yookassa Shop ID <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('yookassa_shop_id') is-danger @enderror" id="yookassa_shop_id" name="yookassa_shop_id" value="{{ config('services.yookassa.shop_id') }}" autocomplete="off">
+											</div>
+											@error('yookassa_shop_id')
+												<p class="text-danger">{{ $errors->first('yookassa_shop_id') }}</p>
+											@enderror
+										</div> <!-- END SECRET ACCESS KEY -->
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">								
+										<!-- ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Yookassa Secret Key <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('yookassa_secret_key') is-danger @enderror" id="yookassa_secret_key" name="yookassa_secret_key" value="{{ config('services.yookassa.secret_key') }}" autocomplete="off">
+											</div> 
+											@error('yookassa_secret_key')
+												<p class="text-danger">{{ $errors->first('yookassa_secret_key') }}</p>
+											@enderror
+										</div> <!-- END ACCESS KEY -->
+									</div>										
+									
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>Yookassa HTTP Notifications <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('yookassa_http_uri') is-danger @enderror" id="yookassa_http_uri" name="yookassa_http_uri" value="{{ config('services.yookassa.http_uri') }}" autocomplete="off">
+											</div>
+											@error('yookassa_http_uri')
+												<p class="text-danger">{{ $errors->first('yookassa_http_uri') }}</p>
+											@enderror
+										</div> 
+									</div>
+									
+								</div>
+	
+							</div>
+						</div>
+
+
+						<div class="card overflow-hidden border-0 special-shadow">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/paddle.webp') }}" alt="Midtrans" class="gateway-logo"><span class="text-primary">Paddle</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
+
+								<div class="row">
+									<div class="col-md-6 col-sm-12 mb-2">
+										<div class="form-group">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-paddle" class="custom-switch-input" @if (config('services.paddle.enable')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Paddle Prepaid</span>
+											</label>
+										</div>
+									</div>
+									<div class="col-md-6 col-sm-12">
+										<div class="form-group mb-4">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-paddle-subscription" class="custom-switch-input" @if (config('services.paddle.subscription')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Paddle Subscription</span>
+											</label>
+										</div>
+								  </div>
+								</div>
+
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<!-- SECRET ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Paddle Vendor ID <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('paddle_vendor_id') is-danger @enderror" id="paddle_vendor_id" name="paddle_vendor_id" value="{{ config('services.paddle.vendor_id') }}" autocomplete="off">
+											</div>
+											@error('paddle_vendor_id')
+												<p class="text-danger">{{ $errors->first('paddle_vendor_id') }}</p>
+											@enderror
+										</div> <!-- END SECRET ACCESS KEY -->
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">								
+										<!-- ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Paddle Vendor Auth Code <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('paddle_vendor_auth_code') is-danger @enderror" id="paddle_vendor_auth_code" name="paddle_vendor_auth_code" value="{{ config('services.paddle.vendor_auth_code') }}" autocomplete="off">
+											</div> 
+											@error('paddle_vendor_auth_code')
+												<p class="text-danger">{{ $errors->first('paddle_vendor_auth_code') }}</p>
+											@enderror
+										</div> <!-- END ACCESS KEY -->
+									</div>										
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>Paddle Sandbox <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<select id="paddle_sandbox" name="paddle_sandbox" data-placeholder="{{ __('Enable/Disable Paddle Sandbox') }}:">			
+												<option value=true @if (config('services.paddle.sandbox')  == true) selected @endif>{{ __('Enable') }}</option>
+												<option value=false @if (config('services.paddle.sandbox')  == false) selected @endif>{{ __('Disable') }}</option>
+											</select>
+											@error('paddle_sandbox')
+												<p class="text-danger">{{ $errors->first('paddle_sandbox') }}</p>
+											@enderror
+										</div> 
+									</div>
+									
+								</div>
+	
+							</div>
+						</div>
 	
 	
 						<div class="card border-0 special-shadow">							
 							<div class="card-body">
 	
-								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/braintree.svg') }}" alt="Braintree" class="gateway-logo">Braintree Payment Gateway <span class="text-primary">({{ __('Prepaid Plans') }})</span></h6>
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/braintree.svg') }}" alt="Braintree" class="gateway-logo"><span class="text-primary">Braintree</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('Prepaid Plans') }})</span></h6>
 	
 								<div class="row">
 									<div class="col-md-6 col-sm-12">
@@ -578,7 +803,82 @@
 	
 							</div>
 						</div>
-					
+
+
+						<div class="card overflow-hidden border-0 special-shadow">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/midtrans.png') }}" alt="Midtrans" class="gateway-logo"><span class="text-primary">Midtrans</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('Prepaid Plans') }})</span></h6>
+
+								<div class="row">
+									<div class="col-md-6 col-sm-12 mb-2">
+										<div class="form-group">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-midtrans" class="custom-switch-input" @if (config('services.midtrans.enable')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use Midtrans Prepaid</span>
+											</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12">								
+										<!-- ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Midtrans Server Key <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('midtrans_server_key') is-danger @enderror" id="midtrans_server_key" name="midtrans_server_key" value="{{ config('services.midtrans.server_key') }}" autocomplete="off">
+											</div> 
+											@error('midtrans_server_key')
+												<p class="text-danger">{{ $errors->first('midtrans_server_key') }}</p>
+											@enderror
+										</div> <!-- END ACCESS KEY -->
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<!-- SECRET ACCESS KEY -->
+										<div class="input-box">								
+											<h6>Midtrans Client Key <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('midtrans_client_key') is-danger @enderror" id="midtrans_client_key" name="midtrans_client_key" value="{{ config('services.midtrans.client_key') }}" autocomplete="off">
+											</div> 
+											@error('midtrans_client_key')
+												<p class="text-danger">{{ $errors->first('midtrans_client_key') }}</p>
+											@enderror
+										</div> <!-- END SECRET ACCESS KEY -->
+									</div>	
+									
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>Midtrans Merchant ID <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('midtrans_merchant_id') is-danger @enderror" id="midtrans_merchant_id" name="midtrans_merchant_id" value="{{ config('services.midtrans.merchant_id') }}" autocomplete="off">
+											</div> 
+											@error('midtrans_merchant_id')
+												<p class="text-danger">{{ $errors->first('midtrans_merchant_id') }}</p>
+											@enderror
+										</div> 
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>Midtrans Production <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<select id="midtrans-production" name="midtrans-production" data-placeholder="{{ __('Enable/Disable Midtrans Production') }}:">			
+												<option value=true @if (config('services.midtrans.production')  == true) selected @endif>{{ __('Enable') }}</option>
+												<option value=false @if (config('services.midtrans.production')  == false) selected @endif>{{ __('Disable') }}</option>
+											</select>
+											@error('midtrans-production')
+												<p class="text-danger">{{ $errors->first('midtrans-production') }}</p>
+											@enderror
+										</div> 
+									</div>
+									
+								</div>
+	
+							</div>
+						</div>
+
 					</div>
 				</div>
 

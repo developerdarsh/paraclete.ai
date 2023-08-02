@@ -195,6 +195,7 @@
  .chat-main-container {
     min-width: 800px;
     min-height: 500px;
+    max-height: 750px;
     display: flex;
     overflow: hidden;
     box-sizing: border-box;
@@ -320,12 +321,7 @@
 		min-height: 75px;
 		height: 75px;
 	}
- }
-
- ::-webkit-scrollbar {
-	width: 2px!important;
-	border: 1px solid #EDF8FD!important;
-}
+ } 
 
 .template {
 	.btn-free {

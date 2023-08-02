@@ -64,7 +64,7 @@ class UserSupportController extends Controller
                         return $custom_priority;
                     })
                     ->addColumn('custom-subject', function($row){
-                        $custom_priority = '<a href="'. route("user.support.show", $row["ticket_id"] ). '">'.$row["subject"].'</a>';
+                        $custom_priority = '<a class="support-subject-text" href="'. route("user.support.show", $row["ticket_id"] ). '">'.$row["subject"].'</a>';
                         return $custom_priority;
                     })
                     ->rawColumns(['actions', 'custom-status', 'created-on', 'resolved-on', 'custom-priority', 'custom-category', 'custom-ticket', 'custom-subject'])

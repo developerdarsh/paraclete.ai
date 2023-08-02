@@ -47,7 +47,7 @@ class CoinbaseWebhookController extends Controller
 
                         if (config('payment.referral.enabled') == 'on') {
                             if (config('payment.referral.payment.policy') == 'first') {
-                                if (Payment::where('user_id', $user->id)->where('status', 'Success')->exists()) {
+                                if (Payment::where('user_id', $user->id)->where('status', 'completed')->exists()) {
                                     /** User already has at least 1 payment */
                                 } else {
                                     event(new PaymentReferrerBonus($user, $payload->event->data->code, $plan->price, 'Coinbase'));
@@ -79,6 +79,7 @@ class CoinbaseWebhookController extends Controller
                                 $user->available_images = $plan->images;
                                 $user->available_chars = $plan->characters;
                                 $user->available_minutes = $plan->minutes;
+                                $user->member_limit = $plan->team_members;
                             } else {
                                 $user->available_words_prepaid = $user->available_words_prepaid + $plan->words;
                                 $user->available_images_prepaid = $user->available_images_prepaid + $plan->images;

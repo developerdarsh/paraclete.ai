@@ -1,14 +1,15 @@
 <?php
 
 return [
-    'en' => [
-        'code' => 'EN',
-        'display' => 'English',
-        'flag' => 'us'
-    ],
     'es' => [
-        'code' => 'ES',
+        'code' => 'es',
         'display' => 'Español',
         'flag' => 'es'
     ], 
+    'en' => [
+        'code' => 'en',
+        'display' => 'English',
+        'flag' => 'us'
+    ],
+    
 ];

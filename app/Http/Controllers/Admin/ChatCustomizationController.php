@@ -122,7 +122,6 @@ class ChatCustomizationController extends Controller
             'prompt' => request('prompt'),
             'category' => request('category'),
             'chat_code' => $code,
-			'voice_code' => request('flexRadioDefault'),
             'type' => 'custom'
         ]); 
 
@@ -144,7 +143,7 @@ class ChatCustomizationController extends Controller
             $name = Str::random(5);
 
           
-            $filePath = 'chats/' . $name . '.' . $image->getClientOriginalExtension();
+            $filePath = '/chats/' . $name . '.' . $image->getClientOriginalExtension();
             
             $this->uploadImage($image, 'chats/', 'public', $name);
             
@@ -166,7 +165,7 @@ class ChatCustomizationController extends Controller
      */
     public function update($id)
     {   
-		$chat = Chat::where('id', $id)->first();
+        $chat = Chat::where('id', $id)->first();
 
         $status = (request('activate') == 'on') ? true : false;
 
@@ -176,7 +175,6 @@ class ChatCustomizationController extends Controller
             'sub_name' => request('character'),
             'description' => request('introduction'),
             'prompt' => request('prompt'),
-			      'voice_code' => request('flexRadioDefault'),
             'category' => request('category'),
         ]);
 
@@ -196,7 +194,7 @@ class ChatCustomizationController extends Controller
             $name = Str::random(5);
 
           
-            $filePath = 'chats/' . $name . '.' . $image->getClientOriginalExtension();
+            $filePath = '/chats/' . $name . '.' . $image->getClientOriginalExtension();
             
             $this->uploadImage($image, 'chats/', 'public', $name);
             

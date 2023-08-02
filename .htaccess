@@ -1,4 +1,3 @@
-SetEnv PHPRC /home/customer/www/paraclete.ai/public_html/php.ini
 #disable directory browsing
 Options -Indexes
 RewriteEngine on
@@ -16,4 +15,3 @@ Deny from all
 order allow,deny
 Deny from all
 </Files>
-AddHandler application/x-httpd-php81 .php .php5 .php4 .php3

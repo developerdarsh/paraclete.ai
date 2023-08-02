@@ -4,10 +4,10 @@
 	<!-- PAGE HEADER -->
 	<div class="page-header mt-5-7">
 		<div class="page-leftheader">
-			<h4 class="page-title mb-0">{{ __('My Profile') }}</h4>
+			<h4 class="page-title mb-0">{{ __('My Account') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{route('user.dashboard')}}"><i class="fa-solid fa-id-badge mr-2 fs-12"></i>{{ __('User') }}</a></li>
-				<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('My Profile') }}</a></li>
+				<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('My Account') }}</a></li>
 			</ol>
 		</div>
 	</div>
@@ -24,7 +24,7 @@
 				<div class="card-body text-center">
 					<div>
 						<h4 class="mb-1 mt-1 text-primary font-weight-bold fs-16">{{ auth()->user()->name }}</h4>
-						<h6 class="text-white fs-12">{{ auth()->user()->job_role }}</h6>
+						<h6 class="font-weight-bold fs-12">{{ auth()->user()->job_role }}</h6>
 					</div>
 				</div>
 				<div class="card-footer p-0">
@@ -34,22 +34,22 @@
 								<div class="d-flex w-100">
 									<div class="flex w-100">
 										<div class="flex w-100">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary text-shadow fs-16">{{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }} / {{ number_format(auth()->user()->total_words) }}</h4>
-											<h6 class="text-white fs-12 text-shadow">{{ __('Words Left') }}</h6>
+											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableWords() }} / {{ App\Services\HelperService::userPlanTotalWords() }}</h4>
+											<h6 class="fs-12">{{ __('Words Left') }}</h6>
 										</div>
 										<div class="flex w-100 mt-4">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary text-shadow fs-16">{{ number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid) }} / {{ number_format(auth()->user()->total_images) }}</h4>
-											<h6 class="text-white fs-12 text-shadow">{{ __('Images Left') }}</h6>
+											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableImages() }} / {{ App\Services\HelperService::userPlanTotalImages() }}</h4>
+											<h6 class="fs-12">{{ __('Images Left') }}</h6>
 										</div>
 									</div>
 									<div class="flex w-100">
 										<div class="flex w-100">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary text-shadow fs-16">{{ number_format(auth()->user()->available_chars + auth()->user()->available_chars_prepaid) }} / {{ number_format(auth()->user()->total_chars) }}</h4>
-											<h6 class="text-white fs-12 text-shadow">{{ __('Characters Left') }}</h6>
+											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableChars() }} / {{ App\Services\HelperService::userPlanTotalChars() }}</h4>
+											<h6 class="fs-12">{{ __('Characters Left') }}</h6>
 										</div>
 										<div class="flex w-100 mt-4">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary text-shadow fs-16">{{ number_format(auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid) }} / {{ number_format(auth()->user()->total_minutes) }}</h4>
-											<h6 class="text-white fs-12 text-shadow">{{ __('Minutes Left') }}</h6>
+											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableMinutes() }} / {{ App\Services\HelperService::userPlanTotalMinutes() }}</h4>
+											<h6 class="fs-12">{{ __('Minutes Left') }}</h6>
 										</div>
 									</div>
 								</div>
@@ -61,27 +61,27 @@
 					<div class="row" id="profile-pages">
 						<div class="col-sm-12">
 							<div class="text-center pt-4">
-								<a href="{{ route('user.profile.edit') }}" class="fs-13 text-white"><i class="fa fa-calendar-lines-pen mr-1"></i> {{ __('Update Profile') }}</a>
+								<a href="{{ route('user.profile.edit') }}" class="fs-13"><i class="fa fa-calendar-lines-pen mr-1"></i> {{ __('Update Profile') }}</a>
 							</div>
 						</div>
 						<div class="col-sm-12">
 							<div class="text-center pt-3">
-								<a href="{{ route('user.profile.defaults') }}" class="fs-13 text-white"><i class="fa-sharp fa-solid fa-sliders mr-1"></i> {{ __('Set Defaults') }}</a>
+								<a href="{{ route('user.profile.defaults') }}" class="fs-13"><i class="fa-sharp fa-solid fa-sliders mr-1"></i> {{ __('Set Defaults') }}</a>
 							</div>
 						</div>
 						<div class="col-sm-12">
 							<div class="text-center p-3 ">
-								<a href="{{ route('user.security') }}" class="fs-13 text-white"><i class="fa fa-lock-hashtag mr-1"></i> {{ __('Change Password') }}</a>
+								<a href="{{ route('user.security') }}" class="fs-13"><i class="fa fa-lock-hashtag mr-1"></i> {{ __('Change Password') }}</a>
 							</div>
 						</div>
 						<div class="col-sm-12">
 							<div class="text-center pb-3">
-								<a href="{{ route('user.security.2fa') }}" class="fs-13 text-white"><i class="fa fa-shield-check mr-1"></i> {{ __('2FA Authentication') }}</a>
+								<a href="{{ route('user.security.2fa') }}" class="fs-13"><i class="fa fa-shield-check mr-1"></i> {{ __('2FA Authentication') }}</a>
 							</div>
 						</div>
 						<div class="col-sm-12">
 							<div class="text-center pb-4">
-								<a href="{{ route('user.profile.delete') }}" class="fs-13 text-white"><i class="fa fa-user-xmark mr-1"></i> {{ __('Delete Account') }}</a>
+								<a href="{{ route('user.profile.delete') }}" class="fs-13"><i class="fa fa-user-xmark mr-1"></i> {{ __('Delete Account') }}</a>
 							</div>
 						</div>
 					</div>
@@ -159,28 +159,80 @@
 
 				<div class="col-lg-12 col-md-12 col-sm-12">
 					<div class="row">
-						<div class="col-lg-6 col-md-12 col-sm-12">
+						<div class="col-lg-4 col-md-6 col-sm-12">
+							<div class="card overflow-hidden border-0">
+								<div class="card-body d-flex">
+									<div class="usage-info w-100">
+										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Documents Created') }}</p>
+										<h2 class="mb-2 number-font fs-20">{{ number_format($data['contents']) }} <span class="text-muted fs-18">{{ __('documents') }}</span></h2>
+									</div>
+									<div class="usage-icon text-right">
+										<i class="fa-solid fa-folder-grid"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-4 col-md-6 col-sm-12">
 							<div class="card overflow-hidden border-0">
 								<div class="card-body d-flex">
 									<div class="usage-info w-100">
 										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Words Generated') }}</p>
 										<h2 class="mb-2 number-font fs-20">{{ number_format($data['words']) }} <span class="text-muted fs-18">{{ __('words') }}</span></h2>
 									</div>
-									<div class="usage-icon w-100 text-right">
+									<div class="usage-icon text-right">
 										<i class="fa-solid fa-scroll-old"></i>
 									</div>
 								</div>
 							</div>
 						</div>
-						<div class="col-lg-6 col-md-12 col-sm-12">
+						<div class="col-lg-4 col-md-6 col-sm-12">
 							<div class="card overflow-hidden border-0">
 								<div class="card-body d-flex">
 									<div class="usage-info w-100">
 										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Images Created') }}</p>
 										<h2 class="mb-2 number-font fs-20">{{ number_format($data['images']) }} <span class="text-muted fs-18">{{ __('images') }}</span></h2>
 									</div>
-									<div class="usage-icon w-100 text-right">
+									<div class="usage-icon text-right">
 										<i class="fa-solid fa-image-landscape"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-4 col-md-6 col-sm-12">
+							<div class="card overflow-hidden border-0">
+								<div class="card-body d-flex">
+									<div class="usage-info w-100">
+										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Voiceover Tasks') }}</p>
+										<h2 class="mb-2 number-font fs-20">{{ number_format($data['synthesized']) }} <span class="text-muted fs-18">{{ __('tasks') }}</span></h2>
+									</div>
+									<div class="usage-icon text-right">
+										<i class="fa-sharp fa-solid fa-waveform-lines"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-4 col-md-6 col-sm-12">
+							<div class="card overflow-hidden border-0">
+								<div class="card-body d-flex">
+									<div class="usage-info w-100">
+										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Audio Transcribed') }}</p>
+										<h2 class="mb-2 number-font fs-20">{{ number_format($data['transcribed']) }} <span class="text-muted fs-18">{{ __('audio files') }}</span></h2>
+									</div>
+									<div class="usage-icon text-right">
+										<i class="fa-sharp fa-solid fa-folder-music"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-4 col-md-6 col-sm-12">
+							<div class="card overflow-hidden border-0">
+								<div class="card-body d-flex">
+									<div class="usage-info w-100">
+										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Codes Generated') }}</p>
+										<h2 class="mb-2 number-font fs-20">{{ number_format($data['codes']) }} <span class="text-muted fs-18">{{ __('codes') }}</span></h2>
+									</div>
+									<div class="usage-icon text-right">
+										<i class="fa-solid fa-square-code"></i>
 									</div>
 								</div>
 							</div>
@@ -227,8 +279,7 @@
 										<span class="fs-12 text-muted">{{ __('Subscription renewal date') }}: {{ __('Never') }}</span>
 									@else
 										<span class="fs-12 text-muted">{{ __('Subscription renewal date') }}: {{ $subscription->active_until }} </span>
-									@endif
-									
+									@endif									
 								</div>
 							@endif
 						</div>
@@ -275,18 +326,17 @@
 				data: {
 					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 					datasets: [{
-						label: '{{ __('Words Generated') }}',
-						data: usageDataset,
-						backgroundColor: '#007bff',
+						label: '{{ __('Images Created') }}',
+						data: usageDataset2,
+						backgroundColor: '#FF9D00',
 						borderWidth: 1,
 						borderRadius: 20,
 						barPercentage: 0.5,
 						fill: true
-					},
-					{
-						label: '{{ __('Images Created') }}',
-						data: usageDataset2,
-						backgroundColor: '#FF9D00',
+					},{
+						label: '{{ __('Words Generated') }}',
+						data: usageDataset,
+						backgroundColor: '#007bff',
 						borderWidth: 1,
 						borderRadius: 20,
 						barPercentage: 0.5,

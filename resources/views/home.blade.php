@@ -446,7 +446,7 @@
                     <div class="row">
                         <div class="card-body">			
 			
-                            @if ($monthly || $yearly || $prepaid)
+                            @if ($monthly || $yearly || $prepaid || $lifetime)
                 
                                 <div class="tab-menu-heading text-center">
                                     <div class="tabs-menu">								
@@ -459,7 +459,10 @@
                                             @endif	
                                             @if ($yearly)
                                                 <li><a href="#yearly_plans" class="@if (!$monthly && !$prepaid && $yearly) active @else '' @endif" data-bs-toggle="tab"> {{ __('Yearly Plans') }}</a></li>
-                                            @endif								
+                                            @endif		
+                                            @if ($lifetime)
+                                                <li><a href="#lifetime" class="@if (!$monthly && !$yearly && !$prepaid &&  $lifetime) active @else '' @endif" data-bs-toggle="tab"> {{ __('Lifetime Plans') }}</a></li>
+                                            @endif							
                                         </ul>
                                     </div>
                                 </div>
@@ -483,11 +486,13 @@
                                                                 <div class="price-card pl-3 pr-3 pt-2 mb-7">
                                                                     <div class="card border-0 p-4 pl-5">
                                                                         <div class="plan prepaid-plan">
-                                                                            <div class="plan-title">{{ $prepaid->plan_name }} <span class="prepaid-currency-sign">{{ $prepaid->currency }}</span><span class="plan-cost">{{ number_format((float)$prepaid->price, 2) }}</span><span class="prepaid-currency-sign">{!! config('payment.default_system_currency_symbol') !!}</span></div>
+                                                                            <div class="plan-title">{{ $prepaid->plan_name }} <span class="prepaid-currency-sign">{{ $prepaid->currency }}</span><span class="plan-cost">@if (config('payment.decimal_points') == 'allow') {{ number_format((float)$prepaid->price, 2) }} @else {{ number_format($prepaid->price) }} @endif</span><span class="prepaid-currency-sign">{!! config('payment.default_system_currency_symbol') !!}</span></div>
                                                                                 <p class="fs-12 mt-2 mb-0">{{ __('Words Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->words) }}</span></p>
-                                                                                <p class="fs-12 mt-2 mb-4">{{ __('Images Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->images) }}</span></p>																								
+                                                                                <p class="fs-12 mt-2 mb-0">{{ __('Images Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->images) }}</span></p>
+                                                                                <p class="fs-12 mt-2 mb-0">{{ __('Characters Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->characters) }}</span></p>																								
+																                <p class="fs-12 mt-2 mb-4">{{ __('Minutes Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->minutes) }}</span></p>																									
                                                                             <div class="text-center action-button mt-2 mb-2">
-                                                                                <a href="{{ route('user.prepaid.checkout', $prepaid->id) }}" class="btn btn-cancel">{{ __('Purchase') }}</a> 
+                                                                                <a href="{{ route('user.prepaid.checkout', ['type' => 'prepaid', 'id' => $prepaid->id]) }}" class="btn btn-cancel">{{ __('Purchase') }}</a> 
                                                                             </div>
                                                                         </div>							
                                                                     </div>	
@@ -527,7 +532,7 @@
                                                                         <div class="plan">			
                                                                             <div class="plan-title text-center">{{ $subscription->plan_name }}</div>		
                                                                             <p class="fs-12 text-center mb-3">{{ $subscription->primary_heading }}</p>																					
-                                                                            <p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!}{{ number_format((float)$subscription->price, 2) }}</p>
+                                                                            <p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!}@if (config('payment.decimal_points') == 'allow') {{ number_format((float)$subscription->price, 2) }} @else {{ number_format($subscription->price) }} @endif</p>
                                                                             <p class="fs-12 text-center mb-3">{{ $subscription->currency }} / {{ __('Month') }}</p>
                                                                             <div class="text-center action-button mt-2 mb-5">
                                                                                 <a href="{{ route('user.plan.subscribe', $subscription->id) }}" class="btn btn-primary">{{ __('Subscribe Now') }}</a>                                                														
@@ -577,7 +582,7 @@
                                                                         <div class="plan">			
                                                                             <div class="plan-title text-center">{{ $subscription->plan_name }}</div>		
                                                                             <p class="fs-12 text-center mb-3">{{ $subscription->primary_heading }}</p>																					
-                                                                            <p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!}{{ number_format((float)$subscription->price, 2) }}</p>
+                                                                            <p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!}@if (config('payment.decimal_points') == 'allow') {{ number_format((float)$subscription->price, 2) }} @else {{ number_format($subscription->price) }} @endif</p>
                                                                             <p class="fs-12 text-center mb-3">{{ $subscription->currency }} / {{ __('Year') }}</p>
                                                                             <div class="text-center action-button mt-2 mb-4">          
                                                                                 <a href="{{ route('user.plan.subscribe', $subscription->id) }}" class="btn btn-primary">{{ __('Subscribe Now') }}</a>
@@ -607,7 +612,58 @@
                                                     </div>
                                                 @endif					
                                             </div>
-                                        @endif					
+                                        @endif	
+                                        
+                                        @if ($lifetime)
+                                            <div class="tab-pane @if ((!$monthly && $lifetime) && (!$yearly && $lifetime)) active @else '' @endif" id="lifetime">
+
+                                                @if ($lifetime_subscriptions->count())
+
+                                                    <h6 class="font-weight-normal fs-12 text-center mb-6">{{ __('Sign up and enjoy Lifetime Plans') }}</h6>
+                                                    
+                                                    <div class="row justify-content-md-center">
+                                                    
+                                                        @foreach ( $lifetime_subscriptions as $subscription )																			
+                                                                <div class="col-lg-3 col-md-6 col-sm-12">
+                                                                    <div class="pt-2 mb-7 prices-responsive">
+                                                                        <div class="card border-0 p-4 pl-5 pr-5 pt-7 price-card @if ($subscription->featured) price-card-border @endif">
+                                                                            @if ($subscription->featured)
+                                                                                <span class="plan-featured">{{ __('Most Popular') }}</span>
+                                                                            @endif
+                                                                            <div class="plan">			
+                                                                                <div class="plan-title text-center">{{ __($subscription->plan_name) }}</div>		
+                                                                                <p class="fs-12 text-center mb-3">{{ __($subscription->primary_heading) }}</p>																					
+                                                                                <p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!}{{ number_format((float)$subscription->price, 2) }}</p>
+                                                                                <p class="fs-12 text-center mb-3">{{ $subscription->currency }} / {{ __('Lifetime') }}</p>
+                                                                                <div class="text-center action-button mt-2 mb-4">
+                                                                                    <a href="{{ route('user.prepaid.checkout', ['type' => 'lifetime', 'id' => $subscription->id]) }}" class="btn btn-primary">{{ __('Subscribe Now') }}</a>													
+                                                                                </div>
+                                                                                <p class="fs-12 text-center mb-3">{{ __($subscription->secondary_heading) }}</p>																	
+                                                                                <ul class="fs-12 pl-3">														
+                                                                                    @foreach ( (explode(',', $subscription->plan_features)) as $feature )
+                                                                                        @if ($feature)
+                                                                                            <li><i class="fa-solid fa-circle-small fs-10 text-muted"></i> {{ __($feature) }}</li>
+                                                                                        @endif																
+                                                                                    @endforeach															
+                                                                                </ul>																
+                                                                            </div>					
+                                                                        </div>	
+                                                                    </div>							
+                                                                </div>										
+                                                            @endforeach					
+
+                                                    </div>
+
+                                                @else
+                                                    <div class="row text-center">
+                                                        <div class="col-sm-12 mt-6 mb-6">
+                                                            <h6 class="fs-12 font-weight-bold text-center">{{ __('No lifetime plans were set yet') }}</h6>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                            </div>	
+                                        @endif	
                                     </div>
                                 </div>
                             

@@ -131,6 +131,7 @@
         max-height: 100%;
         background-color: white;
         transition: all .5s ease;
+        width: 270px;
     }
 
     .chat-main-container .chat-message-container {
@@ -155,6 +156,21 @@
 		left: 0!important;
         transition: all .5s ease!important;
 	}
+
+    #voiceover-character-counter-top {
+        display: block!important;
+
+        #voiceover-character-counter {
+            left: 0!important;
+            margin-top: 14px;
+            margin-left: 12px;
+        }
+    }
+
+    #listen-text {
+        margin-right: 0px!important;
+        margin-bottom: 1rem;
+    }
 
 }
 

@@ -104,6 +104,9 @@ function language_select(value){
 
     "use strict";
 
+    let language = document.getElementById("languages");
+    textarea_language = language.options[language.selectedIndex].text;
+
     for (let i = 0; i < previous_selection.length; i++){
         previous_selection[i].style.display = 'none';
     }
@@ -944,7 +947,8 @@ function startSynthesizeMode(length, map, all_text) {
             $('#processing').hide();
             $('#synthesize-text').html('Synthesize');            
          },
-        success: function(data) {           
+        success: function(data) {     
+            animateValue("balance-number", data['old'], data['current'], 2000);
             $("html, body").animate({scrollTop: $("#results-header").offset().top}, 200);
 			$("#resultTable").DataTable().ajax.reload();
         },
@@ -1044,6 +1048,7 @@ function startListenMode(length, map, all_text) {
             $('#listen-text').html('Listen');                
         },
         success: function(data) {
+            animateValue("balance-number", data['old'], data['current'], 2000);
             $('#waveform-box').slideDown('slow');
         },
         error: function(data) {
@@ -1406,6 +1411,7 @@ function listenRow(row) {
                 $('#' + row.id).html('<i class="fa-solid fa-message-music"></i>');              
             },
             success: function(data) {
+                animateValue("balance-number", data['old'], data['current'], 2000);
                 $('#waveform-box').slideDown('slow')
             },
             error: function(data) {
@@ -1503,6 +1509,22 @@ function processText(text) {
 
 function chunkString(str, length) {
     return str.match(new RegExp('.{1,' + length + '}', 'g'));
+}
+
+function animateValue(id, start, end, duration) {
+    if (start === end) return;
+    var range = end - start;
+    var current = start;
+    var increment = end > start? 1 : -1;
+    var stepTime = Math.abs(Math.floor(duration / range));
+    var obj = document.getElementById(id);
+    var timer = setInterval(function() {
+        current += increment;
+        obj.innerHTML = current;
+        if (current == end) {
+            clearInterval(timer);
+        }
+    }, stepTime);
 }
 
 

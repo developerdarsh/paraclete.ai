@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('template_code')->nullable(); 
             $table->boolean('status')->default(true); 
             $table->boolean('professional')->default(false); 
+            $table->boolean('new')->default(false); 
             $table->string('group')->nullable(); 
             $table->string('slug')->nullable(); 
             $table->string('type')->default('custom'); 

@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 use Orhanerday\OpenAi\OpenAi;
+use App\Services\Service;
 use App\Models\SubscriptionPlan;
 use App\Models\Transcript;
 use App\Models\Workbook;
@@ -21,12 +22,10 @@ use Carbon\Carbon;
 class TranscribeController extends Controller
 {
     private $api;
-    private $user;
 
     public function __construct()
     {
         $this->api = new LicenseController();
-        $this->user = new UserService();
     }
 
     /** 
@@ -82,16 +81,33 @@ class TranscribeController extends Controller
             }
  
             # Check if user has minutes available to proceed
-            if ((Auth::user()->available_minutes + Auth::user()->available_minutes_prepaid) < $audio_length) {
-                $data['status'] = 'error';
-                $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
-                return $data;
+            if ((auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid) < $audio_length) {
+                if (!is_null(auth()->user()->member_of)) {
+                    if (auth()->user()->member_use_credits_speech) {
+                        $member = User::where('id', auth()->user()->member_of)->first();
+                        if (($member->available_minutes + $member->available_minutes_prepaid) < $audio_length) {
+                            $data['status'] = 'error';
+                            $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
+                            return $data;
+                        }
+                    } else {
+                        $data['status'] = 'error';
+                        $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
+                        return $data;
+                    }
+                    
+                } else {
+                    $data['status'] = 'error';
+                    $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
+                    return $data;
+                } 
             } else {
                 $this->updateBalance($audio_length);
             } 
 
-            $upload = $this->user->upload();
-            if (!$upload['status']) return;  
+            $user = new Service();
+            $upload = $user->upload();
+            if (!$upload['status']) return; 
 
             if (request()->has('audiofile')) {
         
@@ -272,11 +288,42 @@ class TranscribeController extends Controller
 
         } else {
 
-            $remaining = $minutes - Auth::user()->available_minutes;
-            $user->available_minutes = 0;
+            if (!is_null(Auth::user()->member_of)) {
 
-            $used = Auth::user()->available_minutes_prepaid - $remaining;
-            $user->available_minutes_prepaid = ($used < 0) ? 0 : $used;
+                $member = User::where('id', Auth::user()->member_of)->first();
+
+                if ($member->available_minutes > $minutes) {
+
+                    $total_minutes = $member->available_minutes - $minutes;
+                    $member->available_minutes = ($total_minutes < 0) ? 0 : $total_minutes;
+        
+                } elseif ($member->available_minutes_prepaid > $minutes) {
+        
+                    $total_minutes_prepaid = $member->available_minutes_prepaid - $minutes;
+                    $member->available_minutes_prepaid = ($total_minutes_prepaid < 0) ? 0 : $total_minutes_prepaid;
+        
+                } elseif (($member->available_minutes + $member->available_minutes_prepaid) == $minutes) {
+        
+                    $member->available_minutes = 0;
+                    $member->available_minutes_prepaid = 0;
+        
+                } else {
+                    $remaining = $minutes - $member->available_minutes;
+                    $member->available_minutes = 0;
+    
+                    $prepaid_left = $member->available_minutes_prepaid - $remaining;
+                    $member->available_minutes_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                }
+
+                $member->update();
+
+            } else {
+                $remaining = $minutes - Auth::user()->available_minutes;
+                $user->available_images = 0;
+
+                $prepaid_left = Auth::user()->available_minutes_prepaid - $remaining;
+                $user->available_minutes_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+            }
 
         }
 

@@ -59,6 +59,7 @@ class AdminDavinciController extends Controller
                         $actionBtn = '<div>      
                                         <a class="editButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="Edit Description"></i></a>      
                                         <a class="changeButton" id="' . $row["id"] . '"  type="' . $row['type'] . '" href="#"><i class="fa-solid fa-square-parking table-action-buttons request-action-button" title="Set Template Package"></i></a>
+                                        <a class="newButton" id="' . $row["id"] . '" href="#"><i class="fa-solid fa-sparkles table-action-buttons edit-action-button" title="Set as New Template"></i></a>
                                         <a class="activateButton" id="' . $row["id"] . '" href="#"><i class="fa fa-check table-action-buttons request-action-button" title="Activate Template"></i></a>
                                         <a class="deactivateButton" id="' . $row["id"] . '" href="#"><i class="fa fa-close table-action-buttons delete-action-button" title="Deactivate Template"></i></a>  
                                     </div>';
@@ -96,12 +97,17 @@ class AdminDavinciController extends Controller
                         }                      
                         return $package;
                     })
+                    ->addColumn('custom-new', function($row){
+                        $icon = ($row['new']) ? '<i class="fa-solid fa-circle-check text-success fs-16"></i>' : '<i class="fa-solid fa-circle-xmark fs-16"></i>';
+                        $custom_new = '<span class="font-weight-bold">'.$icon.'</span>';
+                        return $custom_new;
+                    })
                     ->addColumn('custom-status', function($row){
                         $status = ($row['status']) ? 'Active' : 'Deactive';
                         $custom_voice = '<span class="cell-box status-'.strtolower($status).'">'. $status.'</span>';
                         return $custom_voice;
                     })
-                    ->rawColumns(['actions', 'updated-on', 'custom-name', 'custom-package', 'custom-status'])
+                    ->rawColumns(['actions', 'updated-on', 'custom-name', 'custom-package', 'custom-status', 'custom-new'])
                     ->make(true);
                     
         }
@@ -218,6 +224,35 @@ class AdminDavinciController extends Controller
 
             return  response()->json('success');
         }         
+    }
+
+
+    /**
+     * Set new status
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function setNew(Request $request)
+    {
+        if ($request->ajax()) {
+
+            if (request('type') == 'custom') {
+                $template = CustomTemplate::where('id', request('id'))->firstOrFail();
+            } else {
+                $template = Template::where('id', request('id'))->firstOrFail();
+            }
+
+            if ($template->new) {
+                $template->update(['new' => false]);
+                return  response()->json(true);
+            } else {
+                $template->update(['new' => true]);
+                return  response()->json('success');
+            }
+
+            
+        }
     }
 
 

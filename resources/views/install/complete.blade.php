@@ -12,7 +12,7 @@
                 <span class="btn mr-2"><i class="fa-solid fa-file-certificate"></i></span>
                 <span class="btn mr-2 active"><i class="fa-solid fa-shield-check"></i></span>
             </div>
-            <div class="card overflow-hidden border-0 special-shadow mt-5 mb-5">	
+            <div class="card border-0 special-shadow mt-5 mb-5">	
                 						
                 <div class="card-body mt-7">                                                  
 
@@ -64,15 +64,6 @@
         </div>
          
     </div>
-    <footer class="footer" id="install-footer">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-12 col-sm-12 fs-10 text-muted text-center">
-                    {{ __('Copyright') }} © {{ date("Y") }} <a href="https://codecanyon.net/user/berkine/portfolio" target="_blank">{{ config('app.name') }}</a>. {{ __('All rights reserved') }}
-                </div>
-            </div>
-        </div>
-    </footer> 
 </div>
 @endsection
 

@@ -144,7 +144,7 @@ class ActivationController extends Controller
             }
 
             toastr()->success(__('Application license was successfully activated'));
-            return redirect()->back()->with('success', 'Application license was successfully activated');
+            return redirect()->back();
         } else {
             toastr()->error(__('There was an error while activating your application, please contact support team'));
             return redirect()->back();

@@ -13,6 +13,7 @@ use Illuminate\Http\UploadedFile;
 use App\Models\SubscriptionPlan;
 use App\Models\Subscriber;
 use App\Models\User;
+use Carbon\Carbon;
 use DB;
 
 
@@ -35,13 +36,20 @@ class UserController extends Controller
         $data = [
             'words' => $davinci->userTotalWordsGenerated(),
             'images' => $davinci->userTotalImagesGenerated(),
+            'contents' => $davinci->userTotalContentsGenerated(),
+            'synthesized' => $davinci->userTotalSynthesizedText(),
+            'transcribed' => $davinci->userTotalTranscribedAudio(),
+            'codes' => $davinci->userTotalCodesCreated(),
         ];
         
         $chart_data['word_usage'] = json_encode($davinci->userMonthlyWordsChart());
         $chart_data['image_usage'] = json_encode($davinci->userMonthlyImagesChart());
         
-        if (auth()->user()->hasActiveSubscription()) {
-            $subscription = Subscriber::where('status', 'Active')->where('user_id', auth()->user()->id)->first();
+        $subscription = Subscriber::where('status', 'Active')->where('user_id', auth()->user()->id)->first();
+        if ($subscription) {
+             if(Carbon::parse($subscription->active_until)->isPast()) {
+                 $subscription = false;
+             } 
         } else {
             $subscription = false;
         }

@@ -21,7 +21,7 @@
 			@if ($monthly || $yearly || $prepaid || $lifetime)
 
 				<div class="tab-menu-heading text-center">
-					<div class="tabs-menu">								
+					<div class="tabs-menu dark-theme-target" >								
 						<ul class="nav">
 							@if ($prepaid)						
 								<li><a href="#prepaid" class="@if (!$monthly && !$yearly && $prepaid && !$lifetime) active @else '' @endif" data-bs-toggle="tab"> {{ __('Prepaid Plans') }}</a></li>
@@ -30,10 +30,10 @@
 								<li><a href="#monthly_plans" class="@if (($monthly && $prepaid && $yearly) || ($monthly && !$prepaid && !$yearly) || ($monthly && $prepaid && !$yearly) || ($monthly && !$prepaid && $yearly)) active @else '' @endif" data-bs-toggle="tab"> {{ __('Monthly Plans') }}</a></li>
 							@endif	
 							@if ($yearly)
-								<li><a href="#yearly_plans" class="@if (!$monthly && !$prepaid && $yearly && !$lifetime) active @else '' @endif" data-bs-toggle="tab"> {{ __('Yearly Plans') }}</a></li>
+								<li><a href="#yearly_plans" class="@if ((!$monthly && !$prepaid && $yearly && !$lifetime) || (!$monthly && $prepaid && $yearly && !$lifetime) || (!$monthly && $prepaid && $yearly && $lifetime))  active @else '' @endif" data-bs-toggle="tab"> {{ __('Yearly Plans') }}</a></li>
 							@endif
 							@if ($lifetime)
-								<li><a href="#lifetime" class="@if (!$monthly && !$yearly && !$prepaid &&  $lifetime) active @else '' @endif" data-bs-toggle="tab"> {{ __('Lifetime Plans') }}</a></li>
+								<li><a href="#lifetime" class="@if ((!$monthly && !$yearly && !$prepaid &&  $lifetime) || (!$monthly && !$yearly && $prepaid &&  $lifetime)) active @else '' @endif" data-bs-toggle="tab"> {{ __('Lifetime Plans') }}</a></li>
 							@endif								
 						</ul>
 					</div>

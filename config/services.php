@@ -41,9 +41,13 @@ return [
         'key' => env('OPENAI_SECRET_KEY'),
     ],
 
+    'stable_diffusion' => [
+        'key' => env('STABLE_DIFFUSION_API_KEY'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
-    | Cloud Storage Vendor
+    | Cloud Vendors
     |--------------------------------------------------------------------------
     */
 
@@ -201,6 +205,44 @@ return [
         'enable' => env('BANK_TRANSFER_ENABLED'),
         'subscription' => env('BANK_TRANSFER_SUBSCRIPTION'),
         'class' => App\Services\BankTransferService::class,
+    ],
+
+    'midtrans' => [
+        'enable' => env('MIDTRANS_ENABLED'),
+        'production' => env('MIDTRANS_PRODUCTION'),
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
+        'class' => App\Services\MidtransService::class,
+    ],
+
+    'flutterwave' => [
+        'enable' => env('FLUTTERWAVE_ENABLED'),
+        'subscription' => env('FLUTTERWAVE_SUBSCRIPTION_ENABLED'),
+        'public_key' => env('FLUTTERWAVE_PUBLIC_KEY'),
+        'secret_key' => env('FLUTTERWAVE_SECRET_KEY'),
+        'encryption_key' => env('FLUTTERWAVE_ENCRYPTION_KEY'),
+        'webhook_url' => env('FLUTTERWAVE_WEBHOOK_URL'),
+        'secret_hash' => env('FLUTTERWAVE_SECRET_HASH'),
+        'class' => App\Services\FlutterwaveService::class,
+    ],
+
+    'yookassa' => [
+        'enable' => env('YOOKASSA_ENABLED'),
+        'subscription' => env('YOOKASSA_SUBSCRIPTION_ENABLED'),
+        'shop_id' => env('YOOKASSA_SHOP_ID'),
+        'secret_key' => env('YOOKASSA_SECRET_KEY'),
+        'http_uri' => env('YOOKASSA_HTTP_URI'),
+        'class' => App\Services\YookassaService::class,
+    ],
+
+    'paddle' => [
+        'enable' => env('PADDLE_ENABLED'),
+        'subscription' => env('PADDLE_SUBSCRIPTION_ENABLED'),
+        'vendor_id' => env('PADDLE_VENDOR_ID'),
+        'vendor_auth_code' => env('PADDLE_VENDOR_AUTH_CODE'),
+        'sandbox' => env('PADDLE_SANDBOX'),
+        'class' => App\Services\PaddleService::class,
     ],
 
 ];

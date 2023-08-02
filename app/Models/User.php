@@ -46,7 +46,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'referral_paypal',
         'referral_bank_requisites',
         'default_voiceover_language',
-        'default_voiceover_voice'
+        'default_voiceover_voice',
+        'member_of',
+        'member_limit',
+        'member_use_credits_template',
+        'member_use_credits_chat',
+        'member_use_credits_code',
+        'member_use_credits_voiceover',
+        'member_use_credits_speech',
+        'member_use_credits_image',
     ];
 
     /**

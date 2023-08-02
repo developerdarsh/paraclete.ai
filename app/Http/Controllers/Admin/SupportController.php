@@ -52,11 +52,11 @@ class SupportController extends Controller
                         
                     })
                     ->addColumn('custom-status', function($row){
-                        $custom_status = '<span class="cell-box support-'.strtolower($row["status"]).'">'.$row["status"].'</span>';
+                        $custom_status = '<span class="cell-box support-'.strtolower($row["status"]).'">'.__($row["status"]).'</span>';
                         return $custom_status;
                     })
                     ->addColumn('custom-priority', function($row){
-                        $custom_priority = '<span class="cell-box priority-'.strtolower($row["priority"]).'">'.$row["priority"].'</span>';
+                        $custom_priority = '<span class="cell-box priority-'.strtolower($row["priority"]).'">'.__($row["priority"]).'</span>';
                         return $custom_priority;
                     })
                     ->addColumn('username', function($row){
@@ -72,7 +72,7 @@ class SupportController extends Controller
                         return $custom_priority;
                     })
                     ->addColumn('custom-subject', function($row){
-                        $custom_priority = '<a href="'. route("admin.support.show", $row["ticket_id"] ). '">'.$row["subject"].'</a>';
+                        $custom_priority = '<a class="support-subject-text" href="'. route("admin.support.show", $row["ticket_id"] ). '">'.$row["subject"].'</a>';
                         return $custom_priority;
                     })
                     ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-priority', 'username', 'resolved-on', 'custom-category', 'custom-ticket', 'custom-subject'])

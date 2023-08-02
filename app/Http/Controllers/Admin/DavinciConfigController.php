@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\Language;
 use App\Models\Vendor;
-use App\Models\Voice;
+use App\Models\ApiKey;
+use App\Models\Setting;
+use Yajra\DataTables\DataTables;
 use DB;
 
 
@@ -19,6 +22,7 @@ class DavinciConfigController extends Controller
     public function index()
     {
         $languages = Language::orderBy('languages.language', 'asc')->get();
+        $settings = Setting::where('name', 'words_filter')->first();
 
         # Set Voice Types
         $voiceover_languages = DB::table('voices')
@@ -39,7 +43,7 @@ class DavinciConfigController extends Controller
             ->orderBy('voices.voice', 'asc')
             ->get();
 
-        return view('admin.davinci.configuration.index', compact('languages', 'voiceover_languages', 'voices'));
+        return view('admin.davinci.configuration.index', compact('languages', 'voiceover_languages', 'voices', 'settings'));
     }
 
 
@@ -78,6 +82,8 @@ class DavinciConfigController extends Controller
         $this->storeConfiguration('DAVINCI_SETTINGS_FREE_TIER_WORDS', request('free-tier-words'));
         $this->storeConfiguration('DAVINCI_SETTINGS_FREE_TIER_IMAGES', request('free-tier-images'));
         $this->storeConfiguration('DAVINCI_SETTINGS_IMAGE_FEATURE_USER', request('image-feature-user'));
+        $this->storeConfiguration('DAVINCI_SETTINGS_IMAGE_SERVICE_VENDOR', request('image-vendor'));
+        $this->storeConfiguration('DAVINCI_SETTINGS_IMAGE_STABLE_DIFFUSION_ENGINE', request('stable-diffusion-engine'));
         $this->storeConfiguration('DAVINCI_SETTINGS_CODE_FEATURE_USER', request('code-feature-user'));
         $this->storeConfiguration('DAVINCI_SETTINGS_CHAT_FEATURE_USER', request('chat-feature-user'));
         $this->storeConfiguration('DAVINCI_SETTINGS_VOICEOVER_FEATURE_USER', request('voiceover-feature-user'));
@@ -86,6 +92,11 @@ class DavinciConfigController extends Controller
         $this->storeConfiguration('DAVINCI_SETTINGS_MAX_RESULTS_LIMIT_USER', request('max-results-user'));
         $this->storeConfiguration('DAVINCI_SETTINGS_CHATS_ACCESS_USER', request('chat-user'));
         $this->storeConfiguration('OPENAI_SECRET_KEY', request('secret-key'));
+        $this->storeConfiguration('STABLE_DIFFUSION_API_KEY', request('stable-diffusion-key'));
+        $this->storeConfiguration('DAVINCI_SETTINGS_SD_KEY_USAGE', request('sd-key-usage'));
+        $this->storeConfiguration('DAVINCI_SETTINGS_OPENAI_KEY_USAGE', request('openai-key-usage'));
+        $this->storeConfiguration('DAVINCI_SETTINGS_TEAM_MEMBERS_FEATURE', request('team-members-feature'));
+        $this->storeConfiguration('DAVINCI_SETTINGS_TEAM_MEMBERS_QUANTITY', request('team-members-quantity'));
 
         $this->storeConfiguration('DAVINCI_SETTINGS_VOICEOVER_ENABLE_AZURE', request('enable-azure'));
         $this->storeConfiguration('DAVINCI_SETTINGS_VOICEOVER_ENABLE_GCP', request('enable-gcp'));
@@ -116,6 +127,8 @@ class DavinciConfigController extends Controller
         $this->storeConfiguration('AZURE_SUBSCRIPTION_KEY', request('set-azure-key'));
         $this->storeConfiguration('AZURE_DEFAULT_REGION', request('set-azure-region'));
         $this->storeConfiguration('GOOGLE_APPLICATION_CREDENTIALS', request('gcp-configuration-path'));
+
+        Setting::where('name', 'words_filter')->update(['value' => request('words-filter')]);
 
         # Enable/Disable GCP Voices
         if (request('enable-gcp') == 'on') {
@@ -178,4 +191,154 @@ class DavinciConfigController extends Controller
 
         }
     }
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showKeys(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = ApiKey::orderBy('engine', 'asc')->get();
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('actions', function($row){
+                    $actionBtn = '<div>      
+                                    <a class="editButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="Update API Key"></i></a>          
+                                    <a class="activateButton" id="' . $row["id"] . '" href="#"><i class="fa fa-check table-action-buttons request-action-button" title="Activate or Deactivate API Key"></i></a>
+                                    <a class="deleteButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete API Key"></i></a> 
+                                </div>';     
+                    return $actionBtn;
+                })
+                ->addColumn('created-on', function($row){
+                    $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                    return $created_on;
+                })
+                ->addColumn('engine-name', function($row){
+                    $name = ($row['engine'] == 'openai') ? 'OpenAI' : 'Stable Diffusion';
+                    $user = '<span class="font-weight-bold">'. ucfirst($name) .'</span>';
+                    return $user;
+                }) 
+                ->addColumn('status', function($row){
+                    $status = ($row['status']) ? 'active' : 'deactive';
+                    $user = '<span class="cell-box status-'.$status.'">'. ucfirst($status) .'</span>';
+                    return $user;
+                })
+                ->rawColumns(['actions', 'created-on', 'engine-name', 'status'])
+                ->make(true);
+                    
+        }
+
+        return view('admin.davinci.configuration.keys');
+    }
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function createKeys(Request $request)
+    {
+        return view('admin.davinci.configuration.create');
+    }
+
+
+     /**
+     * Store review post properly in database
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function storeKeys(Request $request)
+    {
+        request()->validate([
+            'engine' => 'required',
+            'api_key' => 'required',
+            'status' => 'required',
+        ]);  
+
+        ApiKey::create([
+            'engine' => $request->engine,
+            'api_key' => $request->api_key,
+            'status' => $request->status,
+        ]);
+
+        toastr()->success(__('API Key successfully stored'));
+        return redirect()->route('admin.davinci.configs.keys');
+    }
+
+
+    /**
+     * Update the api key
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {   
+        if ($request->ajax()) {
+
+            $template = ApiKey::where('id', request('id'))->firstOrFail();
+            
+            $template->update(['api_key' => request('name')]);
+            return  response()->json('success');
+        } 
+    }
+
+
+    /**
+     * Activate the api key
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function activate(Request $request)
+    {   
+        if ($request->ajax()) {
+
+            $template = ApiKey::where('id', request('id'))->firstOrFail();
+            
+            if ($template->status) {
+                $template->update(['status' => false]);
+                return  response()->json('deactive');
+            } else {
+                $template->update(['status' => true]);
+                return  response()->json('active');
+            }   
+        } 
+    }
+
+
+    /**
+     * Delete the api key
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request)
+    {   
+        if ($request->ajax()) {
+
+            $name = ApiKey::find(request('id'));
+
+            if($name) {
+
+                $name->delete();
+
+                return response()->json('success');
+
+            } else{
+                return response()->json('error');
+            } 
+        } 
+    }
+
 }
+
+
+

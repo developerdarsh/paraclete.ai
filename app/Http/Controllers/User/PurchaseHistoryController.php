@@ -79,6 +79,18 @@ class PurchaseHistoryController extends Controller
                             case 'Braintree':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Braintree Gateway" class="w-40" src="' . URL::asset('img/payments/braintree.svg') . '"></div>';
                                 break;
+                            case 'Midtrans':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Midtrans Gateway" class="w-40" src="' . URL::asset('img/payments/midtrans.png') . '"></div>';
+                                break;
+                            case 'Flutterwave':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Flutterwave Gateway" class="w-40" src="' . URL::asset('img/payments/flutterwave.svg') . '"></div>';
+                                break; 
+                            case 'Yookassa':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Yookassa Gateway" class="w-40" src="' . URL::asset('img/payments/yookassa.svg') . '"></div>';
+                                break;
+                            case 'Paddle':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
+                                break;
                             case 'FREE':
                                 $custom_gateway = '<div class="font-weight-bold">Free Plan</div>';
                                 break;
@@ -156,6 +168,18 @@ class PurchaseHistoryController extends Controller
                                 break;
                             case 'Mollie':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Mollie Gateway" class="w-40" src="' . URL::asset('img/payments/mollie.svg') . '"></div>';
+                                break;
+                            case 'Midtrans':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Midtrans Gateway" class="w-40" src="' . URL::asset('img/payments/midtrans.png') . '"></div>';
+                                break;
+                            case 'Flutterwave':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Flutterwave Gateway" class="w-40" src="' . URL::asset('img/payments/flutterwave.svg') . '"></div>';
+                                break; 
+                            case 'Yookassa':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Yookassa Gateway" class="w-40" src="' . URL::asset('img/payments/yookassa.svg') . '"></div>';
+                                break;
+                            case 'Paddle':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
                                 break;
                             case 'FREE':
                                 $custom_gateway = '<div class="font-weight-bold">Free Plan</div>';

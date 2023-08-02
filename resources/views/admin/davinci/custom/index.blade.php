@@ -88,7 +88,7 @@
 										<option value="free">{{ __('Free Package') }}</option>
 										<option value="all" selected>{{ __('Standard Package') }}</option>
 										<option value="professional"> {{ __('Professional Package') }}</option>																															
-										<option value="premium"> {{ __('Premuim Package') }}</option>																																																																																																									
+										<option value="premium"> {{ __('Premium Package') }}</option>																																																																																																									
 									</select>
 								</div>
 							</div>
@@ -176,7 +176,8 @@
 								<th width="3%">{{ __('Status') }}</th> 
 								<th width="7%">{{ __('Template Name') }}</th>
 								<th width="14%">{{ __('Template Description') }}</th>
-								<th width="3%">{{ __('Package') }}</th>						
+								<th width="2%">{{ __('Package') }}</th>						
+								<th width="1%">{{ __('New') }}</th>						
 								<th width="3%">{{ __('Updated On') }}</th>	    										 						           	
 								<th width="7%">{{ __('Actions') }}</th>
 							</tr>
@@ -242,7 +243,13 @@
 						name: 'custom-package',
 						orderable: true,
 						searchable: true
-					},						
+					},			
+					{
+						data: 'custom-new',
+						name: 'custom-new',
+						orderable: true,
+						searchable: true
+					},					
 					{
 						data: 'updated-on',
 						name: 'updated-on',
@@ -311,10 +318,11 @@
 					title: '{{ __('Update Template Package') }}',
 					input: 'select',
 					inputOptions: {
-						all: '{{ __('All') }}',
-						free: '{{ __('Free') }}',
-						professional: '{{ __('Professional') }}',
-						premium: '{{ __('Premium') }}'
+						all: '{{ __('All Templates') }}',
+						free: '{{ __('Only Free Templates') }}',
+						standard: '{{ __('Up to Standard Templates') }}',
+						professional: '{{ __('Up to Professional Templates') }}',
+						premium: '{{ __('Up to Premium Templates') }}'
 					},
 					inputPlaceholder: '{{ __('Set Template Package') }}',
 					showCancelButton: true,
@@ -347,6 +355,39 @@
 						})
 					} 
 				})
+			});
+
+
+			// SET AS NEW TEMPLATE
+			$(document).on('click', '.newButton', function(e) {
+
+				e.preventDefault();
+
+				var formData = new FormData();
+				formData.append("id", $(this).attr('id'));
+				formData.append("type", $(this).attr('type'));
+
+				$.ajax({
+					headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+					method: 'post',
+					url: 'templates/template/setnew',
+					data: formData,
+					processData: false,
+					contentType: false,
+					success: function (data) {
+						if (data == 'success') {
+							Swal.fire('{{ __('Template Update') }}', '{{ __('Template has been successfully set as new') }}', 'success');
+							$("#allTemplates").DataTable().ajax.reload();
+						} else {
+							Swal.fire('{{ __('Template Update') }}', '{{ __('New tag has been successfully removed from template') }}', 'success');
+							$("#allTemplates").DataTable().ajax.reload();
+						}      
+					},
+					error: function(data) {
+						Swal.fire({ type: 'error', title: 'Oops...', text: 'Something went wrong!' })
+					}
+				})
+
 			});
 
 

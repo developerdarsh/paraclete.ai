@@ -19,6 +19,8 @@ class SubscriptionPlan extends Model
         'stripe_gateway_plan_id',
         'paystack_gateway_plan_id',
         'razorpay_gateway_plan_id',
+        'flutterwave_gateway_plan_id',
+        'paddle_gateway_plan_id',
         'status',
         'plan_name',
         'price',
@@ -44,6 +46,7 @@ class SubscriptionPlan extends Model
         'image_storage_days',
         'voiceover_storage_days',
         'whisper_storage_days',
+        'team_members'
     ];
 
     /**

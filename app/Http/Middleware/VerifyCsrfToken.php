@@ -15,6 +15,7 @@ class VerifyCsrfToken extends Middleware
         'webhooks/*',
         'user/payments/approved/razorpay',        
         'user/payments/subscription/razorpay',  
+        'user/payments/approved/braintree', 
         'public/install/*',    
         'install/*',
     ];

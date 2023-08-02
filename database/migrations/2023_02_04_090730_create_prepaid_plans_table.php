@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('status')->default('active')->comment('active|closed');
             $table->integer('words')->default(0);
             $table->integer('images')->default(0);
+            $table->integer('characters')->default(0);
+            $table->integer('minutes')->default(0);
             $table->boolean('featured')->nullable()->default(false);
             $table->string('pricing_plan')->default('prepaid');
             $table->timestamps();

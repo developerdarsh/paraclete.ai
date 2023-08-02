@@ -12,8 +12,9 @@
 	<div class="row mt-24">
 		<div class="col-lg-12 col-md-12 col-xm-12">
 			<div class="card border-0">
-				<div class="card-header pt-4 border-0">
+				<div class="card-header pt-4 border-0" id="voiceover-character-counter-top">
 					<h3 class="card-title"><i class="fa-sharp fa-solid fa-waveform-lines mr-4 text-info"></i>{{ __('AI Voiceover Studio') }} </h3>
+					<span class="fs-11 text-muted pl-3" id="voiceover-character-counter"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">{{ number_format(auth()->user()->available_chars + auth()->user()->available_chars_prepaid) }}</span> {{ __('Characters') }}</span>
 				</div>
 				<div class="card-body pt-2 pl-7 pr-7 pb-4" id="tts-body-minify">
 				

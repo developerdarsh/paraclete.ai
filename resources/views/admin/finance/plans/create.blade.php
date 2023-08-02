@@ -167,6 +167,30 @@
 											@enderror
 										</div> 						
 									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Flutterwave Plan ID') }} <span class="text-danger">({{ __('Required for Flutterwave') }}) <i class="ml-2 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('You have to get Flutterwave Plan ID in your Flutterwave account. Refer to the documentation if you need help with creating one') }}."></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control" id="flutterwave_gateway_plan_id" name="flutterwave_gateway_plan_id" value="{{ old('flutterwave_gateway_plan_id') }}">
+											</div> 
+											@error('flutterwave_gateway_plan_id')
+												<p class="text-danger">{{ $errors->first('flutterwave_gateway_plan_id') }}</p>
+											@enderror
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Paddle Plan ID') }} <span class="text-danger">({{ __('Required for Paddle') }}) <i class="ml-2 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('You have to get Paddle Plan ID in your Paddle account. Refer to the documentation if you need help with creating one') }}."></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control" id="paddle_gateway_plan_id" name="paddle_gateway_plan_id" value="{{ old('paddle_gateway_plan_id') }}">
+											</div> 
+											@error('paddle_gateway_plan_id')
+												<p class="text-danger">{{ $errors->first('paddle_gateway_plan_id') }}</p>
+											@enderror
+										</div> 						
+									</div>
 								</div>
 							</div>						
 						</div>
@@ -237,6 +261,7 @@
 												<option value="text-curie-001">{{ __('Curie') }} ({{ __('GPT 3') }})</option>
 												<option value="text-davinci-003">{{ __('Davinci') }} ({{ __('GPT 3') }})</option>
 												<option value="gpt-3.5-turbo">{{ __('GPT 3.5 Turbo') }}</option>
+												<option value="gpt-3.5-turbo-16k">{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
 												<option value="gpt-4">{{ __('GPT 4') }} ({{ __('8K') }})</option>
 												<option value="gpt-4-32k">{{ __('GPT 4') }} ({{ __('32K') }})</option>
 											</select>
@@ -263,7 +288,7 @@
 												<input type="number" class="form-control" id="tokens" name="tokens" value="{{ old('tokens') }}" required>
 											</div> 
 											@error('tokens')
-												<p class="text-danger">{{ $errors->first('words') }}</p>
+												<p class="text-danger">{{ $errors->first('tokens') }}</p>
 											@enderror
 										</div> 						
 									</div>
@@ -329,6 +354,18 @@
 												<option value="premium"> {{ __('Upto Premium Chat Types') }} ({{ __('All') }})</option>																																																														
 											</select>
 										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Number of Team Members') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Define how many team members a user is allowed to create under this subscription plan') }}."></i></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="team-members" name="team-members" value="{{ old('team-members') }}" required>
+											</div> 
+											@error('team-members')
+												<p class="text-danger">{{ $errors->first('team-members') }}</p>
+											@enderror
+										</div> 						
 									</div>
 								</div>
 							</div>

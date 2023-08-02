@@ -52,6 +52,21 @@ class LanguagesSeeder extends Seeder
             ['id' => 35, 'language' => 'Ukrainian (Ukraine)', 'language_code' => 'uk-UA', 'language_flag' => '/img/flags/ua.svg', 'status' => 1],
             ['id' => 36, 'language' => 'Lithuanian (Lithuania)', 'language_code' => 'lt-LT', 'language_flag' => '/img/flags/lt.svg', 'status' => 1],
             ['id' => 37, 'language' => 'Bulgarian (Bulgaria)', 'language_code' => 'bg-BG', 'language_flag' => '/img/flags/bg.svg', 'status' => 1],
+            ['id' => 38, 'language' => 'Tamil (Malaysia)', 'language_code' => 'ta-MY', 'language_flag' => '/img/flags/my.svg', 'status' => 1],
+            ['id' => 39, 'language' => 'Persian (Iran)', 'language_code' => 'fa-IR', 'language_flag' => '/img/flags/ir.svg', 'status' => 1],
+            ['id' => 40, 'language' => 'English (UK)', 'language_code' => 'en-GB', 'language_flag' => '/img/flags/gb.svg', 'status' => 1],
+            ['id' => 41, 'language' => 'Slovak (Slovakia)', 'language_code' => 'sk-SK', 'language_flag' => '/img/flags/sk.svg', 'status' => 1],
+            ['id' => 42, 'language' => 'Latvian (Latvia)', 'language_code' => 'lv-LV', 'language_flag' => '/img/flags/lv.svg', 'status' => 1],
+            ['id' => 43, 'language' => 'Albanian (Albania)', 'language_code' => 'sq-AL', 'language_flag' => '/img/flags/al.svg', 'status' => 1],
+            ['id' => 44, 'language' => 'Filipino (Philippines)', 'language_code' => 'fil-PH', 'language_flag' => '/img/flags/ph.svg', 'status' => 1],
+            ['id' => 45, 'language' => 'Khmer (Cambodia)', 'language_code' => 'km-KH', 'language_flag' => '/img/flags/kh.svg', 'status' => 1],
+            ['id' => 46, 'language' => 'Bangla (Bangladesh)', 'language_code' => 'bn-BD', 'language_flag' => '/img/flags/bd.svg', 'status' => 1],
+            ['id' => 47, 'language' => 'Bengali (India)', 'language_code' => 'bn-IN', 'language_flag' => '/img/flags/in.svg', 'status' => 1],
+            ['id' => 48, 'language' => 'Welsh (Wales)', 'language_code' => 'cy-GB', 'language_flag' => '/img/flags/gb-wls.svg', 'status' => 1],
+            ['id' => 49, 'language' => 'Catalan (Spain)', 'language_code' => 'ca-ES', 'language_flag' => '/img/flags/es.svg', 'status' => 1],
+            ['id' => 50, 'language' => 'Serbian (Serbia)', 'language_code' => 'sr-RS', 'language_flag' => '/img/flags/rs.svg', 'status' => 1],
+            ['id' => 51, 'language' => 'Maltese (Malta)', 'language_code' => 'mt-MT', 'language_flag' => '/img/flags/mt.svg', 'status' => 1],
+            ['id' => 52, 'language' => 'Irish (Ireland)', 'language_code' => 'ga-IE', 'language_flag' => '/img/flags/ie.svg', 'status' => 1],
         ];
 
 

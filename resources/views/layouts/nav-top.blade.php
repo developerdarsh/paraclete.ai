@@ -28,7 +28,7 @@
                 <div id="form-group">
                     <select id="template-selection" name="template-selection" data-placeholder="{{ __('Create AI Document') }}" data-callback="changeTemplate">
                         @foreach (App\Services\HelperService::listTemplates() as $temp)
-                            <option data-id="{{ $temp->template_code }}" value="{{ $temp->slug }}" data-icon="{{   $temp->icon }}">{{ __($temp->name)  }}</option>
+                            <option data-id="{{ $temp->template_code }}" value="original-template/{{ $temp->slug }}" data-icon="{{   $temp->icon }}">{{ __($temp->name)  }}</option>
                         @endforeach	
                         @foreach (App\Services\HelperService::listCustomTemplates() as $temp)
                             <option data-id="{{ $temp->template_code }}" value="{{ $temp->slug }}/{{ $temp->template_code }}" data-icon="{{   $temp->icon }}">{{ __($temp->name)  }}</option>
@@ -56,7 +56,7 @@
                         @role('admin')
                             @if (auth()->user()->unreadNotifications->where('type', '<>', 'App\Notifications\GeneralNotification')->count())
                                 <div class="dropdown-header">
-                                    <h6 class="mb-0 fs-12 font-weight-bold"><span id="total-notifications"></span> <span class="text-primary">{{ __('New') }}</span> {{ __('Notification(s)') }}</h6>
+                                    <h6 class="mb-0 fs-12 font-weight-bold notification-dark-theme"><span id="total-notifications"></span> <span class="text-primary">{{ __('New') }}</span> {{ __('Notification(s)') }}</h6>
                                     <a href="#" class="mb-1 badge badge-primary ml-auto pl-3 pr-3 mark-read" id="mark-all">{{ __('Mark All Read') }}</a>
                                 </div>
                                 <div class="notify-menu">
@@ -68,7 +68,7 @@
                                                         <a href="{{ route('admin.notifications.systemShow', [$notification->id]) }}" class="d-flex">
                                                             <div class="notifyimg bg-info-transparent text-info"> <i class="fa-solid fa-user-check fs-18"></i></div>
                                                             <div class="mr-6">
-                                                                <div class="font-weight-bold fs-12">{{ __('New User Registered') }}</div>
+                                                                <div class="font-weight-bold fs-12 notification-dark-theme">{{ __('New User Registered') }}</div>
                                                                 <div class="text-muted fs-10">{{ __('Name') }}: {{ $notification->data['name'] }}</div>
                                                                 <div class="small text-muted fs-10">{{ $notification->created_at->diffForHumans() }}</div>
                                                             </div>                                            
@@ -83,7 +83,7 @@
                                                         <a href="{{ route('admin.notifications.systemShow', [$notification->id]) }}" class="d-flex">
                                                             <div class="notifyimg bg-info-green"> <i class="fa-solid fa-sack-dollar leading-loose"></i></div>
                                                             <div class="mr-4">
-                                                                <div class="font-weight-bold fs-12">{{ __('New User Payment') }}</div>
+                                                                <div class="font-weight-bold fs-12 notification-dark-theme">{{ __('New User Payment') }}</div>
                                                                 <div class="text-muted fs-10">{{ __('From') }}: {{ $notification->data['name'] }}</div>
                                                                 <div class="small text-muted fs-10">{{ $notification->created_at->diffForHumans() }}</div>
                                                             </div>                                            
@@ -98,7 +98,7 @@
                                                         <a href="{{ route('admin.notifications.systemShow', [$notification->id]) }}" class="d-flex">
                                                             <div class="notifyimg bg-info-green"> <i class="fa-solid fa-face-tongue-money fs-20 leading-loose"></i></div>
                                                             <div class="mr-4">
-                                                                <div class="font-weight-bold fs-12">{{ __('New Payout Request') }}</div>
+                                                                <div class="font-weight-bold fs-12 notification-dark-theme">{{ __('New Payout Request') }}</div>
                                                                 <div class="text-muted fs-10">{{ __('From') }}: {{ $notification->data['name'] }}</div>
                                                                 <div class="small text-muted fs-10">{{ $notification->created_at->diffForHumans() }}</div>
                                                             </div>                                            
@@ -113,11 +113,11 @@
                                     </div>                              
                                 </div>
                                 <div class="view-all-button text-center">                            
-                                    <a href="{{ route('admin.notifications.system') }}" class="fs-12 font-weight-bold">{{ __('View All Notifications') }}</a>
+                                    <a href="{{ route('admin.notifications.system') }}" class="fs-12 font-weight-bold notification-dark-theme">{{ __('View All Notifications') }}</a>
                                 </div>                            
                             @else
                                 <div class="view-all-button text-center">
-                                    <h6 class=" fs-12 font-weight-bold mb-1">{{ __('There are no new notifications') }}</h6>                                    
+                                    <h6 class=" fs-12 font-weight-bold mb-1 notification-dark-theme">{{ __('There are no new notifications') }}</h6>                                    
                                 </div>
                             @endif
                         @endrole
@@ -125,7 +125,7 @@
                             @role('user|subscriber')
                                 @if (auth()->user()->unreadNotifications->where('type', 'App\Notifications\GeneralNotification')->count())
                                     <div class="dropdown-header">
-                                        <h6 class="mb-0 fs-12 font-weight-bold">{{ auth()->user()->unreadNotifications->where('type', 'App\Notifications\GeneralNotification')->count() }} <span class="text-primary">New</span> Notification(s)</h6>
+                                        <h6 class="mb-0 fs-12 font-weight-bold notification-dark-theme">{{ auth()->user()->unreadNotifications->where('type', 'App\Notifications\GeneralNotification')->count() }} <span class="text-primary">New</span> Notification(s)</h6>
                                         <a href="#" class="mb-1 badge badge-primary ml-auto pl-3 pr-3 mark-read" id="mark-all">{{ __('Mark All Read') }}</a>
                                     </div>
                                     <div class="notify-menu">
@@ -136,7 +136,7 @@
                                                         <a href="{{ route('user.notifications.show', [$notification->id]) }}" class="d-flex">
                                                             <div class="notifyimg bg-info-transparent text-info"> <i class="fa fa-bell fs-18"></i></div>
                                                             <div>
-                                                                <div class="font-weight-bold fs-12 mt-2">{{ __('New') }} {{ $notification->data['type'] }} {{ __('Notification') }}</div>
+                                                                <div class="font-weight-bold fs-12 mt-2 notification-dark-theme">{{ __('New') }} {{ $notification->data['type'] }} {{ __('Notification') }}</div>
                                                                 <div class="small text-muted fs-10">{{ $notification->created_at->diffForHumans() }}</div>
                                                             </div>                                            
                                                         </a>
@@ -146,16 +146,21 @@
                                         </div>
                                     </div>
                                     <div class="view-all-button text-center">                            
-                                        <a href="{{ route('user.notifications') }}" class="fs-12 font-weight-bold">{{ __('View All Notifications') }}</a>
+                                        <a href="{{ route('user.notifications') }}" class="fs-12 font-weight-bold notification-dark-theme">{{ __('View All Notifications') }}</a>
                                     </div>                             
                                 @else
                                     <div class="view-all-button text-center">
-                                        <h6 class=" fs-12 font-weight-bold mb-1">{{ __('There are no new notifications') }}</h6>                                    
+                                        <h6 class=" fs-12 font-weight-bold mb-1 notification-dark-theme">{{ __('There are no new notifications') }}</h6>                                    
                                     </div>
                                 @endif
                             @endrole
                         @endif                        
                     </div>
+                </div>
+                <div class="dropdown items-center flex">
+                    <a href="#" class="nav-link icon btn-theme-toggle">
+                        <span class="header-icon fa-sharp fa-solid"></span>
+                    </a>
                 </div>
                 <div class="dropdown header-expand" >
                     <a  class="nav-link icon" id="fullscreen-button">
@@ -192,6 +197,22 @@
                             <span class="text-center user fs-12 pb-0 font-weight-bold">{{ Auth::user()->name }}</span><br>
                             <span class="text-center fs-12 text-muted">{{ Auth::user()->job_role }}</span>
                             <div class="dropdown-divider mt-3"></div>
+                            <li class="mt-3 mb-2 fs-12 font-weight-bold">{{ __('Plan') }}: @if (is_null(auth()->user()->plan_id)){{ __('Free Trial') }} @else {{ __(App\Services\HelperService::getPlanName())}}  @endif @if (is_null(auth()->user()->plan_id)) <br><a href="{{ route('user.plans') }}" class="text-yellow upgrade-action-button">{{ __('Upgrade Now') }}</a> @endif</li>
+                            <div class="inline-flex w-100 text-left pl-6">
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-solid fa-message-lines text-primary mr-2"></i><span class="text-muted">{{ __('Words') }}</span> <span class="text-primary ml-1" id="available-words">{{ App\Services\HelperService::userAvailableWords()}}</span></span>
+                                </div> 
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-sharp fa-solid fa-message-image text-primary mr-2"></i><span class="text-muted">{{ __('Images') }}</span> <span class="text-primary ml-1" id="available-images">{{ App\Services\HelperService::userAvailableImages()}}</span></span>
+                                </div> 
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-sharp fa-solid fa-message-music text-primary mr-2"></i><span class="text-muted">{{ __('Minutes') }}</span> <span class="text-primary ml-1" id="available-minutes">{{ App\Services\HelperService::userAvailableMinutes()}}</span></span>
+                                </div> 
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-solid fa-message-captions text-primary mr-2"></i><span class="text-muted">{{ __('Characters') }}</span> <span class="text-primary ml-1" id="available-characters">{{ App\Services\HelperService::userAvailableChars()}}</span></span>
+                                </div>                    
+                            </div>
+                            <div class="dropdown-divider mt-3"></div>     
                         </div>
                         <a class="dropdown-item d-flex" href="{{ route('user.plans') }}">
                             <span class="profile-icon fa-solid fa-box-circle-check"></span>

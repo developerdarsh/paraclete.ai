@@ -25,7 +25,7 @@
 
 @section('content')	
 	<div class="row">
-		<div class="col-lg-6 col-md-6 col-sm-12">
+		<div class="col-md-12 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('All Categories') }}</h3>
@@ -38,8 +38,9 @@
 						<table id='allTemplates' class='table' width='100%'>
 								<thead>
 									<tr>									
-										<th width="10%">{{ __('Category Name') }}</th> 					
-										<th width="3%">{{ __('Type') }}</th> 					
+										<th width="5%">{{ __('Category Name') }}</th> 					
+										<th width="5%">{{ __('Type') }}</th> 					
+										<th width="15%">{{ __('Description') }}</th> 					
 										<th width="3%">{{ __('Updated On') }}</th>	    										 						           	
 										<th width="2%">{{ __('Actions') }}</th>
 									</tr>
@@ -99,7 +100,13 @@
 						name: 'custom-type',
 						orderable: true,
 						searchable: true
-					},								
+					},	
+					{
+						data: 'description',
+						name: 'description',
+						orderable: true,
+						searchable: true
+					},							
 					{
 						data: 'updated-on',
 						name: 'updated-on',
@@ -116,7 +123,7 @@
 			});
 
 			
-			// UPDATE DESCRIPTION
+			// UPDATE NAME
 			$(document).on('click', '.editButton', function(e) {
 
 				e.preventDefault();
@@ -145,6 +152,47 @@
 									$("#allTemplates").DataTable().ajax.reload();
 								} else {
 									Swal.fire('{{ __('Update Error') }}', '{{ __('Category name was not updated correctly') }}', 'error');
+								}      
+							},
+							error: function(data) {
+								Swal.fire('Update Error', data.responseJSON['error'], 'error');
+							}
+						})
+					} else if (result.dismiss !== Swal.DismissReason.cancel) {
+						Swal.fire('{{ __('No Name Entered') }}', '{{ __('Make sure to provide a new name before updating') }}', 'error')
+					}
+				})
+			});
+
+			// UPDATE DESCRIPTION
+			$(document).on('click', '.editDescription', function(e) {
+
+				e.preventDefault();
+
+				Swal.fire({
+					title: '{{ __('Update Category Description') }}',
+					showCancelButton: true,
+					confirmButtonText: '{{ __('Update') }}',
+					reverseButtons: true,
+					input: 'text',
+				}).then((result) => {
+					if (result.value) {
+						var formData = new FormData();
+						formData.append("name", result.value);
+						formData.append("id", $(this).attr('id'));
+						$.ajax({
+							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+							method: 'post',
+							url: 'category/description',
+							data: formData,
+							processData: false,
+							contentType: false,
+							success: function (data) {
+								if (data == 'success') {
+									Swal.fire('{{ __('Category Description Updated') }}', '{{ __('Category description has been successfully updated') }}', 'success');
+									$("#allTemplates").DataTable().ajax.reload();
+								} else {
+									Swal.fire('{{ __('Update Error') }}', '{{ __('Category description was not updated correctly') }}', 'error');
 								}      
 							},
 							error: function(data) {

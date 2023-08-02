@@ -44,6 +44,9 @@ return new class extends Migration
             $table->string('stripe_gateway_plan_id')->nullable();
             $table->string('paystack_gateway_plan_id')->nullable();
             $table->string('razorpay_gateway_plan_id')->nullable();
+            $table->string('flutterwave_gateway_plan_id')->nullable();
+            $table->string('paddle_gateway_plan_id')->nullable();
+            $table->integer('team_members')->nullable();
             $table->timestamps();
         });
     }

@@ -20,6 +20,8 @@ class Template extends Model
         'professional',
         'template_code',
         'type',
-        'package'
+        'package',
+        'fields',
+        'new',
     ];
 }

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('usages_left')->default(1);
             $table->boolean('bound_to_user')->default(false);
             $table->boolean('multi_use')->default(false);
-            $table->json('details')->nullable();
+            $table->longText('details')->nullable();
             $table->timestamp('expired_at')->nullable();
             $table->timestamps();
         });

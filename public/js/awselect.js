@@ -151,6 +151,28 @@ $(function(e) {
 
           $('#chats').awselect();
 
+          $('#lightning').awselect();
+
+          $('#artist').awselect();
+
+          $('#image-vendor').awselect();
+
+          $('#stable-diffusion-engine').awselect();
+
+          $('#diffusion-samples').awselect();
+
+          $('#preset').awselect();
+
+          $('#sd-key-usage').awselect();
+
+          $('#openai-key-usage').awselect();
+
+          $('#templates-streaming').awselect();
+
+          $('#team-members-feature').awselect();
+          $('#midtrans-production').awselect();
+          $('#paddle_sandbox').awselect();
+
       }); 
   
   });

@@ -492,7 +492,6 @@
   transition: border-left-color 0.2s ease, background-color 0.2s ease;
   color: #344050;
   margin: 0px 5px 0px 0px;
-  border-radius: 50px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   height: 46px;
@@ -519,11 +518,12 @@
   }
 
   &.active {
-    background: $primaryTextActiveColor;
-    color: $white;
+    color: $text-color;
+    background: $body-background;
+    border-left: 3px solid #007BFF;
 
     .side-menu__icon {
-      color: $white;
+      color: $primaryTextActiveColor;
     }
 
     &:hover .angle, &:focus .angle {
@@ -560,14 +560,14 @@
 }
 
 .slide.is-expanded a.slide-item {
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
+  // -webkit-transition: all 0.3s;
+  // transition: all 0.3s;
 
   &:hover {
     margin-left: 5px;
     text-decoration: none;
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
+    // -webkit-transition: all 0.3s;
+    // transition: all 0.3s;
     color: $primaryTextHoverColor!important;
   }
 }
@@ -974,7 +974,6 @@
       transition: border-left-color 0.3s ease, background-color 0.3s ease;
       color: #344050;
       margin: 0px 5px 0px 0px;
-      border-radius: 50px;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
@@ -1525,9 +1524,9 @@
   }
 
   max-height: 100vh;
-  -webkit-transition: max-height 2s ease;
-  -o-transition: max-height 2s ease;
-  transition: max-height 2s ease;
+  -webkit-transition: max-height 0.2s ease;
+  -o-transition: max-height 0.2s ease;
+  transition: max-height 0.2s ease;
 }
 
 .sub-side-menu__item {
@@ -1673,7 +1672,6 @@
   text-decoration: none;
   color: $text-color;
   background: $body-background;
-  border-radius: 50px;
 }
 
 .app.sidebar-mini.sidenav-toggled .slide.active.is-expanded .side-menu__item {

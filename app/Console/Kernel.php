@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('subscription:check')->daily();
         $schedule->command('subscription:renew')->daily();
-        $schedule->command('checkimage:process')->everyHour();
+        $schedule->command('checkimage:process')->hourly();
     }
 
     /**

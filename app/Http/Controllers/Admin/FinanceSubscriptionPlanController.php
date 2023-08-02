@@ -123,6 +123,8 @@ class FinanceSubscriptionPlanController extends Controller
             'stripe_gateway_plan_id' => request('stripe_gateway_plan_id'),
             'paystack_gateway_plan_id' => request('paystack_gateway_plan_id'),
             'razorpay_gateway_plan_id' => request('razorpay_gateway_plan_id'),
+            'flutterwave_gateway_plan_id' => request('flutterwave_gateway_plan_id'),
+            'paddle_gateway_plan_id' => request('paddle_gateway_plan_id'),
             'status' => request('plan-status'),
             'plan_name' => request('plan-name'),
             'price' => request('cost'),
@@ -143,6 +145,7 @@ class FinanceSubscriptionPlanController extends Controller
             'plan_features' => request('features'),
             'max_tokens' => request('tokens'),
             'model' => request('model'),
+            'team_members' => request('team-members'),
         ]); 
                
         $plan->save();            
@@ -200,6 +203,8 @@ class FinanceSubscriptionPlanController extends Controller
             'stripe_gateway_plan_id' => request('stripe_gateway_plan_id'),
             'paystack_gateway_plan_id' => request('paystack_gateway_plan_id'),
             'razorpay_gateway_plan_id' => request('razorpay_gateway_plan_id'),
+            'flutterwave_gateway_plan_id' => request('flutterwave_gateway_plan_id'),
+            'paddle_gateway_plan_id' => request('paddle_gateway_plan_id'),
             'status' => request('plan-status'),
             'plan_name' => request('plan-name'),
             'price' => request('cost'),
@@ -222,6 +227,7 @@ class FinanceSubscriptionPlanController extends Controller
             'chats' => request('chats'),
             'max_tokens' => request('tokens'),
             'model' => request('model'),
+            'team_members' => request('team-members'),
         ]); 
            
         toastr()->success(__('Selected plan has been updated successfully'));

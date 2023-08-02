@@ -175,20 +175,20 @@ a {
   }
 }
 
-pre, code, kbd, samp {
-  font-family: monospace, monospace;
-  font-size: 1em;
-}
+// pre, code, kbd, samp {
+//   font-family: monospace, monospace;
+//   font-size: 1em;
+// }
 
-pre {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  overflow: auto;
-  -ms-overflow-style: scrollbar;
-  display: block;
-  font-size: 85%;
-  color: #282d3c;
-}
+// pre {
+//   margin-top: 0;
+//   margin-bottom: 1rem;
+//   overflow: auto;
+//   -ms-overflow-style: scrollbar;
+//   display: block;
+//   font-size: 85%;
+//   color: #282d3c;
+// }
 
 figure {
   margin: 0 0 1rem;
@@ -666,15 +666,15 @@ mark, .mark {
   margin-top: -1rem;
 }
 
-code, kbd, pre, samp {
-  font-family: Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
+// code, kbd, pre, samp {
+//   font-family: Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+// }
 
-code {
-  font-size: 85%;
-  color: inherit;
-  word-break: break-word;
-}
+// code {
+//   font-size: 85%;
+//   color: inherit;
+//   word-break: break-word;
+// }
 
 a > code {
   color: inherit;
@@ -694,11 +694,11 @@ kbd {
   }
 }
 
-pre code {
-  font-size: inherit;
-  color: inherit;
-  word-break: normal;
-}
+// pre code {
+//   font-size: inherit;
+//   color: inherit;
+//   word-break: normal;
+// }
 
 .pre-scrollable {
   max-height: 340px;

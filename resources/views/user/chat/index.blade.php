@@ -5,21 +5,21 @@
 	<link href="{{URL::asset('plugins/sweetalert/sweetalert2.min.css')}}" rel="stylesheet" />
 @endsection
 
-@section('page-header')
-	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
-			<h4 class="page-title mb-0">{{ __('AI Chat Assistants') }}</h4>
-			<ol class="breadcrumb mb-2">
-				<li class="breadcrumb-item"><a href="{{route('user.dashboard')}}"><i class="fa-solid fa-messages-question mr-2 fs-12"></i>{{ __('User') }}</a></li>
-				<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('AI Chat') }}</a></li>
-			</ol>
+@section('content')
+
+	<div class="row mt-24">
+		<div id="chat-search-panel">
+			<h3 class="card-title mb-3 ml-2 fs-20"><i class="fa-solid fa-message-captions mr-2 text-primary"></i>{{ __('AI Chat Assistants') }}</h3>
+			<h6 class="text-muted mb-3 ml-2">{{ __('Find your AI assistant quickly! Get ready to explore our fantastic lineup of AI chat assitants') }}</h6>
+			<div class="search-template">
+				<div class="input-box">								
+					<div class="form-group">							    
+						<input type="text" class="form-control" id="search-template" placeholder="{{ __('Search for your AI assistant...') }}">
+					</div> 
+				</div> 
+			</div>
 		</div>
 	</div>
-	<!-- END PAGE HEADER -->
-@endsection
-
-@section('content')
 
 	<div class="row" id="templates-panel">
 
@@ -202,5 +202,19 @@
 			let url = '{{ url('user/chats') }}/' + value;
 			window.location.href=url;
 		}
+
+		$(document).on('keyup', '#search-template', function () {
+
+			var searchTerm = $(this).val().toLowerCase();
+			$('#templates-panel').find('> div').each(function () {
+				if ($(this).filter(function() {
+					return (($(this).find('h6').text().toLowerCase().indexOf(searchTerm) > -1) || ($(this).find('p').text().toLowerCase().indexOf(searchTerm) > -1));
+				}).length > 0 || searchTerm.length < 1) {
+					$(this).show();
+				} else {
+					$(this).hide();
+				}
+			});
+		});
 	</script>
 @endsection

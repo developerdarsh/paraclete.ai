@@ -80,13 +80,13 @@ class AdminUserController extends Controller
                             $path = asset($row['profile_photo_path']);
                             $user = '<div class="d-flex">
                                     <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" src="' . $path . '"></div>
-                                    <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
+                                    <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span> <br> <span class="text-muted">'.$row["email"].'</span></div>
                                 </div>';
                         } else {
                             $path = URL::asset('img/users/avatar.png');
                             $user = '<div class="d-flex">
                                     <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" class="rounded-circle" src="' . $path . '"></div>
-                                    <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
+                                    <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span> <br> <span class="text-muted">'.$row["email"].'</span></div>
                                 </div>';
                         }
                         
@@ -118,7 +118,17 @@ class AdminUserController extends Controller
                         $used = '<span class="font-weight-bold">'.$words.'</span>';
                         return $used;
                     })
-                    ->rawColumns(['actions', 'custom-status', 'custom-group', 'created-on', 'user', 'custom-country','words-left', 'images-left'])
+                    ->addColumn('chars-left', function($row){
+                        $words = (is_null($row['available_chars'] + $row['available_chars_prepaid'])) ? 0 : number_format($row["available_chars"] + $row['available_chars_prepaid']);
+                        $used = '<span class="font-weight-bold">'.$words.'</span>';
+                        return $used;
+                    })
+                    ->addColumn('minutes-left', function($row){
+                        $words = (is_null($row['available_minutes'] + $row['available_minutes_prepaid'])) ? 0 : number_format($row["available_minutes"] + $row['available_minutes_prepaid']);
+                        $used = '<span class="font-weight-bold">'.$words.'</span>';
+                        return $used;
+                    })
+                    ->rawColumns(['actions', 'custom-status', 'custom-group', 'created-on', 'user', 'custom-country','words-left', 'images-left', 'chars-left', 'minutes-left'])
                     ->make(true);                    
         }
 
@@ -223,8 +233,11 @@ class AdminUserController extends Controller
         
         $chart_data['word_usage'] = json_encode($davinci->userMonthlyWordsChart($user->id));
         
-        if ($user->hasActiveSubscription()) {
-            $subscription = Subscriber::where('user_id', $user->id)->where('status', 'Active')->first();
+        $subscription = Subscriber::where('status', 'Active')->where('user_id', $user->id)->first();
+        if ($subscription) {
+             if(Carbon::parse($subscription->active_until)->isPast()) {
+                 $subscription = false;
+             } 
         } else {
             $subscription = false;
         }

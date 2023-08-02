@@ -5,6 +5,10 @@ namespace App\Services\Statistics;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Content;
 use App\Models\Image;
+use App\Models\VoiceoverResult;
+use App\Models\Transcript;
+use App\Models\Code;
+use App\Models\User;
 use DB;
 
 class DavinciUsageService 
@@ -412,23 +416,6 @@ class DavinciUsageService
 
 
     /**
-     * Current month total usage per user id
-     */
-    public function userTotalTemplatesUsedCurrentMonth($user = null)
-    {
-        $user_id = (is_null($user)) ? Auth::user()->id : $user;
-
-        $total_words = Content::select(DB::raw("count(DISTINCT template_code) as data"))
-                ->where('user_id', $user_id)
-                ->whereMonth('created_at', $this->month)
-                ->whereYear('created_at', $this->year)
-                ->get();  
-        
-        return $total_words[0]['data'];
-    }
-
-
-    /**
      * Total content usage per user id
      */
     public function getTotalContentsCurrentYear()
@@ -469,6 +456,202 @@ class DavinciUsageService
                 ->get();  
         
         return $total_transfers[0]['data'];
+    }
+
+
+    /**
+     * Current month total usage per user id
+     */
+    public function userTotalSynthesizedTextCurrentMonth($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = VoiceoverResult::select(DB::raw("count(id) as data"))
+                ->where('user_id', $user_id)
+                ->whereMonth('created_at', $this->month)
+                ->whereYear('created_at', $this->year)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
+
+    /**
+     * Total usage per user id
+     */
+    public function userTotalSynthesizedText($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = VoiceoverResult::select(DB::raw("count(id) as data"))
+                ->where('user_id', $user_id)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
+
+
+    /**
+     * Current month total usage per user id
+     */
+    public function userTotalTranscribedAudioCurrentMonth($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = Transcript::select(DB::raw("count(id) as data"))
+                ->where('user_id', $user_id)
+                ->whereMonth('created_at', $this->month)
+                ->whereYear('created_at', $this->year)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
+
+    /**
+     * Total usage per user id
+     */
+    public function userTotalTranscribedAudio($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = Transcript::select(DB::raw("count(id) as data"))
+                ->where('user_id', $user_id)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
+
+
+    /**
+     * Current month total usage per user id
+     */
+    public function userTotalCodesCreatedCurrentMonth($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = Code::select(DB::raw("count(id) as data"))
+                ->where('user_id', $user_id)
+                ->whereMonth('created_at', $this->month)
+                ->whereYear('created_at', $this->year)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
+
+     /**
+     * Total usage per user id
+     */
+    public function userTotalCodesCreated($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = Code::select(DB::raw("count(id) as data"))
+                ->where('user_id', $user_id)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
+
+
+    /**
+     * Total words generated 
+     */
+    public function teamTotalWordsGenerated()
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+        
+        $content = Content::whereIn('user_id', $members)->select(DB::raw("sum(tokens) as data"))->get();    
+        
+        return $content[0]['data'];
+    }
+
+
+    /**
+     * Total words generated 
+     */
+    public function teamTotalContentSaved()
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+        
+        $content = Content::whereIn('user_id', $members)->select(DB::raw("count(id) as data"))->where('result_text','<>', null)->get();    
+        
+        return $content[0]['data'];
+    }
+
+
+    /**
+     * Total words generated 
+     */
+    public function teamTotalImagesGenerated()
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+        
+        $content = Image::whereIn('user_id', $members)->select(DB::raw("count(id) as data"))->get();    
+        
+        return $content[0]['data'];
+    }
+
+
+    /**
+     * Total words generated 
+     */
+    public function teamTotalVoiceoverTasks()
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+        
+        $content = VoiceoverResult::whereIn('user_id', $members)->select(DB::raw("count(id) as data"))->get();    
+        
+        return $content[0]['data'];
+    }
+
+
+    /**
+     * Total words generated 
+     */
+    public function teamTotalCharsGenerated()
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+        
+        $content = VoiceoverResult::whereIn('user_id', $members)->select(DB::raw("sum(characters) as data"))->get();    
+        
+        return $content[0]['data'];
+    }
+
+
+    /**
+     * Total words generated 
+     */
+    public function teamTotalTranscribeTasks()
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+        
+        $content = Transcript::whereIn('user_id', $members)->select(DB::raw("count(id) as data"))->get();    
+        
+        return $content[0]['data'];
+    }
+
+
+    public function teamWordsChart($user = null)
+    {
+        $members = User::where('member_of', auth()->user()->id)->pluck('id');
+
+        $words = Content::whereIn('user_id', $members)->select(DB::raw("sum(tokens) as data"), DB::raw("MONTH(created_at) month"))
+                ->whereYear('created_at', date('Y'))
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()->toArray();  
+        
+        $data = [];
+
+        for($i = 1; $i <= 12; $i++) {
+            $data[$i] = 0;
+        }
+
+        foreach ($words as $row) {				            
+            $month = $row['month'];
+            $data[$month] = intval($row['data']);
+        }
+        
+        return $data;
     }
 
 }

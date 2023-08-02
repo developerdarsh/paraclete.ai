@@ -23,12 +23,15 @@ return new class extends Migration
             $table->string('model')->nullable();
             $table->string('frequency')->nullable();
             $table->string('subscription_id');
-            $table->integer('words')->nullable();
-            $table->integer('images')->nullable();
+            $table->integer('words')->nullable()->default(0);
+            $table->integer('images')->nullable()->default(0);
+            $table->integer('characters')->nullable()->default(0);
+            $table->integer('minutes')->nullable()->default(0);
             $table->integer('max_tokens')->nullable();
             $table->string('paystack_customer_code')->nullable();
             $table->string('paystack_authorization_code')->nullable();
             $table->string('paystack_email_token')->nullable();
+            $table->string('paddle_cancel_url')->nullable();
             $table->timestamps();
         });
     }

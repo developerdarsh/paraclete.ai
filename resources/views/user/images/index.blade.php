@@ -64,35 +64,112 @@
 
 						<div class="col-lg-12 col-md-12 col-sm-12">
 							<div id="form-group">
-								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Art Style') }}</h6>
-								<select id="style" name="style" data-placeholder="{{ __('Select Image Style') }}">
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Artist Name') }}</h6>
+								<select id="artist" name="artist" data-placeholder="{{ __('Select Artist Name') }}">
 									<option value='none' selected>{{ __('None') }}</option>																																																												
-									<option value='abstract'>{{ __('Abstract') }}</option>																																																												
-									<option value='realistic'>{{ __('Realistic') }}</option>																																																												
-									<option value='3d render'>{{ __('3D Render') }}</option>																																																												
-									<option value='cartoon'>{{ __('Cartoon') }}</option>																																																												
-									<option value='anime'>{{ __('Anime') }}</option>																																																												
-									<option value='digital art'>{{ __('Digital Art') }}</option>
-									<option value='modern'>{{ __('Modern') }}</option>																																																												
-									<option value='art deco'>{{ __('Art Deco') }}</option>																																																												
-									<option value='illustration'>{{ __('Illustration') }}</option>																																																												
-									<option value='origami'>{{ __('Origami') }}</option>																																																												
-									<option value='pixel art'>{{ __('Pixel Art') }}</option>																																																												
-									<option value='retro'>{{ __('Retro') }}</option>																																																												
-									<option value='photography'>{{ __('Photography') }}</option>																																																												
-									<option value='line art'>{{ __('Line Art') }}</option>																																																												
-									<option value='pop art'>{{ __('Pop Art') }}</option>																																																																																																																						
-									<option value='vaporwave'>{{ __('Vaporwave') }}</option>																																																												
-									<option value='pencil drawing'>{{ __('Pencil Drawing') }}</option>																																																												
-									<option value='renaissance'>{{ __('Renaissance') }}</option>																																																												
-									<option value='minimalism'>{{ __('Minimalism') }}</option>																																																																																																																							
+									<option value="Leonardo da Vinci (Renaissance)">{{ __('Leonardo da Vinci (Renaissance)') }}</option>																																																																																																																																																																																	
+									<option value="Vincent van Gogh (Impressionists and Neo-Impressionists)">{{ __('Vincent van Gogh (Impressionists and Neo-Impressionists)') }}</option>																																																																																																																																																																																	
+									<option value="Pablo Picasso (Cubism)">{{ __('Pablo Picasso (Cubism)') }}</option>																																																																																																																																																																																	
+									<option value="Salvador Dali (Surrealism)">{{ __('Salvador Dali (Surrealism)') }}</option>																																																																																																																																																																																	
+									<option value="Banksy (Street Art)">{{ __('Banksy (Street Art)') }}</option>																																																																																																																																																																																	
+									<option value="Takashi Murakami (Superflat)">{{ __('Takashi Murakami (Superflat)') }}</option>																																																																																																																																																																																	
+									<option value="George Condo (Artificial Realism)">{{ __('George Condo (Artificial Realism)') }}</option>																																																																																																																																																																																	
+									<option value="Tim Burton (Expressionism)">{{ __('Tim Burton (Expressionism)') }}</option>																																																																																																																																																																																	
+									<option value="Normal Rockwell (exaggerated realism)">{{ __('Normal Rockwell (Exaggerated Realism)') }}</option>																																																																																																																																																																																	
+									<option value="Andy Warhol (Pop Art)">{{ __('Andy Warhol (Pop Art)') }}</option>																																																																																																																																																																																	
+									<option value="Claude Monet (Impressionism-Nature)">{{ __('Claude Monet (Impressionism-Nature)') }}</option>																																																																																																																																																																																	
+									<option value="Robert Wyland (outdoor murals)">{{ __('Robert Wyland (Outdoor Murals)') }}</option>																																																																																																																																																																																	
+									<option value="Thomas Kinkade (luminism)">{{ __('Thomas Kinkade (Luminism)') }}</option>																																																																																																																																																																																	
+									<option value="Michelangelo (Fresco Art)">{{ __('Michelangelo (Fresco Art)') }}</option>																																																																																																																																																																																	
+									<option value="Johannes Vermeer (impressionist)">{{ __('Johannes Vermeer (Impressionist)') }}</option>																																																																																																																																																																																	
+									<option value="Gustav Klimt (fresco-secco)">{{ __('Gustav Klimt (Fresco-Secco)') }}</option>																																																																																																																																																																																	
+									<option value="Sandro Botticelli (egg tempera)">{{ __('Sandro Botticelli (Egg Tempera)') }}</option>																																																																																																																																																																																	
+									<option value="James Abbott (Impressionist)">{{ __('James Abbott (Impressionist)') }}</option>																																																																																																																																																																																	
+									<option value="McNeill Whistler (Realism)">{{ __('McNeill Whistler (Realism)') }}</option>																																																																																																																																																																																	
+									<option value="Jan van Eyck (Oil Panting)">{{ __('Jan van Eyck (Oil Panting)') }}</option>																																																																																																																																																																																	
+									<option value="Hieronymus Bosch (Flemish painting)">{{ __('Hieronymus Bosch (Flemish Painting)') }}</option>																																																																																																																																																																																	
+									<option value="Georges Seurat (pointillism)">{{ __('Georges Seurat (Pointillism)') }}</option>																																																																																																																																																																																	
+									<option value="Pieter Bruegel (Flemish Renaissance)">{{ __('Pieter Bruegel (Flemish Renaissance)') }}</option>																																																																																																																																																																																	
+									<option value="Diego Rodríguez (portraiture and scene painting)">{{ __('Diego Rodríguez (Portraiture and Scene Painting)') }}</option>																																																																																																																																																																																	
+									<option value="Silva Velázquez (Baroque)">{{ __('Silva Velázquez (Baroque)') }}</option>																																																																																																																																																																																	
+									<option value="John Bramblitt (impressionism Pop Art)">{{ __('John Bramblitt (impressionism Pop Art)') }}</option>																																																																																																																																																																																	
+									<option value="Beeple (3d art)">{{ __('Beeple (3D Art)') }}</option>																																																																																																																																																																																	
+									<option value="Sam Gilliam (Abstract)">{{ __('Sam Gilliam (Abstract)') }}</option>																																																																																																																																																																																	
+									<option value="Hayao Miyazaki (Anime)">{{ __('Hayao Miyazaki (Anime)') }}</option>																																																																																																																																																																																
+									<option value="datfootdive (Vaperwave)">{{ __('Datfootdive (Vaperwave)') }}</option>																																																																																																																																																																																
+									<option value="Keith Thompson (Steampunk)">{{ __('Keith Thompson (Steampunk)') }}</option>																																																																																																																																																																																
+									<option value="Johnny Silverhand (Cyberpunk)">{{ __('Johnny Silverhand (Cyberpunk)') }}</option>																																																																																																																																																																																
 								</select>
 							</div>
 						</div>
 
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
-								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Medium') }}</h6>
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Image Style') }}</h6>
+								<select id="style" name="style" data-placeholder="{{ __('Select Image Style') }}">
+									@if (config('settings.image_vendor') == 'openai')
+										<option value='none' selected>{{ __('None') }}</option>																																																												
+										<option value='abstract'>{{ __('Abstract') }}</option>																																																												
+										<option value='realistic'>{{ __('Realistic') }}</option>																																																												
+										<option value='3d render'>{{ __('3D Render') }}</option>																																																												
+										<option value='cartoon'>{{ __('Cartoon') }}</option>																																																												
+										<option value='anime'>{{ __('Anime') }}</option>																																																												
+										<option value='digital art'>{{ __('Digital Art') }}</option>
+										<option value='modern'>{{ __('Modern') }}</option>																																																												
+										<option value='art deco'>{{ __('Art Deco') }}</option>																																																												
+										<option value='illustration'>{{ __('Illustration') }}</option>																																																												
+										<option value='origami'>{{ __('Origami') }}</option>																																																												
+										<option value='pixel art'>{{ __('Pixel Art') }}</option>																																																												
+										<option value='retro'>{{ __('Retro') }}</option>																																																												
+										<option value='photography'>{{ __('Photography') }}</option>																																																												
+										<option value='line art'>{{ __('Line Art') }}</option>																																																												
+										<option value='pop art'>{{ __('Pop Art') }}</option>																																																																																																																						
+										<option value='vaporwave'>{{ __('Vaporwave') }}</option>																																																												
+										<option value='pencil drawing'>{{ __('Pencil Drawing') }}</option>																																																												
+										<option value='renaissance'>{{ __('Renaissance') }}</option>																																																												
+										<option value='minimalism'>{{ __('Minimalism') }}</option>																																																																																																																							
+										<option value='sticker'>{{ __('Sticker') }}</option>																																																																																																																							
+										<option value='isometric'>{{ __('Isometric') }}</option>																																																																																																																							
+										<option value='cyberpunk'>{{ __('Cyberpunk') }}</option>																																																																																																																							
+										<option value='ballpoint pen drawing'>{{ __('Ballpoint Pen Drawing') }}</option>																																																																																																																																																																																																																																													
+										<option value='steampunk'>{{ __('Steampunk') }}</option>																																																																																																																																																																																																																																													
+										<option value='glitchcore'>{{ __('Glitchcore') }}</option>																																																																																																																																																																																																																																													
+										<option value='bauhaus'>{{ __('Bauhaus') }}</option>																																																																																																																																																																																																																																													
+										<option value='vector'>{{ __('Vector') }}</option>																																																																																																																																																																																																																																													
+										<option value='low poly'>{{ __('Low Poly') }}</option>																																																																																																																																																																																																																																													
+										<option value='ukiyo-e'>{{ __('Ukiyo-e') }}</option>																																																																																																																																																																																																																																													
+										<option value='cubism'>{{ __('Cubism') }}</option>																																																																																																																																																																																																																																													
+										<option value='contemporary'>{{ __('Contemporary') }}</option>																																																																																																																																																																																																																																													
+										<option value='impressionism'>{{ __('Impressionism') }}</option>																																																																																																																																																																																																																																													
+										<option value='pointilism'>{{ __('Pointilism') }}</option>	
+									@else
+										<option value='none' selected>{{ __('None') }}</option>																																																																																																																							
+										<option value='3d-model'>{{ __('3D Model') }}</option>																																																																																																																							
+										<option value='analog-film'>{{ __('Analog Film') }}</option>																																																																																																																							
+										<option value='anime'>{{ __('Anime') }}</option>																																																																																																																							
+										<option value='cinematic'>{{ __('Cinematic') }}</option>																																																																																																																																																																																																																																													
+										<option value='comic-book'>{{ __('Comic Book') }}</option>																																																																																																																																																																																																																																													
+										<option value='digital-art'>{{ __('Digital Art') }}</option>																																																																																																																																																																																																																																													
+										<option value='enhance'>{{ __('Enhance') }}</option>																																																																																																																																																																																																																																													
+										<option value='fantasy-art'>{{ __('Fantasy Art') }}</option>																																																																																																																																																																																																																																													
+										<option value='isometric'>{{ __('Isometric') }}</option>																																																																																																																																																																																																																																													
+										<option value='line-art'>{{ __('Line Art') }}</option>																																																																																																																																																																																																																																													
+										<option value='low-poly'>{{ __('Low Poly') }}</option>																																																																																																																																																																																																																																													
+										<option value='modeling-compound'>{{ __('Modeling Compound') }}</option>																																																																																																																																																																																																																																													
+										<option value='neon-punk'>{{ __('Neon Punk') }}</option>																																																																																																																																																																																																																																													
+										<option value='origami'>{{ __('Origami') }}</option>	
+										<option value='photographic'>{{ __('Photographic') }}</option>	
+										<option value='pixel-art'>{{ __('Pixel Art') }}</option>	
+										<option value='tile-texture'>{{ __('Tile Texture') }}</option>	
+									@endif
+																																																																																																																																																																																																																																																					
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<div id="form-group">
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Image Medium') }}</h6>
 								<select id="medium" name="medium" data-placeholder="{{ __('Select Image Medium') }}">
 									<option value='none' selected>{{ __('None') }}</option>																																																												
 									<option value='acrylic'>{{ __('Acrylic') }}</option>																																																																																																																																																																																		
@@ -114,6 +191,36 @@
 
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Lighting Style') }}</h6>
+								<select id="lightning" name="lightning" data-placeholder="{{ __('Select Image Lighting Style') }}">
+									<option value='none' selected>{{ __('None') }}</option>																																																												
+									<option value="warm">{{ __('Warm') }}</option>
+                                    <option value="cold">{{ __('Cold') }}</option>
+                                    <option value="golden hour">{{ __('Golden Hour') }}</option>
+                                    <option value="blue hour">{{ __('Blue Hour') }}</option>
+                                    <option value="ambient">{{ __('Ambient') }}</option>
+                                    <option value="studio">{{ __('Studio') }}</option>
+                                    <option value="neon">{{ __('Neon') }}</option>
+                                    <option value="dramatic">{{ __('Dramatic') }}</option>
+                                    <option value="cinematic">{{ __('Cinematic') }}</option>
+                                    <option value="natural">{{ __('Natural') }}</option>
+                                    <option value="foggy">{{ __('Foggy') }}</option>
+                                    <option value="backlight">{{ __('Backlight') }}</option>
+                                    <option value="hard">{{ __('Hard') }}</option>																																																																																																																																																																																		
+                                    <option value="soft">{{ __('Soft') }}</option>																																																																																																																																																																																		
+                                    <option value="irivescent">{{ __('Irivescent') }}</option>																																																																																																																																																																																		
+                                    <option value="fluorescent">{{ __('Fluorescent') }}</option>																																																																																																																																																																																		
+                                    <option value="decorative">{{ __('Decorative') }}</option>																																																																																																																																																																																		
+                                    <option value="accent">{{ __('Accent') }}</option>																																																																																																																																																																																		
+                                    <option value="task">{{ __('Task') }}</option>																																																																																																																																																																																		
+                                    <option value="halogen">{{ __('Halogen') }}</option>																																																																																																																																																																																		
+                                    <option value="light emitting diode">{{ __('Light Emitting Diode (LED)') }}</option>																																																																																																																																																																																		
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Mood') }}</h6>
 								<select id="mood" name="mood" data-placeholder="{{ __('Select Image Mood') }}">
 									<option value='none' selected>{{ __('None') }}</option>																																																												
@@ -128,30 +235,109 @@
 									<option value='happy'>{{ __('Happy') }}</option>																																																																																																																																																																																		
 									<option value='dark'>{{ __('Dark') }}</option>																																																																																																																																																																																		
 									<option value='neutral'>{{ __('Neutral') }}</option>																																																																																																																																																																																		
+									<option value='sad'>{{ __('Sad') }}</option>																																																																																																																																																																																		
+									<option value='crying'>{{ __('Crying') }}</option>																																																																																																																																																																																		
+									<option value='disappointed'>{{ __('Disappointed') }}</option>																																																																																																																																																																																		
+									<option value='flirt'>{{ __('Flirt') }}</option>																																																																																																																																																																																		
 								</select>
 							</div>
 						</div>
+
+						@if (config('settings.image_vendor') == 'stable_diffusion')
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div id="form-group">
+									<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Image Diffusion Samples') }}</h6>
+									<select id="diffusion-samples" name="diffusion_samples" data-placeholder="{{ __('Set Image Diffusion Samples') }}">
+										<option value='none' selected>{{ __('Auto') }}</option>																																																												
+										<option value='DDIM'>{{ __('DDIM') }}</option>																																																																																																																																																																																		
+										<option value='DDPM'>{{ __('DDPM') }}</option>																																																																																																																																																																																		
+										<option value='K_DPMPP_2M'>{{ __('K_DPMPP_2M') }}</option>																																																																																																																																																																																		
+										<option value='K_DPMPP_2S_ANCESTRAL'>{{ __('K_DPMPP_2S_ANCESTRAL') }}</option>																																																																																																																																																																																		
+										<option value='K_DPM_2'>{{ __('K_DPM_2') }}</option>																																																																																																																																																																																		
+										<option value='K_DPM_2_ANCESTRAL'>{{ __('K_DPM_2_ANCESTRAL') }}</option>																																																																																																																																																																																		
+										<option value='K_EULER'>{{ __('K_EULER') }}</option>																																																																																																																																																																																		
+										<option value='K_EULER_ANCESTRAL'>{{ __('K_EULER_ANCESTRAL') }}</option>																																																																																																																																																																																		
+										<option value='K_HEUN'>{{ __('K_HEUN') }}</option>																																																																																																																																																																																		
+										<option value='K_LMS'>{{ __('K_LMS') }}</option>																																																																																																																																																																																																																																																																																																																																																																				
+									</select>
+								</div>
+							</div>		
+							
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div id="form-group">
+									<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Clip Guidance Preset') }}</h6>
+									<select id="preset" name="preset" data-placeholder="{{ __('Set Clip Guidance Preset') }}">
+										<option value='NONE' selected>{{ __('None') }}</option>																																																												
+										<option value='FAST_BLUE'>{{ __('FAST_BLUE') }}</option>																																																																																																																																																																																		
+										<option value='FAST_GREEN'>{{ __('FAST_GREEN') }}</option>																																																																																																																																																																																		
+										<option value='SIMPLE'>{{ __('SIMPLE') }}</option>																																																																																																																																																																																		
+										<option value='SLOW'>{{ __('SLOW') }}</option>																																																																																																																																																																																		
+										<option value='SLOWER'>{{ __('SLOWER') }}</option>																																																																																																																																																																																		
+										<option value='SLOWEST'>{{ __('SLOWEST') }}</option>																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																						
+									</select>
+								</div>
+							</div>
+						@endif
 						
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Image Resolution') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('The image resolutoin of the generated images') }}"></i></h6>
 								<select id="resolution" name="resolution" data-placeholder="{{ __('Set image resolution') }}">
-									<option value='256x256' selected>[256x256] {{ __('Small Image') }}</option>
-									<option value='512x512'>[512x512] {{ __('Medium Image') }}</option>																															
-									<option value='1024x1024'>[1024x1024] {{ __('Large Image') }}</option>																																																													
+									@if (config('settings.image_vendor') == 'openai')
+										<option value='256x256' selected>[256x256] {{ __('Small Image') }}</option>
+										<option value='512x512'>[512x512] {{ __('Medium Image') }}</option>																															
+										<option value='1024x1024'>[1024x1024] {{ __('Large Image') }}</option>	
+									@endif
+									@if (config('settings.image_vendor') == 'stable_diffusion')		
+										@if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-v1-5')
+											<option value='512x512' selected>{{ __('Width') }} 512 x {{ __('Height') }} 512</option>
+											<option value='768x768'>{{ __('Width') }} 768 x {{ __('Height') }} 768</option>
+										@elseif (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-512-v2-1')
+											<option value='768x512'>{{ __('Width') }} 768 x {{ __('Height') }} 512</option>
+											<option value='1024x512'>{{ __('Width') }} 1024 x {{ __('Height') }} 512</option>
+											<option value='512x512' selected>{{ __('Width') }} 512 x {{ __('Height') }} 512</option>
+											<option value='512x768'>{{ __('Width') }} 512 x {{ __('Height') }} 768</option>
+											<option value='512x1024'>{{ __('Width') }} 512 x {{ __('Height') }} 1024</option>
+										@elseif (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-768-v2-1')
+											<option value='1344x768'>{{ __('Width') }} 1344 x {{ __('Height') }} 768</option>
+											<option value='1152x768'>{{ __('Width') }} 1152 x {{ __('Height') }} 768</option>
+											<option value='1024x768'>{{ __('Width') }} 1024 x {{ __('Height') }} 768</option>
+											<option value='768x768' selected>{{ __('Width') }} 768 x {{ __('Height') }} 768</option>
+											<option value='768x1024'>{{ __('Width') }} 768 x {{ __('Height') }} 1024</option>
+											<option value='768x1152'>{{ __('Width') }} 768 x {{ __('Height') }} 1152</option>
+											<option value='768x1344'>{{ __('Width') }} 768 x {{ __('Height') }} 1344</option>
+										@elseif (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-beta-v2-2-2')
+											<option value='896x512'>{{ __('Width') }} 896 x {{ __('Height') }} 512</option>
+											<option value='768x512'>{{ __('Width') }} 768 x {{ __('Height') }} 512</option>
+											<option value='512x512' selected>{{ __('Width') }} 512 x {{ __('Height') }} 512</option>
+											<option value='512x768'>{{ __('Width') }} 512 x {{ __('Height') }} 768</option>	
+											<option value='512x896'>{{ __('Width') }} 512 x {{ __('Height') }} 896</option>	
+										@elseif (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-1024-v0-9')
+											<option value='1536x640'>{{ __('Width') }} 1536 x {{ __('Height') }} 640</option>
+											<option value='1344x768'>{{ __('Width') }} 1344 x {{ __('Height') }} 768</option>
+											<option value='1024x1024' selected>{{ __('Width') }} 1024 x {{ __('Height') }} 1024</option>
+											<option value='768x1344'>{{ __('Width') }} 768 x {{ __('Height') }} 1344</option>
+											<option value='640x1536'>{{ __('Width') }} 640 x {{ __('Height') }} 1536</option>
+										@endif								
+									@endif																																																												
 								</select>
 							</div>
 						</div>
 
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
-								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Number of Images') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('The number of images to generate') }}"></i></h6>
-								<select id="max-results" name="max_results" data-placeholder="{{ __('Set max number of results') }}">
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Number of Variations') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('The number of images to generate') }}"></i></h6>
+								<select id="max-results" name="max_results" data-placeholder="{{ __('Set Number of Variants') }}">
 									<option value=1 selected>1</option>
 									<option value=2>2</option>																															
 									<option value=3>3</option>																															
 									<option value=4>4</option>																															
 									<option value=5>5</option>																															
+									<option value=6>6</option>																															
+									<option value=7>7</option>																															
+									<option value=8>8</option>																															
+									<option value=9>9</option>																															
+									<option value=10>10</option>																															
 								</select>
 							</div>
 						</div>
@@ -259,7 +445,7 @@
 		$(document).ready(function() {
 
 			$('#title').simpleTxtCounter({
-				maxLength: 2000,
+				maxLength: 3000,
 				countElem: '<div class="form-text"></div>',
 				lineBreak: false,
 			});

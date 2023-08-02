@@ -23,7 +23,6 @@ function exportPDF(){
     window.jsPDF = window.jspdf.jsPDF;
     var doc = new jsPDF();
     var id = document.querySelector('.richText-editor').id;
-    console.log(id)
     var elementHTML = document.querySelector('#' + id);
     doc.setFont('PTSans');
     doc.html(elementHTML, {

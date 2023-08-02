@@ -7,16 +7,6 @@
         </a>
     </div>
     <ul class="side-menu app-sidebar3">
-        <div class="side-progress-position mt-4">
-            <div class="inline-flex w-100 text-center">
-                <div class="flex w-100">
-                    <span class="fs-12 font-weight-bold" id="side-word-notification"><i class="fa-solid fa-scroll-old text-yellow mr-2"></i><span class="text-primary mr-1" id="available-words">{{ App\Services\HelperService::getTotalWords()}}</span> <span class="text-muted">{{ __('words left') }}</span></span>
-                </div> 
-                @if (is_null(auth()->user()->plan_id))                 
-                    <a href="{{ route('user.plans') }}" class="btn btn-cancel-upgrade mt-3 fs-12 pl-6 pr-6"><i class="fa-solid fa-circle-bolt mr-3 fs-15 text-yellow vertical-align-middle"></i>{{ __('Upgrade') }}</a>        
-                @endif                    
-            </div>
-        </div>
         <li class="side-item side-item-category mt-4 mb-3">{{ __('AI Panel') }}</li>
         <li class="slide">
             <a class="side-menu__item" href="{{ route('user.dashboard') }}">
@@ -34,7 +24,7 @@
                 <span class="side-menu__label">{{ __('Documents') }}</span><i class="angle fa fa-angle-right"></i></a>
                 <ul class="slide-menu">
                     <li><a href="{{ route('user.documents') }}" class="slide-item">{{ __('All Documents') }}</a></li>
-                    @role('user')
+                    @role('user|subscriber')
                         @if (config('settings.image_feature_user') == 'allow')
                             <li><a href="{{ route('user.documents.images') }}" class="slide-item">{{ __('All Images') }}</a></li> 
                         @endif 
@@ -42,12 +32,12 @@
                     @role('admin')
                         <li><a href="{{ route('user.documents.images') }}" class="slide-item">{{ __('All Images') }}</a></li>
                     @endrole
-                    @role('user')
+                    @role('user|subscriber')
                         @if (config('settings.voiceover_feature_user') == 'allow')
                             <li><a href="{{ route('user.documents.voiceovers') }}" class="slide-item">{{ __('All Voiceovers') }}</a></li> 
                         @endif 
                     @endrole
-                    @role('admin|subscriber')
+                    @role('admin')
                         <li><a href="{{ route('user.documents.voiceovers') }}" class="slide-item">{{ __('All Voiceovers') }}</a></li> 
                     @endrole
                     @role('user|subscriber')
@@ -70,7 +60,7 @@
                     <li><a href="{{ route('user.workbooks') }}" class="slide-item">{{ __('Workbooks') }}</a></li>                    
                 </ul>
         </li>
-        @role('user')
+        @role('user|subscriber')
             @if (config('settings.voiceover_feature_user') == 'allow')
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('user.voiceover') }}">
@@ -79,7 +69,7 @@
                 </li> 
             @endif
         @endrole
-        @role('admin|subscriber')
+        @role('admin')
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('user.voiceover') }}">
                 <span class="side-menu__icon fa-sharp fa-solid fa-waveform-lines"></span>
@@ -150,22 +140,32 @@
                 <span class="side-menu__label">{{ __('AI Chat') }}</span></a>
             </li>
         @endrole 
-		@role('user|subscriber')
-            @if (config('settings.video_feature_user') == 'allow')
-                <li class="slide mb-3">
-                    <a class="side-menu__item" href="{{ route('user.videos') }}">
-                    <span class="side-menu__icon fa-solid fa-circle-video"></span>
-                    <span class="side-menu__label">{{ __('Videos') }}</span></a>
-                </li> 
-            @endif
-        @endrole
-        @role('admin')
-            <li class="slide mb-3">
-                <a class="side-menu__item" href="{{ route('user.videos') }}">
-                <span class="side-menu__icon fa-solid fa-circle-video"></span>
-                <span class="side-menu__label">{{ __('Videos') }}</span></a>
+        <hr class="w-90 text-center m-auto">
+        <li class="side-item side-item-category mt-4 mb-3">{{ __('Account') }}</li>
+        <li class="slide">
+            <a class="side-menu__item" href="{{ route('user.plans') }}">
+            <span class="side-menu__icon lead-3 fa-solid fa-box-circle-check"></span>
+            <span class="side-menu__label">{{ __('Subscription Plans') }}</span></a>
+        </li>
+        @if (config('settings.team_members_feature') == 'enable')
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('user.team') }}">
+                <span class="side-menu__icon lead-3 fa-solid fa-people-arrows"></span>
+                <span class="side-menu__label">{{ __('Team Members') }}</span></a>
             </li>
-        @endrole 
+        @endif 
+        <li class="slide">
+            <a class="side-menu__item" href="{{ route('user.profile') }}">
+            <span class="side-menu__icon lead-3 fa-solid fa-id-badge"></span>
+            <span class="side-menu__label">{{ __('My Account') }}</span></a>
+        </li>
+        @if (config('payment.referral.enabled') == 'on')
+            <li class="slide mb-3">
+                <a class="side-menu__item" href="{{ route('user.referral') }}">
+                <span class="side-menu__icon lead-3 fa-solid fa-badge-dollar"></span>
+                <span class="side-menu__label">{{ __('Affiliate Program') }}</span></a>
+            </li>
+        @endif 
         @role('admin')
             <hr class="w-90 text-center m-auto">
             <li class="side-item side-item-category mt-4 mb-3">{{ __('Admin Panel') }}</li>
@@ -271,7 +271,7 @@
                         <li><a href="{{ route('admin.settings.adsense') }}" class="slide-item">{{ __('Google Adsense') }}</a></li>                           
                     </ul>
             </li>
-            <li class="slide">
+            <li class="slide mb-3">
                 <a class="side-menu__item" data-toggle="slide" href="{{ url('#')}}">
                     <span class="side-menu__icon fa fa-sliders"></span>
                     <span class="side-menu__label">{{ __('General Settings') }}</span><i class="angle fa fa-angle-right"></i></a>
@@ -287,6 +287,26 @@
                     </ul>
             </li>
         @endrole
+        <hr class="w-90 text-center m-auto">
+        <li class="side-item side-item-category mt-4 mb-3">{{ __('AI Credits') }}</li>
+        <li class="side-item side-item-category mt-4 mb-2">{{ __('Plan') }}: @if (is_null(auth()->user()->plan_id))<span class="text-primary">{{ __('Free Trial') }}</span> @else <span class="text-primary">{{ __(App\Services\HelperService::getPlanName())}}</span>  @endif @if (is_null(auth()->user()->plan_id)) - <a href="{{ route('user.plans') }}" class="text-yellow upgrade-action-button"> {{ __('Upgrade Now') }}</a> @endif</li>
+        <li class="side-item side-item-category mt-0 mb-2">{{ __('Next Renewal') }}: @if (is_null(auth()->user()->plan_id)){{ __('No Renewal') }} @else {{ __(App\Services\HelperService::getRenewalDate())}}  @endif</li>
+        <div class="side-progress-position">
+            <div class="inline-flex w-100">
+                <div class="flex w-100">
+                    <span class="fs-11 font-weight-600 side-word-notification"><i class="fa-solid fa-message-lines text-primary mr-2"></i><span class="text-muted">{{ __('Words') }}</span> <span class="text-primary ml-1" id="available-words">{{ App\Services\HelperService::getTotalWords()}}</span></span>
+                </div> 
+                <div class="flex w-100">
+                    <span class="fs-11 font-weight-600 side-word-notification"><i class="fa-sharp fa-solid fa-message-image text-primary mr-2"></i><span class="text-muted">{{ __('Images') }}</span> <span class="text-primary ml-1" id="available-images">{{ App\Services\HelperService::getTotalImages()}}</span></span>
+                </div> 
+                <div class="flex w-100">
+                    <span class="fs-11 font-weight-600 side-word-notification"><i class="fa-sharp fa-solid fa-message-music text-primary mr-2"></i><span class="text-muted">{{ __('Minutes') }}</span> <span class="text-primary ml-1" id="available-minutes">{{ App\Services\HelperService::getTotalMinutes()}}</span></span>
+                </div> 
+                <div class="flex w-100">
+                    <span class="fs-11 font-weight-600 side-word-notification"><i class="fa-solid fa-message-captions text-primary mr-2"></i><span class="text-muted">{{ __('Characters') }}</span> <span class="text-primary ml-1" id="available-characters">{{ App\Services\HelperService::getTotalCharacters()}}</span></span>
+                </div>                     
+            </div>
+        </div>
     </ul>
 </aside>
 <!-- END SIDE MENU BAR -->

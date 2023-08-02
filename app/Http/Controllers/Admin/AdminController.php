@@ -85,4 +85,5 @@ class AdminController extends Controller
  
         return view('admin.dashboard.index', compact('total_data_monthly', 'total_data_yearly', 'chart_data', 'percentage', 'result', 'transaction'));
     }
+
 }

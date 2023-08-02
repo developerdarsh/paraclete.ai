@@ -544,6 +544,30 @@
 
 						<div class="card border-0 special-shadow">							
 							<div class="card-body">
+								<h6 class="fs-12 font-weight-bold mb-4">{{ __('Live Chat') }} <span class="text-muted">({{ __('tawk.to') }})</span></h6>
+								
+								<div class="form-group">
+									<label class="custom-switch">
+										<input type="checkbox" name="enable-live-chat" class="custom-switch-input" @if ( config('settings.live_chat')  == 'on') checked @endif>
+										<span class="custom-switch-indicator"></span>
+										<span class="custom-switch-description">{{ __('Enable Live Chat') }}</span>
+									</label>
+								</div>
+							
+								<div class="input-box mb-2 mt-2">								
+									<h6>{{ __('Direct Chat Link') }}</h6>
+									<div class="form-group">							    
+										<input type="text" class="form-control @error('live-chat-link') is-danger @enderror" id="live-chat-link" name="live-chat-link" value="{{ config('settings.live_chat_link') }}" autocomplete="off">
+										@error('live-chat-link')
+											<p class="text-danger">{{ $errors->first('live-chat-link') }}</p>
+										@enderror
+									</div> 
+								</div> 	
+							</div>
+						</div>
+
+						<div class="card border-0 special-shadow">							
+							<div class="card-body pb-0">
 								<h6 class="fs-12 font-weight-bold mb-4">{{ __('Google reCaptcha v3') }}</h6>
 								
 								<div class="form-group">
@@ -557,7 +581,7 @@
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12">								
 										<!-- ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6>{{ __('reCaptcha Site Key') }}</h6>
 											<div class="form-group">							    
 												<input type="text" class="form-control @error('recaptcha-site-key') is-danger @enderror" id="recaptcha-site-key" name="recaptcha-site-key" value="{{ config('services.google.recaptcha.site_key') }}" autocomplete="off">
@@ -570,7 +594,7 @@
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<!-- SECRET ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6>{{ __('reCaptcha Secret Key') }}</h6> 
 											<div class="form-group">							    
 												<input type="text" class="form-control @error('recaptcha-secret-key') is-danger @enderror" id="recaptcha-secret-key" name="recaptcha-secret-key" value="{{ config('services.google.recaptcha.secret_key') }}" autocomplete="off">
@@ -585,7 +609,7 @@
 						</div>	
 
 						<div class="card overflow-hidden border-0 special-shadow">							
-							<div class="card-body">
+							<div class="card-body pb-0">
 
 								<h6 class="fs-12 font-weight-bold mb-4">{{ __('Google Analytics') }}</h6>
 
@@ -600,7 +624,7 @@
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12">								
 										<!-- ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6>{{ __('Google Analytics Tracking ID') }}</h6>
 											<div class="form-group">							    
 												<input type="text" class="form-control @error('google-analytics') is-danger @enderror" id="google-analytics" name="google-analytics" value="{{ config('services.google.analytics.id') }}" autocomplete="off">
@@ -617,7 +641,7 @@
 						</div>
 
 						<div class="card overflow-hidden border-0 special-shadow">							
-							<div class="card-body">
+							<div class="card-body pb-0">
 
 								<h6 class="fs-12 font-weight-bold mb-4">{{ __('Google Maps') }}</h6>
 
@@ -632,7 +656,7 @@
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12">								
 										<!-- ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6>{{ __('Google Maps API Key') }}</h6>
 											<div class="form-group">							    
 												<input type="text" class="form-control @error('google-key') is-danger @enderror" id="google-key" name="google-key" value="{{ config('services.google.maps.key') }}" autocomplete="off">

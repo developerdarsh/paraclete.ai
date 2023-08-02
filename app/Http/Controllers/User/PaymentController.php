@@ -17,6 +17,8 @@ use App\Models\PrepaidPlan;
 use App\Models\User;
 use Carbon\Carbon;
 
+use KingFlamez\Rave\Facades\Rave as Flutterwave;
+
 
 class PaymentController extends Controller
 {   
@@ -75,6 +77,26 @@ class PaymentController extends Controller
             $id = PrepaidPlan::where('id', $request->id)->first();
             $type = 'prepaid';
         }
+
+        if ($request->value < 1) {
+            if ($type == 'lifetime') {
+                $plan = SubscriptionPlan::where('id', $request->id)->first();
+                $order_id = $this->registerFreeSubscription($plan);
+
+                return view('user.plans.success', compact('plan', 'order_id'));
+
+            } else {
+                $plan = PrepaidPlan::where('id', $request->id)->first();
+                auth()->user()->available_words_prepaid = auth()->user()->available_words_prepaid + $plan->words;
+                auth()->user()->available_images_prepaid = auth()->user()->available_images_prepaid + $plan->images;
+                auth()->user()->available_chars_prepaid = auth()->user()->available_chars_prepaid + $plan->characters;
+                auth()->user()->available_minutes_prepaid = auth()->user()->available_minutes_prepaid + $plan->minutes;
+                auth()->user()->save();   
+                $order_id = Str::random(10);
+                return view('user.plans.success', compact('plan', 'order_id'));
+            }
+            
+        }
         
         $rules = [
             'payment_platform' => ['required', 'exists:payment_platforms,id'],
@@ -131,6 +153,15 @@ class PaymentController extends Controller
         $plan = PrepaidPlan::where('id', $request->plan)->first();
         $order_id = request('amp;order');
         
+        return view('user.plans.success', compact('plan', 'order_id'));
+    }
+
+
+    public function paddleSuccess() 
+    {
+        $plan = session()->get('plan_id');
+        $order_id = 'random';  
+
         return view('user.plans.success', compact('plan', 'order_id'));
     }
 
@@ -254,6 +285,61 @@ class PaymentController extends Controller
 
 
     /**
+     * Process approved flutterwave subscription plan requests
+     */
+    public function approvedFlutterwaveSubscription(Request $request)
+    {   
+        $status = request()->status;
+
+        if ($status ==  'successful') {
+    
+            $transactionID = Flutterwave::getTransactionIDFromCallback();
+            $data = Flutterwave::verifyTransaction($transactionID);
+            $order_id = $data['data']['tx_ref'];
+            $subscriptionID = $data['data']['id'];
+
+            $plan = session()->get('plan_id');
+
+            $duration = $plan->payment_frequency;
+            $days = ($duration == 'monthly') ? 30 : 365;
+
+            $subscription = Subscriber::create([
+                'user_id' => auth()->user()->id,
+                'plan_id' => $plan->id,
+                'status' => 'Active',
+                'created_at' => now(),
+                'gateway' => 'Flutterwave',
+                'frequency' => $plan->payment_frequency,
+                'plan_name' => $plan->plan_name,
+                'words' => $plan->words,
+                'images' => $plan->images,
+                'characters' => $plan->characters,
+                'minutes' => $plan->minutes,
+                'subscription_id' => $subscriptionID,
+                'active_until' => Carbon::now()->addDays($days),
+            ]);       
+
+            session()->forget('gatewayID');
+            session()->forget('plan_id');
+
+            $this->registerSubscriptionPayment($plan, auth()->user(), $subscriptionID, 'Flutterwave');               
+            $order_id = $subscriptionID;
+
+            return view('user.plans.success', compact('plan', 'order_id'));
+
+        } elseif ($status == 'cancelled'){
+            toastr()->error(__('Payment has been cancelled'));
+            return redirect()->back();
+        } else{
+            toastr()->error(__('Payment was not successful, please try again'));
+            return redirect()->back();
+        }
+         
+
+    }
+
+
+    /**
      * Process cancelled subscription plan requests
      */
     public function cancelledSubscription()
@@ -313,6 +399,7 @@ class PaymentController extends Controller
         $user->available_images = $plan->images;
         $user->available_chars = $plan->characters;
         $user->available_minutes = $plan->minutes;
+        $user->member_limit = $plan->team_members;
         $user->save();       
 
         event(new PaymentProcessed(auth()->user()));
@@ -357,7 +444,7 @@ class PaymentController extends Controller
     public function stopSubscription(Request $request)
     {   
         if ($request->ajax()) {
-
+            
             $id = Subscriber::where('id', $request->id)->first();
 
             if ($id->status == 'Cancelled') {
@@ -383,6 +470,7 @@ class PaymentController extends Controller
                 $user->total_images = 0;
                 $user->total_chars = 0;
                 $user->total_minutes = 0;
+                $user->member_limit = null;
                 $user->save();
 
                 $data['status'] = 200;
@@ -410,6 +498,15 @@ class PaymentController extends Controller
                     case 'Mollie':
                         $platformID = 7;
                         break;
+                    case 'Flutterwave':
+                        $platformID = 10;
+                        break;
+                    case 'Yookassa':
+                        $platformID = 11;
+                        break;
+                    case 'Paddle':
+                        $platformID = 12;
+                        break;
                     case 'FREE':
                         $platformID = 99;
                         break;
@@ -417,9 +514,9 @@ class PaymentController extends Controller
                         $platformID = 1;
                         break;
                 }
+                
 
-
-                if ($id->gateway == 'PayPal' || $id->gateway == 'Stripe' || $id->gateway == 'Paystack' || $id->gateway == 'Razorpay' || $id->gateway == 'Mollie') {
+                if ($id->gateway == 'PayPal' || $id->gateway == 'Stripe' || $id->gateway == 'Paystack' || $id->gateway == 'Razorpay' || $id->gateway == 'Mollie' || $id->gateway == 'Flutterwave' || $id->gateway == 'Yookassa' || $id->gateway == 'Paddle') {
                     $paymentPlatform = $this->paymentPlatformResolver->resolveService($platformID);
 
                     $status = $paymentPlatform->stopSubscription($id->subscription_id);
@@ -434,6 +531,7 @@ class PaymentController extends Controller
                             $user->total_images = 0;
                             $user->total_chars = 0;
                             $user->total_minutes = 0;
+                            $user->member_limit = null;
                             $user->save();
                         }
                     } elseif ($platformID == 4) {
@@ -446,6 +544,7 @@ class PaymentController extends Controller
                             $user->total_images = 0;
                             $user->total_chars = 0;
                             $user->total_minutes = 0;
+                            $user->member_limit = null;
                             $user->save();
                         }
                     } elseif ($platformID == 5) {
@@ -458,10 +557,11 @@ class PaymentController extends Controller
                             $user->total_images = 0;
                             $user->total_chars = 0;
                             $user->total_minutes = 0;
+                            $user->member_limit = null;
                             $user->save();
                         }
                     } elseif ($platformID == 7) {
-                        if ($status->status == 'Canceled') {
+                        if ($status->status == 'Cancelled') {
                             $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
                             $user = User::where('id', $id->user_id)->firstOrFail();
                             $user->plan_id = null;
@@ -470,6 +570,46 @@ class PaymentController extends Controller
                             $user->total_images = 0;
                             $user->total_chars = 0;
                             $user->total_minutes = 0;
+                            $user->member_limit = null;
+                            $user->save();
+                        }
+                    } elseif ($platformID == 10) {
+                        if ($status == 'cancelled') {
+                            $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                            $user = User::where('id', $id->user_id)->firstOrFail();
+                            $user->plan_id = null;
+                            $user->group = 'user';
+                            $user->total_words = 0;
+                            $user->total_images = 0;
+                            $user->total_chars = 0;
+                            $user->total_minutes = 0;
+                            $user->member_limit = null;
+                            $user->save();
+                        }
+                    } elseif ($platformID == 11) {
+                        if ($status == 'cancelled') {
+                            $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                            $user = User::where('id', $id->user_id)->firstOrFail();
+                            $user->plan_id = null;
+                            $user->group = 'user';
+                            $user->total_words = 0;
+                            $user->total_images = 0;
+                            $user->total_chars = 0;
+                            $user->total_minutes = 0;
+                            $user->member_limit = null;
+                            $user->save();
+                        }
+                    } elseif ($platformID == 12) {
+                        if ($status == 'cancelled') {
+                            $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                            $user = User::where('id', $id->user_id)->firstOrFail();
+                            $user->plan_id = null;
+                            $user->group = 'user';
+                            $user->total_words = 0;
+                            $user->total_images = 0;
+                            $user->total_chars = 0;
+                            $user->total_minutes = 0;
+                            $user->member_limit = null;
                             $user->save();
                         }
                     } elseif ($platformID == 99) { 
@@ -481,6 +621,7 @@ class PaymentController extends Controller
                         $user->total_images = 0;
                         $user->total_chars = 0;
                         $user->total_minutes = 0;
+                        $user->member_limit = null;
                         $user->save();
                     } else {
                         if (is_null($status)) {
@@ -492,6 +633,7 @@ class PaymentController extends Controller
                             $user->total_images = 0;
                             $user->total_chars = 0;
                             $user->total_minutes = 0;
+                            $user->member_limit = null;
                             $user->save();
                         }
                     }
@@ -504,6 +646,7 @@ class PaymentController extends Controller
                     $user->total_images = 0;
                     $user->total_chars = 0;
                     $user->total_minutes = 0;
+                    $user->member_limit = null;
                     $user->save();
                 }
                 
@@ -570,6 +713,7 @@ class PaymentController extends Controller
         $user->available_images = $plan->images;
         $user->available_chars = $plan->characters;
         $user->available_minutes = $plan->minutes;
+        $user->member_limit = $plan->team_members;
         $user->save();       
         
         return $order_id;

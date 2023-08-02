@@ -90,7 +90,7 @@
 										<option value="free" @if($id->package == 'free') selected @endif>{{ __('Free Package') }}</option>
 										<option value="all" @if($id->package == 'all') selected @endif>{{ __('Standard Package') }}</option>
 										<option value="professional" @if($id->package == 'professional') selected @endif> {{ __('Professional Package') }}</option>																															
-										<option value="premium" @if($id->package == 'premium') selected @endif> {{ __('Premuim Package') }}</option>																																																																																																									
+										<option value="premium" @if($id->package == 'premium') selected @endif> {{ __('Premium Package') }}</option>																																																																																																									
 									</select>
 								</div>
 							</div>						

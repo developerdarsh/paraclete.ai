@@ -32,7 +32,6 @@
 		<!--Google AdSense-->
 		{!! adsense_header() !!}
 
-
 	</head>
 
 	<body class="app sidebar-mini frontend-body {{ Request::path() != '/' ? 'blue-background' : '' }}">
@@ -188,7 +187,7 @@
 										<h5>{{ __('Information') }}</h5>
 
 										<ul class="list-unstyled">
-											<li><a href="https://aws.amazon.com" target="_blank">{{ __('AWS Cloud') }}</a></li>                             
+											<li><a href="#" target="_blank">{{ __('AI World') }}</a></li>                             
 										</ul>
 
 									</div> <!-- END INFORMATION LINKS -->

@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->string('name', 128)->primary();
-            $table->text('value')->nullable();
+            $table->longText('value')->nullable();
         });
 
         DB::table('settings')->insert(
@@ -129,6 +129,10 @@ return new class extends Migration
                     'name' => 'username',
                     'value' => ''
                 ],
+                [
+                    'name' => 'words_filter',
+                    'value' => ''
+                ]
 
             ]
         );

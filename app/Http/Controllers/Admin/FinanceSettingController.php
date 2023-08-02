@@ -108,6 +108,34 @@ class FinanceSettingController extends Controller
             'coinbase_webhook_uri' => 'required_if:enable-coinbase,on',
             'coinbase_webhook_secret' => 'required_if:enable-coinbase,on',
 
+            'enable-midtrans' => 'sometimes|required',
+            'midtrans_server_key' => 'required_if:enable-midtrans,on',
+            'midtrans_client_key' => 'required_if:enable-midtrans,on',
+            'midtrans_merchant_id' => 'required_if:enable-midtrans,on',
+            'midtrans-production' => 'required_if:enable-midtrans,on',
+
+            'enable-flutterwave' => 'sometimes|required',
+            'flutterwave_public_key' => 'required_if:enable-flutterwave,on',
+            'flutterwave_secret_key' => 'required_if:enable-flutterwave,on',
+
+            'enable-flutterwave-subscription' => 'sometimes|required',
+            'flutterwave_webhook_url' => 'required_if:enable-flutterwave-subscription,on',
+            'flutterwave_secret_hash' => 'required_if:enable-flutterwave-subscription,on',
+
+            'enable-yookassa' => 'sometimes|required',
+            'yookassa_shop_id' => 'required_if:enable-yookassa,on',
+            'yookassa_secret_key' => 'required_if:enable-yookassa,on',
+
+            'enable-yookassa-subscription' => 'sometimes|required',
+            'yookassa_http_uri' => 'required_if:enable-yookassa-subscription,on',
+
+            'enable-paddle' => 'sometimes|required',
+            'paddle_vendor_id' => 'required_if:enable-paddle,on',
+            'paddle_vendor_auth_code' => 'required_if:enable-paddle,on',
+
+            'enable-paddle-subscription' => 'sometimes|required',
+            'paddle_vendor_id' => 'required_if:enable-paddle-subscription,on',
+            'paddle_vendor_auth_code' => 'required_if:enable-paddle-subscription,on',
         ]);
        
 
@@ -169,7 +197,32 @@ class FinanceSettingController extends Controller
         $this->storeConfiguration('COINBASE_WEBHOOK_SECRET', request('coinbase_webhook_secret')); 
 
         $this->storeConfiguration('BANK_TRANSFER_ENABLED', request('enable-bank'));
-        $this->storeConfiguration('BANK_TRANSFER_SUBSCRIPTION', request('enable-bank-subscription'));    
+        $this->storeConfiguration('BANK_TRANSFER_SUBSCRIPTION', request('enable-bank-subscription')); 
+        
+        $this->storeConfiguration('MIDTRANS_ENABLED', request('enable-midtrans'));
+        $this->storeConfiguration('MIDTRANS_SERVER_KEY', request('midtrans_server_key'));
+        $this->storeConfiguration('MIDTRANS_CLIENT_KEY', request('midtrans_client_key'));  
+        $this->storeConfiguration('MIDTRANS_MERCHANT_ID', request('midtrans_merchant_id'));  
+        $this->storeConfiguration('MIDTRANS_PRODUCTION', request('midtrans-production')); 
+
+        $this->storeConfiguration('FLUTTERWAVE_ENABLED', request('enable-flutterwave'));
+        $this->storeConfiguration('FLUTTERWAVE_SUBSCRIPTION_ENABLED', request('enable-flutterwave-subscription'));
+        $this->storeConfiguration('FLUTTERWAVE_PUBLIC_KEY', request('flutterwave_public_key'));
+        $this->storeConfiguration('FLUTTERWAVE_SECRET_KEY', request('flutterwave_secret_key'));  
+        $this->storeConfiguration('FLUTTERWAVE_WEBHOOK_URL', request('flutterwave_webhook_url'));  
+        $this->storeConfiguration('FLUTTERWAVE_SECRET_HASH', request('flutterwave_secret_hash')); 
+
+        $this->storeConfiguration('YOOKASSA_ENABLED', request('enable-yookassa'));
+        $this->storeConfiguration('YOOKASSA_SUBSCRIPTION_ENABLED', request('enable-yookassa-subscription'));
+        $this->storeConfiguration('YOOKASSA_SHOP_ID', request('yookassa_shop_id'));
+        $this->storeConfiguration('YOOKASSA_SECRET_KEY', request('yookassa_secret_key'));
+        $this->storeConfiguration('YOOKASSA_HTTP_URI', request('yookassa_http_uri'));
+
+        $this->storeConfiguration('PADDLE_ENABLED', request('enable-paddle'));
+        $this->storeConfiguration('PADDLE_SUBSCRIPTION_ENABLED', request('enable-paddle-subscription'));
+        $this->storeConfiguration('PADDLE_VENDOR_ID', request('paddle_vendor_id'));
+        $this->storeConfiguration('PADDLE_VENDOR_AUTH_CODE', request('paddle_vendor_auth_code'));
+        $this->storeConfiguration('PADDLE_SANDBOX', request('paddle_sandbox'));
         
 
         $rows = ['bank_instructions', 'bank_requisites'];
@@ -267,6 +320,48 @@ class FinanceSettingController extends Controller
             $bank_transfer->save();
         }
 
+        if (request('enable-midtrans') == 'on') {
+            $stripe = PaymentPlatform::where('name', 'Midtrans')->first();
+            $stripe->enabled = 1;
+            $stripe->save();
+
+        } else {
+            $stripe = PaymentPlatform::where('name', 'Midtrans')->first();
+            $stripe->enabled = 0;
+            $stripe->save();
+        }
+
+        if (request('enable-flutterwave') == 'on') {
+            $stripe = PaymentPlatform::where('name', 'Flutterwave')->first();
+            $stripe->enabled = 1;
+            $stripe->save();
+
+        } else {
+            $stripe = PaymentPlatform::where('name', 'Flutterwave')->first();
+            $stripe->enabled = 0;
+            $stripe->save();
+        }
+
+        if (request('enable-yookassa') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'Yookassa')->first();
+            $yookassa->enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'Yookassa')->first();
+            $yookassa->enabled = 0;
+            $yookassa->save();
+        }
+
+        if (request('enable-paddle') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'Paddle')->first();
+            $yookassa->enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'Paddle')->first();
+            $yookassa->enabled = 0;
+            $yookassa->save();
+        }
+
         # Enable/Disable Payment Gateways Subscription
         if (request('enable-paypal-subscription') == 'on') {
             $paypal = PaymentPlatform::where('name', 'PayPal')->first();
@@ -323,6 +418,17 @@ class FinanceSettingController extends Controller
             $stripe->save();
         }
 
+        if (request('enable-flutterwave-subscription') == 'on') {
+            $stripe = PaymentPlatform::where('name', 'Flutterwave')->first();
+            $stripe->subscriptions_enabled = 1;
+            $stripe->save();
+
+        } else {
+            $stripe = PaymentPlatform::where('name', 'Flutterwave')->first();
+            $stripe->subscriptions_enabled = 0;
+            $stripe->save();
+        }
+
         if (request('enable-bank-subscription') == 'on') {
             $bank_transfer = PaymentPlatform::where('name', 'BankTransfer')->first();
             $bank_transfer->subscriptions_enabled = 1;
@@ -332,6 +438,26 @@ class FinanceSettingController extends Controller
             $bank_transfer = PaymentPlatform::where('name', 'BankTransfer')->first();
             $bank_transfer->subscriptions_enabled = 0;
             $bank_transfer->save();
+        }
+
+        if (request('enable-yookassa-subscription') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'Yookassa')->first();
+            $yookassa->subscriptions_enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'Yookassa')->first();
+            $yookassa->subscriptions_enabled = 0;
+            $yookassa->save();
+        }
+
+        if (request('enable-paddle-subscription') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'Paddle')->first();
+            $yookassa->subscriptions_enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'Paddle')->first();
+            $yookassa->subscriptions_enabled = 0;
+            $yookassa->save();
         }
 
         toastr()->success(__('Payment settings successfully updated'));

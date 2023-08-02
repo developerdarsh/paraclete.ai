@@ -42,8 +42,12 @@ use App\Http\Controllers\Admin\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\Admin\Webhooks\RazorpayWebhookController;
 use App\Http\Controllers\Admin\Webhooks\MollieWebhookController;
 use App\Http\Controllers\Admin\Webhooks\CoinbaseWebhookController;
+use App\Http\Controllers\Admin\Webhooks\FlutterwaveWebhookController;
+use App\Http\Controllers\Admin\Webhooks\YookassaWebhookController;
+use App\Http\Controllers\Admin\Webhooks\PaddleWebhookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\TeamController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserPasswordController;
 use App\Http\Controllers\User\TemplateController;
@@ -63,7 +67,6 @@ use App\Http\Controllers\User\UserSupportController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\SearchController;
 use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\User\VideoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,7 +87,6 @@ Route::middleware(['middleware' => 'PreventBackHistory'])->group(function () {
 // FRONTEND ROUTES
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index');
-    Route::get('/phpInfo', 'phpInfo');
     Route::get('/blog/{slug}', 'blogShow')->name('blogs.show');
     Route::post('/contact', 'contact')->name('contact');
     Route::get('/terms-and-conditions', 'termsAndConditions')->name('terms');
@@ -98,6 +100,9 @@ Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handlePays
 Route::post('/webhooks/razorpay', [RazorpayWebhookController::class, 'handleRazorpay']);
 Route::post('/webhooks/mollie', [MollieWebhookController::class, 'handleMollie'])->name('mollie.webhook');
 Route::post('/webhooks/coinbase', [CoinbaseWebhookController::class, 'handleCoinbase']);
+Route::post('/webhooks/flutterwave', [FlutterwaveWebhookController::class, 'handleFlutterwave']);
+Route::post('/webhooks/yookassa', [YookassaWebhookController::class, 'handleYookassa']);
+Route::post('/webhooks/paddle', [PaddleWebhookController::class, 'handlePaddle']);
 
 // INSTALL ROUTES
 Route::group(['prefix' => 'install', 'middleware' => 'install'], function() {
@@ -115,12 +120,11 @@ Route::group(['prefix' => 'install', 'middleware' => 'install'], function() {
 // LOCALE ROUTES
 Route::get('/locale/{lang}', [LocaleController::class, 'language'])->name('locale');
 
-// UPDATE ROUTE
-Route::get('/update/now', [UpdateController::class, 'updateDatabase']);
-
-
 // ADMIN ROUTES
 Route::group(['prefix' => 'admin', 'middleware' => ['verified', '2fa.verify', 'role:admin', 'PreventBackHistory']], function() {
+
+    // UPDATE ROUTE
+    Route::get('/update/now', [UpdateController::class, 'updateDatabase']);
 
     // ADMIN DASHBOARD ROUTES
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -133,6 +137,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['verified', '2fa.verify', 'r
         Route::post('/davinci/templates/template/activate', 'templateActivate');   
         Route::post('/davinci/templates/template/deactivate', 'templateDeactivate');  
         Route::post('/davinci/templates/template/changepackage', 'assignPackage');  
+        Route::post('/davinci/templates/template/setnew', 'setNew');  
         Route::post('/davinci/templates/template/delete', 'deleteTemplate');  
         Route::get('/davinci/templates/activate/all', 'templateActivateAll'); 
         Route::get('/davinci/templates/deactivate/all', 'templateDeactivateAll'); 
@@ -142,6 +147,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['verified', '2fa.verify', 'r
     Route::controller(DavinciConfigController::class)->group(function() {
         Route::get('/davinci/configs', 'index')->name('admin.davinci.configs');
         Route::post('/davinci/configs', 'store')->name('admin.davinci.configs.store');
+        Route::get('/davinci/configs/keys', 'showKeys')->name('admin.davinci.configs.keys');
+        Route::get('/davinci/configs/keys/create', 'createKeys')->name('admin.davinci.configs.keys.create');
+        Route::post('/davinci/configs/keys/store', 'storeKeys')->name('admin.davinci.configs.keys.store');
+        Route::post('/davinci/configs/keys/update', 'update');
+        Route::post('/davinci/configs/keys/activate', 'activate');
+        Route::post('/davinci/configs/keys/delete', 'delete');
     }); 
 
     // ADMIN DAVINCI CUSTOM TEMPLATES ROUTES
@@ -152,6 +163,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['verified', '2fa.verify', 'r
         Route::put('/davinci/custom/{id}/update', 'update')->name('admin.davinci.custom.update');
         Route::get('/davinci/custom/category', 'category')->name('admin.davinci.custom.category');
         Route::post('/davinci/custom/category/change', 'change');
+        Route::post('/davinci/custom/category/description', 'description');
         Route::post('/davinci/custom/category/create', 'create');
         Route::post('/davinci/custom/category/delete', 'delete');
     }); 
@@ -412,62 +424,20 @@ Route::group(['prefix' => 'user', 'middleware' => ['verified', '2fa.verify', 'ro
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');  
     Route::post('/dashboard/favorite', [UserDashboardController::class, 'favorite']);    
     Route::post('/dashboard/favoritecustom', [UserDashboardController::class, 'favoriteCustom']);    
-
-    Route::controller(PaymentController::class)->group(function() {
-        Route::post('/subscription/stop/{id}', 'stopSubscription');
-    });
     
     // USER TEMPLATE ROUTES
     Route::controller(TemplateController::class)->group(function () {
         Route::get('/templates', 'index')->name('user.templates');       
-        Route::post('/templates/process', 'process');     
-        Route::post('/templates/custom-template/process', 'processCustom');     
+        Route::post('/templates/original-template/generate', 'generate');     
+        Route::get('/templates/original-template/process', 'process');   
+        Route::post('/templates/custom-template/customGenerate', 'customGenerate');   
+        Route::get('/templates/custom-template/process', 'process');                 
         Route::post('/templates/save', 'save');     
-        Route::post('/templates/favorite', 'favorite');     
-        Route::post('/templates/favoritecustom', 'favoriteCustom');     
+        Route::post('/templates/original-template/favorite', 'favorite');     
+        Route::post('/templates/original-template/favoritecustom', 'favoriteCustom');     
         Route::post('/templates/custom-template/favorite', 'favoriteCustom');     
-        Route::get('/templates/article-generator', 'viewArticleGenerator');
-        Route::get('/templates/paragraph-generator', 'viewParagraphGenerator');
-        Route::get('/templates/pros-and-cons', 'viewProsAndCons');
-        Route::get('/templates/talking-points', 'viewTalkingPoints');
-        Route::get('/templates/summarize-text', 'viewSummarizeText');
-        Route::get('/templates/product-description', 'viewProductDescription');
-        Route::get('/templates/startup-name-generator', 'viewStartupNameGenerator');
-        Route::get('/templates/product-name-generator', 'viewProductNameGenerator');
-        Route::get('/templates/meta-description', 'viewMetaDescription');
-        Route::get('/templates/faqs', 'viewFAQs');
-        Route::get('/templates/faq-answers', 'viewFAQAnswers');
-        Route::get('/templates/testimonials', 'viewTestimonials');
-        Route::get('/templates/blog-titles', 'viewBlogTitles');
-        Route::get('/templates/blog-section', 'viewBlogSection');
-        Route::get('/templates/blog-ideas', 'viewBlogIdeas');
-        Route::get('/templates/blog-intros', 'viewBlogIntros');
-        Route::get('/templates/blog-conclusion', 'viewBlogConclusion');
-        Route::get('/templates/content-rewriter', 'viewContentRewriter');
-        Route::get('/templates/facebook-ads', 'viewFacebookAds');
-        Route::get('/templates/video-descriptions', 'viewVideoDescriptions');
-        Route::get('/templates/video-titles', 'viewVideoTitles');
-        Route::get('/templates/youtube-tags-generator', 'viewYoutubeTagsGenerator');
-        Route::get('/templates/instagram-captions', 'viewInstagramCaptions');
-        Route::get('/templates/instagram-hashtags', 'viewInstagramHashtagsGenerator');
-        Route::get('/templates/social-post-personal', 'viewSocialPostPersonal');
-        Route::get('/templates/social-post-business', 'viewSocialPostBusiness');
-        Route::get('/templates/facebook-headlines', 'viewFacebookHeadlines');
-        Route::get('/templates/google-headlines', 'viewGoogleAdsHeadlines');
-        Route::get('/templates/google-ads', 'viewGoogleAdsDescription');
-        Route::get('/templates/problem-agitate-solution', 'viewPAS');
-        Route::get('/templates/academic-essay', 'viewAcademicEssay');
-        Route::get('/templates/email-welcome', 'viewWelcomeEmail');
-        Route::get('/templates/email-cold', 'viewColdEmail');
-        Route::get('/templates/email-follow-up', 'viewFollowUpEmail');
-        Route::get('/templates/creative-stories', 'viewCreativeStories');
-        Route::get('/templates/grammar-checker', 'viewGrammarChecker');
-        Route::get('/templates/cv-generator', 'viewCVGenerator');
-        Route::get('/templates/cover-letter', 'viewCoverLetter');
-        Route::get('/templates/2nd-grader', 'viewSummarize2ndGrader');
-        Route::get('/templates/video-scripts', 'viewVideoScripts');
-        Route::get('/templates/amazon-product', 'viewAmazonProduct');
         Route::get('/templates/custom-template/{code}', 'viewCustomTemplate');
+        Route::get('/templates/original-template/{slug}', 'viewOriginalTemplate');
     });
 
     // USER AI IMAGE ROUTES
@@ -498,24 +468,6 @@ Route::group(['prefix' => 'user', 'middleware' => ['verified', '2fa.verify', 'ro
         Route::post('/chat/rename', 'rename');
         Route::post('/chat/delete', 'delete');
         Route::get('/chats/{code}', 'view');
-        Route::post('/chat/save-audio', 'saveAudio');
-        Route::post('/chat/audio-convert', 'audioConvert');
-        Route::get('chat/audioPlayerEleven', 'audioPlayerEleven');
-        Route::post('text-to-speech', 'textToSpeech')->name('text-to-speech');
-    });
-
-    // USER VIDEO ROUTES
-    Route::controller(VideoController::class)->group(function () {
-        Route::get('/videos', 'index')->name('user.videos');
-        Route::post('/videos/search', 'index')->name('user.videos.search');
-        Route::get('/videos/create', 'create')->name('user.videos.create');
-        Route::get('/videos/list', 'list')->name('user.videos.list');
-        Route::get('/videos/delete/{id}', 'delete')->name('user.videos.delete');
-        Route::post('/videos/save', 'save')->name('user.videos.save');
-        Route::get('/videos/edit/{id}', 'edit')->name('user.videos.edit');
-        Route::post('/videos/update/{id}', 'update')->name('user.videos.update');
-        Route::get('/videos/download', 'videoDownload')->name('user.videos.download');
-        Route::get('/videos/pdfdownload', 'pdfDownload')->name('user.videos.pdfdownload');
     });
 
     // USER SPEECH TO TEXT ROUTES
@@ -588,6 +540,19 @@ Route::group(['prefix' => 'user', 'middleware' => ['verified', '2fa.verify', 'ro
         Route::post('/profile/edit/delete/{user}', 'accountDelete')->name('user.profile.delete.account');     
         Route::put('/profile/update/defaults/{user}', 'updateDefaults')->name('user.profile.update.defaults');     
     });      
+
+    // USER TEAM MANAGEMENT ROUTES
+    Route::controller(TeamController::class)->group(function() {
+        Route::get('/team', 'index')->name('user.team');
+        Route::get('/team/list', 'listUsers')->name('user.team.list');        
+        Route::post('/team', 'store')->name('user.team.store');
+        Route::get('/team/create', 'create')->name('user.team.create');        
+        Route::get('/team/{user}/show', 'show')->name('user.team.show');
+        Route::get('/team/{user}/edit', 'edit')->name('user.team.edit');
+        Route::put('/team/{user}/update', 'update')->name('user.team.update');     
+        Route::post('/team/leave', 'leave');
+        Route::post('/team/delete', 'delete');
+    }); 
     
     Route::controller(PaymentController::class)->group(function() {
         Route::post('/purchases/subscriptions/cancel', 'stopSubscription');
@@ -612,10 +577,12 @@ Route::group(['prefix' => 'user', 'middleware' => ['verified', '2fa.verify', 'ro
         Route::post('/payments/pay/{id}', 'pay')->name('user.payments.pay')->middleware('unsubscribed');
         Route::post('/payments/pay/one-time/{type}/{id}', 'payPrePaid')->name('user.payments.pay.prepaid');
         Route::post('/payments/approved/razorpay', 'approvedRazorpayPrepaid')->name('user.payments.approved.razorpay');
-        Route::get('/payments/success/braintree', 'braintreeSuccess')->name('user.payments.approved.braintree'); 
+        Route::get('/payments/approved/braintree', 'braintreeSuccess')->name('user.payments.approved.braintree');
+        Route::get('/payments/approved/paddle', 'paddleSuccess'); 
         Route::get('/payments/approved', 'approved')->name('user.payments.approved');               
         Route::get('/payments/cancelled', 'cancelled')->name('user.payments.cancelled');
         Route::post('/payments/subscription/razorpay', 'approvedRazorpaySubscription')->name('user.payments.subscription.razorpay');
+        Route::get('/payments/subscription/flutterwave', 'approvedFlutterwaveSubscription')->name('user.payments.subscription.flutterwave');
         Route::get('/payments/subscription/approved', 'approvedSubscription')->name('user.payments.subscription.approved');        
         Route::get('/payments/subscription/cancelled', 'cancelledSubscription')->name('user.payments.subscription.cancelled')->middleware('unsubscribed');
     });

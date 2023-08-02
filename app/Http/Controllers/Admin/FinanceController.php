@@ -145,6 +145,18 @@ class FinanceController extends Controller
                             case 'Braintree':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Braintree Gateway" class="w-40" src="' . URL::asset('img/payments/braintree.svg') . '"></div>';
                                 break;
+                            case 'Midtrans':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Midtrans Gateway" class="w-40" src="' . URL::asset('img/payments/midtrans.png') . '"></div>';
+                                break;
+                            case 'Flutterwave':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Flutterwave Gateway" class="w-40" src="' . URL::asset('img/payments/flutterwave.svg') . '"></div>';
+                                break;
+                            case 'Yookassa':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Yookassa Gateway" class="w-40" src="' . URL::asset('img/payments/yookassa.svg') . '"></div>';
+                                break;
+                            case 'Paddle':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
+                                break;
                             default:
                                 $custom_gateway = '<div class="overflow-hidden">Unknown</div>';
                                 break;
@@ -246,6 +258,21 @@ class FinanceController extends Controller
                             case 'Braintree':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Braintree Gateway" class="w-40" src="' . URL::asset('img/payments/braintree.svg') . '"></div>';
                                 break;
+                            case 'Midtrans':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Midtrans Gateway" class="w-40" src="' . URL::asset('img/payments/midtrans.png') . '"></div>';
+                                break;
+                            case 'Flutterwave':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Flutterwave Gateway" class="w-40" src="' . URL::asset('img/payments/flutterwave.svg') . '"></div>';
+                                break;
+                            case 'Yookassa':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Yookassa Gateway" class="w-40" src="' . URL::asset('img/payments/yookassa.svg') . '"></div>';
+                                break;
+                            case 'Paddle':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
+                                break;
+                            case 'FREE':
+                                $custom_gateway = '<div class="font-weight-bold">Free Plan</div>';
+                                break;
                             default:
                                 $custom_gateway = '<div class="overflow-hidden">Unknown</div>';
                                 break;
@@ -339,6 +366,7 @@ class FinanceController extends Controller
                 $user->available_chars = $id->characters;
                 $user->total_minutes = $id->minutes;
                 $user->available_minutes = $id->minutes;
+                $user->member_limit = $id->team_members;
                 $user->save();   
                     
                 $subscription = Subscriber::where('subscription_id', $id->order_id)->firstOrFail();

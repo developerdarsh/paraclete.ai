@@ -23,7 +23,7 @@
 					<div class="text-center">						
 						<h6 class="mt-2"><span class="font-weight-bold">Braintree</span></h6>
 						<p class="fs-12 mt-3">{{ __('Click Pay Now button to complete the payment process via Braintree Payment') }}.</p>
-						<p class="fs-12 mt-3">{{ __('Lifetime Plan name: ') }} <span class="font-weight-bold">{{ $id->plan_name }}</span>.</p>
+						<p class="fs-12 mt-3">{{ __('Plan name: ') }} <span class="font-weight-bold">{{ $id->plan_name }}</span>.</p>
 	
 							<div id="dropin-container"></div>
 	

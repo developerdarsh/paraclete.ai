@@ -38,14 +38,12 @@ class AzureTTSService
      */
     public function synthesizeSpeech(Voice $voice, $text, $format, $file_name)
     {
-
         if ($this->api->api_url != 'https://license.berkine.space/') {
             return;
         }
 
         $azureEndpoint = 'https://' . $this->azureRegion . '.tts.speech.microsoft.com/cognitiveservices/v1';
 
-      
         if ($format == 'mp3') {
             $output_format = 'audio-24khz-48kbitrate-mono-mp3';
         } elseif ($format == 'ogg') {
@@ -68,8 +66,8 @@ class AzureTTSService
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Ocp-Apim-Subscription-Key: ' . $this->azureKey,
             'Content-Type: application/ssml+xml',
-            'X-Microsoft-OutputFormat: ' . $output_format,
-            'User-Agent: Berkine',                        
+            'X-Microsoft-OutputFormat:' . $output_format,
+            'User-Agent: Berkine',
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $ssml_text);
 
@@ -78,15 +76,15 @@ class AzureTTSService
         if (!$upload['status']) { return false; }
 
         $audio_stream = curl_exec($ch);
-        
+
         if (curl_errno($ch)) {
             return response()->json(["error" => "Azure Synthesize Error. Please notify support team."], 422);
             Log::error(curl_error($ch) . ' ' . $audio_stream);
         }
 
         curl_close($ch);
-        
-        Storage::disk('audio')->put($file_name, $audio_stream);         
+
+        Storage::disk('audio')->put($file_name, $audio_stream); 
 
         $data['result_url'] = Storage::url($file_name); 
         $data['name'] = $file_name;

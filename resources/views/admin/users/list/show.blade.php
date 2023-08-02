@@ -217,10 +217,10 @@
 								</div>
 							@else
 								<div>
-									<h3 class="card-title fs-24 font-weight-800">@if ($user_subscription->payment_frequency == 'monthly') {{ __('Monthly Subscription') }} @else {{ __('Yearly Subscription') }} @endif</h3>
+									<h3 class="card-title fs-24 font-weight-800">@if ($user_subscription->payment_frequency == 'monthly') {{ __('Monthly Subscription') }} @elseif($user_subscription->payment_frequency == 'yearly') {{ __('Yearly Subscription') }} @else {{ __('Lifetime Subscription') }} @endif</h3>
 								</div>
 								<div class="mb-1">
-									<span class="fs-12 text-muted">{{ $user_subscription->plan_name }} {{ __('Plan') }} / {!! config('payment.default_system_currency_symbol') !!}{{ $user_subscription->price }} @if ($user_subscription->pricing_plan == 'monthly') {{ __('Per Month') }} @else {{ __('Per Year') }} @endif</span>
+									<span class="fs-12 text-muted">{{ $user_subscription->plan_name }} {{ __('Plan') }} / {!! config('payment.default_system_currency_symbol') !!}{{ $user_subscription->price }} @if ($user_subscription->payment_frequency == 'monthly') {{ __('Per Month') }} @elseif ($user_subscription->payment_frequency == 'yearly') {{ __('Per Year') }} @else {{ __('One Time Payment') }} @endif</span>
 								</div>
 							@endif
 						</div>
@@ -236,9 +236,13 @@
 								<div class="progress-bar progress-bar-striped progress-bar-animated bg-warning subscription-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ $progress['words'] }}%"></div>
 							</div>
 							@if ($subscription) 
-								<div class="mb-3">
-									<span class="fs-12 text-muted">{{ __('Subscription renewal date ') }}: {{ $subscription->active_until }} </span>
-								</div>
+							<div class="mb-3">
+								@if ($user_subscription->payment_frequency == 'lifetime')
+									<span class="fs-12 text-muted">{{ __('Subscription renewal date') }}: {{ __('Never') }}</span>
+								@else
+									<span class="fs-12 text-muted">{{ __('Subscription renewal date') }}: {{ $subscription->active_until }} </span>
+								@endif									
+							</div>
 							@endif
 						</div>
 					</div>

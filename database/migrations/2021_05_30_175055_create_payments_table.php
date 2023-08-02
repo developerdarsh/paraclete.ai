@@ -24,8 +24,10 @@ return new class extends Migration
             $table->string('gateway');
             $table->string('status')->comment('completed|cancelled|declined|failed|pending');
             $table->string('plan_name');
-            $table->integer('words')->nullable();
-            $table->integer('images')->nullable();
+            $table->integer('words')->nullable()->default(0);
+            $table->integer('images')->nullable()->default(0);
+            $table->integer('characters')->nullable()->default(0);
+            $table->integer('minutes')->nullable()->default(0);
             $table->dateTime('valid_until')->nullable();
             $table->timestamps();
 
