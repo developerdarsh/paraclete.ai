@@ -57,58 +57,70 @@
 										</div>
 									</div>
 								</div>
-								<div class="col-lg-4 col-md-6 col-sm-12">
-									<div class="card overflow-hidden user-dashboard-special-box">
-										<div class="card-body d-flex">
-											<div class="usage-info w-100">
-												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Images Created') }}</p>
-												<h2 class="mb-2 number-font fs-16">{{ number_format($data['images']) }} <span class="text-muted fs-16">{{ __('images') }}</span></h2>
-											</div>
-											<div class="usage-icon text-right">
-												<i class="fa-solid fa-image-landscape"></i>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-lg-4 col-md-6 col-sm-12">
-									<div class="card overflow-hidden user-dashboard-special-box">
-										<div class="card-body d-flex">
-											<div class="usage-info w-100">
-												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Transcribe Tasks') }}</p>
-												<h2 class="mb-2 number-font fs-16">{{ number_format($data['transcribed']) }} <span class="text-muted fs-16">{{ __('audio files') }}</span></h2>
-											</div>
-											<div class="usage-icon text-right">
-												<i class="fa-sharp fa-solid fa-folder-music"></i>
+								@role('user|subscriber|admin')
+            						@if (config('settings.image_feature_user') == 'allow')
+										<div class="col-lg-4 col-md-6 col-sm-12">
+											<div class="card overflow-hidden user-dashboard-special-box">
+												<div class="card-body d-flex">
+													<div class="usage-info w-100">
+														<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Images Created') }}</p>
+														<h2 class="mb-2 number-font fs-16">{{ number_format($data['images']) }} <span class="text-muted fs-16">{{ __('images') }}</span></h2>
+													</div>
+													<div class="usage-icon text-right">
+														<i class="fa-solid fa-image-landscape"></i>
+													</div>
+												</div>
 											</div>
 										</div>
-									</div>
-								</div>
-								<div class="col-lg-4 col-md-6 col-sm-12">
-									<div class="card overflow-hidden user-dashboard-special-box">
-										<div class="card-body d-flex">
-											<div class="usage-info w-100">
-												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Voiceover Chars Used') }}</p>
-												<h2 class="mb-2 number-font fs-16">{{ number_format($data['chars']) }} <span class="text-muted fs-16">{{ __('characters') }}</span></h2>
-											</div>
-											<div class="usage-icon text-right">
-												<i class="fa-sharp fa-solid fa-waveform-lines"></i>
-											</div>
-										</div>
-									</div>
-								</div>	
-								<div class="col-lg-4 col-md-6 col-sm-12">
-									<div class="card overflow-hidden user-dashboard-special-box">
-										<div class="card-body d-flex">
-											<div class="usage-info w-100">
-												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Voiceover Tasks') }}</p>
-												<h2 class="mb-2 number-font fs-16">{{ number_format($data['synthesized']) }} <span class="text-muted fs-16">{{ __('tasks') }}</span></h2>
-											</div>
-											<div class="usage-icon text-right">
-												<i class="fa-sharp fa-solid fa-microphone-lines"></i>
+									@endif
+								@endrole
+								@role('user|subscriber|admin')
+            						@if (config('settings.whisper_feature_user') == 'allow')
+										<div class="col-lg-4 col-md-6 col-sm-12">
+											<div class="card overflow-hidden user-dashboard-special-box">
+												<div class="card-body d-flex">
+													<div class="usage-info w-100">
+														<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Transcribe Tasks') }}</p>
+														<h2 class="mb-2 number-font fs-16">{{ number_format($data['transcribed']) }} <span class="text-muted fs-16">{{ __('audio files') }}</span></h2>
+													</div>
+													<div class="usage-icon text-right">
+														<i class="fa-sharp fa-solid fa-folder-music"></i>
+													</div>
+												</div>
 											</div>
 										</div>
-									</div>
-								</div>
+									@endif
+								@endrole
+								@role('user|subscriber|admin')
+            						@if (config('settings.voiceover_feature_user') == 'allow')
+										<div class="col-lg-4 col-md-6 col-sm-12">
+											<div class="card overflow-hidden user-dashboard-special-box">
+												<div class="card-body d-flex">
+													<div class="usage-info w-100">
+														<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Voiceover Chars Used') }}</p>
+														<h2 class="mb-2 number-font fs-16">{{ number_format($data['chars']) }} <span class="text-muted fs-16">{{ __('characters') }}</span></h2>
+													</div>
+													<div class="usage-icon text-right">
+														<i class="fa-sharp fa-solid fa-waveform-lines"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-lg-4 col-md-6 col-sm-12">
+											<div class="card overflow-hidden user-dashboard-special-box">
+												<div class="card-body d-flex">
+													<div class="usage-info w-100">
+														<p class=" mb-3 fs-12 font-weight-bold">{{ __('Total Voiceover Tasks') }}</p>
+														<h2 class="mb-2 number-font fs-16">{{ number_format($data['synthesized']) }} <span class="text-muted fs-16">{{ __('tasks') }}</span></h2>
+													</div>
+													<div class="usage-icon text-right">
+														<i class="fa-sharp fa-solid fa-microphone-lines"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									@endif
+								@endrole	
 								<div class="col-lg-4 col-md-6 col-sm-12">
 									<div class="card overflow-hidden user-dashboard-special-box">
 										<div class="card-body d-flex">
@@ -144,9 +156,9 @@
 									<tr>	
 										<th width="15%">{{ __('User') }}</th> 										
 										<th width="7%">{{ __('Words Used') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Images Used') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Chars Used') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Minutes Used') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	   
+										@if (config('settings.image_feature_user') == 'allow')<th width="7%">{{ __('Images Used') }}</th> @endif        	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
+										@if (config('settings.voiceover_feature_user') == 'allow')<th width="7%">{{ __('Chars Used') }}</th> @endif       	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
+										@if (config('settings.whisper_feature_user') == 'allow')<th width="7%">{{ __('Minutes Used') }}</th> @endif         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	   
 										<th width="5%">{{ __('Status') }}</th> 						           	
 										<th width="7%">{{ __('Added On') }}</th> 							    						           								    						           	
 										@if (!$member)<th width="7%">{{ __('Actions') }}</th> @endif      	      	
@@ -198,7 +210,7 @@
 					"lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
 					responsive: true,
 					colReorder: true,
-					"order": [[ 6, "desc" ]],
+					"order": [[ 0, "desc" ]],
 					language: {
 						"emptyTable": "{{ __('You did not add any team members yet') }}",
 						search: "<i class='fa fa-search search-icon'></i>",
@@ -227,24 +239,30 @@
 							orderable: true,
 							searchable: true
 						},
-						{
-							data: 'images-used',
-							name: 'images-used',
-							orderable: true,
-							searchable: true
-						},
-						{
-							data: 'chars-used',
-							name: 'chars-used',
-							orderable: true,
-							searchable: true
-						},
-						{
-							data: 'minutes-used',
-							name: 'minutes-used',
-							orderable: true,
-							searchable: true
-						},								
+						@if (config('settings.image_feature_user') == 'allow')
+							{
+								data: 'images-used',
+								name: 'images-used',
+								orderable: true,
+								searchable: true
+							},
+						@endif
+						@if (config('settings.voiceover_feature_user') == 'allow')
+							{
+								data: 'chars-used',
+								name: 'chars-used',
+								orderable: true,
+								searchable: true
+							},
+						@endif
+						@if (config('settings.whisper_feature_user') == 'allow')
+							{
+								data: 'minutes-used',
+								name: 'minutes-used',
+								orderable: true,
+								searchable: true
+							},	
+						@endif							
 						{
 							data: 'custom-status',
 							name: 'custom-status',
@@ -273,6 +291,7 @@
 					"order": [[ 6, "desc" ]],
 					language: {
 						"emptyTable": "{{ __('You did not add any team members yet') }}",
+						"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 						search: "<i class='fa fa-search search-icon'></i>",
 						lengthMenu: '_MENU_ ',
 						paginate : {
@@ -299,24 +318,30 @@
 							orderable: true,
 							searchable: true
 						},
-						{
-							data: 'images-used',
-							name: 'images-used',
-							orderable: true,
-							searchable: true
-						},
-						{
-							data: 'chars-used',
-							name: 'chars-used',
-							orderable: true,
-							searchable: true
-						},
-						{
-							data: 'minutes-used',
-							name: 'minutes-used',
-							orderable: true,
-							searchable: true
-						},								
+						@if (config('settings.image_feature_user') == 'allow')
+							{
+								data: 'images-used',
+								name: 'images-used',
+								orderable: true,
+								searchable: true
+							},
+						@endif
+						@if (config('settings.voiceover_feature_user') == 'allow')
+							{
+								data: 'chars-used',
+								name: 'chars-used',
+								orderable: true,
+								searchable: true
+							},
+						@endif
+						@if (config('settings.whisper_feature_user') == 'allow')
+							{
+								data: 'minutes-used',
+								name: 'minutes-used',
+								orderable: true,
+								searchable: true
+							},	
+						@endif									
 						{
 							data: 'custom-status',
 							name: 'custom-status',
@@ -344,7 +369,7 @@
 			new Chart(ctx, {
 				type: 'bar',
 				data: {
-					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+					labels: ['{{ __('Jan') }}', '{{ __('Feb') }}', '{{ __('Mar') }}', '{{ __('Apr') }}', '{{ __('May') }}', '{{ __('Jun') }}', '{{ __('Jul') }}', '{{ __('Aug') }}', '{{ __('Sep') }}', '{{ __('Oct') }}', '{{ __('Nov') }}', '{{ __('Dec') }}'],
 					datasets: [{
 						label: '{{ __('Words Generated') }}',
 						data: usageDataset,

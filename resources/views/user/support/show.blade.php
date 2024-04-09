@@ -32,7 +32,7 @@
 								@if ($message->role != 'admin')
 									<div class="background-white support-message mb-5 ">
 										<p class="font-weight-bold fs-11"><i class="fa-sharp fa-solid fa-calendar-clock mr-2"></i>{{ date_format($message->created_at, 'd M Y H:i A') }} <span>{{ __('Your Message') }}</span></p>
-										<p class="fs-14 mb-1">{{ $message->message }}</p>
+										<p class="fs-14 mb-1">{!! nl2br(html_entity_decode($message->message))!!}</p>
 										@if ($message->attachment)
 											<p class="font-weight-bold fs-11 mb-1">{{ __('Attachment') }}</p>
 											<a class="font-weight-bold fs-11 text-primary" href="{{ URL::asset($message->attachment) }}">{{ __('View Attached Image') }}</a>
@@ -41,7 +41,7 @@
 								@else
 									<div class="background-white support-message support-response mb-5">
 										<p class="font-weight-bold fs-11"><i class="fa-sharp fa-solid fa-calendar-clock mr-2"></i>{{ date_format($message->created_at, 'd M Y H:i A') }} <span class="text-primary">{{ __('Admin Response') }}</span></p>
-										<p class="fs-14 mb-1">{{ $message->message }}</p>
+										<p class="fs-14 mb-1">{!! nl2br(html_entity_decode($message->message))!!}</p>
 										@if ($message->attachment)
 											<p class="font-weight-bold fs-11 mt-3 mb-1">{{ __('Attachment') }}</p>
 											<a class="font-weight-bold fs-11 text-primary" href="{{ URL::asset($message->attachment) }}">{{ __('View Attached Image') }}</a>

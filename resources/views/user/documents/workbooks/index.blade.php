@@ -31,7 +31,7 @@
 							<div class="row">
 								<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12">
 									<div class="form-group" id="tts-project">
-										<select id="project" name="project" data-placeholder="{{ __('Select Workbook Name') }}" data-callback="changeProjectName">	
+										<select id="project" name="project" class="form-select" onchange="changeProjectName()">	
 											<option value="all"> {{ __('All Workbook') }}</option>
 											@foreach ($workbooks as $workbook)
 												<option value="{{ $workbook->name }}" @if (strtolower(auth()->user()->workbook) == strtolower($workbook->name)) selected @endif> {{ ucfirst($workbook->name) }}</option>
@@ -164,6 +164,7 @@
 				"order": [[ 2, "desc" ]],	
 				language: {
 					"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>{{ __('Workbook does not contain any documents yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {
@@ -227,7 +228,7 @@
 				Swal.fire({
 					title: '{{ __('Create New Workbook') }}',
 					showCancelButton: true,
-					confirmButtonText: 'Create',
+					confirmButtonText: '{{ __('Create') }}',
 					reverseButtons: true,
 					closeOnCancel: true,
 					input: 'text',
@@ -303,8 +304,11 @@
 
 
 		// CHANGE PROJECT NAME
-		function changeProjectName(value) {
+		function changeProjectName() {
 			
+			let e = document.getElementById("project");
+			let value = e.value;
+
 			$.get("{{ route('user.workbooks.change') }}", { group: value}, 
 				function(data){
 					table = $('#resultsTable').DataTable({

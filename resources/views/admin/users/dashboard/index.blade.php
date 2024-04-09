@@ -40,7 +40,7 @@
 			<div class="card border-0">
 				<div class="card-body">
 					<i class="fa-solid fa-user-clock fs-35 mt-3 float-right"></i>	
-					<p class=" mb-3 fs-12 font-weight-bold mt-1">{{ __('Visiters Today') }} ({{ __('Registered') }})</p>
+					<p class=" mb-3 fs-12 font-weight-bold mt-1">{{ __('Visitors Today') }} ({{ __('Registered') }})</p>
 					<h2 class="mb-0"><span class="number-font-chars">{{ $users_today }}</span></h2>
 				</div>
 			</div>
@@ -143,7 +143,7 @@
 			new Chart(ctx, {
 				type: 'bar',
 				data: {
-					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+					labels: ['{{ __('Jan') }}', '{{ __('Feb') }}', '{{ __('Mar') }}', '{{ __('Apr') }}', '{{ __('May') }}', '{{ __('Jun') }}', '{{ __('Jul') }}', '{{ __('Aug') }}', '{{ __('Sep') }}', '{{ __('Oct') }}', '{{ __('Nov') }}', '{{ __('Dec') }}'],
 					datasets: [{
 						label: '{{ __('Total Users') }}',
 						data: freeDataset,

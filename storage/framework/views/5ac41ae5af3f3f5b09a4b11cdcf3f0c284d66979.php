@@ -1,23 +1,25 @@
+
+
 <?php $__env->startSection('css'); ?>
 	<!-- Sweet Alert CSS -->
 	<link href="<?php echo e(URL::asset('plugins/sweetalert/sweetalert2.min.css')); ?>" rel="stylesheet" />
 <?php $__env->stopSection(); ?>
 
-<?php $__env->startSection('page-header'); ?>
-	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
-			<h4 class="page-title mb-0"><?php echo e(__('AI Chat Assistants')); ?></h4>
-			<ol class="breadcrumb mb-2">
-				<li class="breadcrumb-item"><a href="<?php echo e(route('user.dashboard')); ?>"><i class="fa-solid fa-messages-question mr-2 fs-12"></i><?php echo e(__('User')); ?></a></li>
-				<li class="breadcrumb-item active" aria-current="page"><a href="<?php echo e(url('#')); ?>"> <?php echo e(__('AI Chat')); ?></a></li>
-			</ol>
+<?php $__env->startSection('content'); ?>
+
+	<div class="row mt-24">
+		<div id="chat-search-panel">
+			<h3 class="card-title mb-3 ml-2 fs-20"><i class="fa-solid fa-message-captions mr-2 text-primary"></i><?php echo e(__('AI Chat Assistants')); ?></h3>
+			<h6 class="text-muted mb-3 ml-2"><?php echo e(__('Find your AI assistant quickly! Get ready to explore our fantastic lineup of AI chat assitants')); ?></h6>
+			<div class="search-template">
+				<div class="input-box">								
+					<div class="form-group">							    
+						<input type="text" class="form-control" id="search-template" placeholder="<?php echo e(__('Search for your AI assistant...')); ?>">
+					</div> 
+				</div> 
+			</div>
 		</div>
 	</div>
-	<!-- END PAGE HEADER -->
-<?php $__env->stopSection(); ?>
-
-<?php $__env->startSection('content'); ?>
 
 	<div class="row" id="templates-panel">
 
@@ -200,6 +202,20 @@
 			let url = '<?php echo e(url('user/chats')); ?>/' + value;
 			window.location.href=url;
 		}
+
+		$(document).on('keyup', '#search-template', function () {
+
+			var searchTerm = $(this).val().toLowerCase();
+			$('#templates-panel').find('> div').each(function () {
+				if ($(this).filter(function() {
+					return (($(this).find('h6').text().toLowerCase().indexOf(searchTerm) > -1) || ($(this).find('p').text().toLowerCase().indexOf(searchTerm) > -1));
+				}).length > 0 || searchTerm.length < 1) {
+					$(this).show();
+				} else {
+					$(this).hide();
+				}
+			});
+		});
 	</script>
 <?php $__env->stopSection(); ?>
 

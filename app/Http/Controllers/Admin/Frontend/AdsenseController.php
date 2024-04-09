@@ -22,7 +22,7 @@ class AdsenseController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                            <a href="'. route("admin.settings.adsense.edit", $row["id"] ). '"><i class="fa-solid fa-pencil-square table-action-buttons edit-action-button" title="Edit FAQ"></i></a>
+                                            <a href="'. route("admin.settings.adsense.edit", $row["id"] ). '"><i class="fa-solid fa-pencil-square table-action-buttons edit-action-button" title="'. __('Edit FAQ') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })

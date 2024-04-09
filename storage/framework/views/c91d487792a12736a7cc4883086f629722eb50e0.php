@@ -23,7 +23,17 @@
 
 								</div>
 								<div>
-									<h6 class="mt-1 ml-3 fs-16 number-font"><?php echo e(__($template->name)); ?> <?php if($template->professional): ?> <span class="fs-8 btn btn-yellow ml-2"><i class="fa-sharp fa-solid fa-crown mr-2"></i><?php echo e(__('Pro')); ?></span> <?php endif; ?></h6>
+									<h6 class="mt-1 ml-3 fs-16 number-font"><?php echo e(__($template->name)); ?> 										
+										<?php if($template->package == 'professional'): ?> 
+											<span class="fs-8 btn btn-pro ml-2"><i class="fa-sharp fa-solid fa-crown mr-2"></i><?php echo e(__('Pro')); ?> </span> 
+										<?php elseif($template->package == 'free'): ?>
+											<span class="fs-8 btn btn-free ml-2"><i class="fa-sharp fa-solid fa-gift mr-2"></i><?php echo e(__('Free')); ?> </span> 
+										<?php elseif($template->package == 'premium'): ?>
+											<span class="fs-8 btn btn-yellow ml-2"><i class="fa-sharp fa-solid fa-gem mr-2"></i><?php echo e(__('Premium')); ?> </span> 
+										<?php elseif($template->new): ?>
+											<span class="fs-8 btn btn-new ml-2"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i><?php echo e(__('New')); ?></span>
+										<?php endif; ?>	
+									</h6>
 								</div>
 								<div>
 									<a id="<?php echo e($template->template_code); ?>" <?php if($favorite): ?> data-tippy-content="<?php echo e(__('Remove from favorite')); ?>" <?php else: ?> data-tippy-content="<?php echo e(__('Select as favorite')); ?>" <?php endif; ?> onclick="favoriteStatus(this.id)"><i id="<?php echo e($template->template_code); ?>-icon" class="<?php if($favorite): ?> fa-solid fa-stars <?php else: ?> fa-regular fa-star <?php endif; ?> star"></i></a>
@@ -104,7 +114,7 @@ unset($__errorArgs, $__bag); ?>
 										<option value="masculine" <?php if(config('settings.tone_default_state') == 'masculine'): ?> selected <?php endif; ?>> <?php echo e(__('Masculine')); ?></option>																															
 										<option value="bold" <?php if(config('settings.tone_default_state') == 'bold'): ?> selected <?php endif; ?>> <?php echo e(__('Bold')); ?></option>																															
 										<option value="dramatic" <?php if(config('settings.tone_default_state') == 'dramatic'): ?> selected <?php endif; ?>> <?php echo e(__('Dramatic')); ?></option>																															
-										<option value="gumpy" <?php if(config('settings.tone_default_state') == 'gumpy'): ?> selected <?php endif; ?>> <?php echo e(__('Gumpy')); ?></option>																															
+										<option value="grumpy" <?php if(config('settings.tone_default_state') == 'grumpy'): ?> selected <?php endif; ?>> <?php echo e(__('Grumpy')); ?></option>																															
 										<option value="secretive" <?php if(config('settings.tone_default_state') == 'secretive'): ?> selected <?php endif; ?>> <?php echo e(__('Secretive')); ?></option>																															
 									</select>
 								</div>
@@ -426,39 +436,60 @@ unset($__errorArgs, $__bag); ?>
 			$.ajax({
 				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 				method: 'POST',
-				url: 'process',
+				url: 'customGenerate',
 				data: form.serialize(),
 				beforeSend: function() {
 					$('#generate').html('');
 					$('#generate').prop('disabled', true);
 					$('#processing').show().clone().appendTo('#generate'); 
 					$('#processing').hide();          
-				},
-				complete: function() {
-					$('#generate').prop('disabled', false);
-					$('#processing', '#generate').empty().remove();
-					$('#processing').hide();
-					$('#generate').html('Generate Text');            
-				},
-				success: function (data) {		
+				},			
+				success: function (data) {	
+
+					if (data['status'] == 'error') {
 						
-					if (data['status'] == 'success') {
-						let formatted_text=nl2br(data['text']);
+						Swal.fire('<?php echo e(__('Text Generation Error')); ?>', data['message'], 'warning');
+						$('#generate').prop('disabled', false);
+						$('#processing', '#generate').empty().remove();
+						$('#processing').hide();
+						$('#generate').html('<?php echo e(__('Generate Text')); ?>'); 
+
+					} else {
+					
+						const eventSource = new EventSource( "/user/templates/original-template/process?content_id=" + data.id+"&max_results=" + data.max_results + "&max_words=" + data.max_words + "&temperature=" + data.temperature);
+						const response = document.getElementById('richtext');
 						let id = document.querySelector('.richText-editor').id;
 						let editor = document.getElementById(id);
-				
-						editor.innerHTML += formatted_text;
-						editor.innerHTML += '<br><br><br>';
-
 						let save = document.getElementById('save-button');
 						save.setAttribute('target', data['id']);
-					
-						animateValue("available-words", data['old'], data['current'], 4000);
-						animateValue("balance-number", data['old'], data['current'], 4000);
-					} else {						
-						Swal.fire('<?php echo e(__('Text Generation Error')); ?>', data['message'], 'warning');
+
+						eventSource.onmessage = function (e) {
+		
+							if ( e.data == '[DONE]' ) {	
+								eventSource.close();
+								editor.innerHTML += '<br><br>';
+								$('#generate').prop('disabled', false);
+								$('#processing', '#generate').empty().remove();
+								$('#processing').hide();
+								$('#generate').html('<?php echo e(__('Generate Text')); ?>');  
+								
+							} else {
+
+								let stream = e.data
+								if ( stream && stream !== '[DONE]') {
+									editor.innerHTML += stream;
+								}
+
+								editor.scrollTop += 100;
+							}
+							
+						};
+						eventSource.onerror = function (e) {
+							console.log(e);
+						};
 					}
 				},
+
 				error: function(data) {
 					$('#generate').prop('disabled', false);
             		$('#generate').html('Generate Text'); 

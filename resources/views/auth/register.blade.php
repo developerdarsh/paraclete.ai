@@ -18,107 +18,138 @@
         </div>
     @else
         @if (config('settings.registration') == 'enabled')
-            <div class="container-fluid justify-content-center">
-                <div class="row h-100vh align-items-center background-white">
-                    <div class="col-md-7 col-sm-12 text-center background-special h-100 align-middle p-0" id="login-background">
-                        <div class="login-bg"></div>
+            <div class="container-fluid h-100vh ">
+                <div class="row background-white justify-content-center">
+                    <div class="col-md-6 col-sm-12" id="login-responsive"> 
+                        <div class="row justify-content-center">
+                            <div class="col-lg-7 mx-auto">
+                                <div class="card-body pt-8">
+
+                                    <div class="dropdown header-locale" id="frontend-local-login">
+                                        <a class="icon" data-bs-toggle="dropdown">
+                                            <span class="fs-12 mr-4"><i class="fa-solid text-black fs-16 mr-2 fa-globe"></i>{{ ucfirst(Config::get('locale')[App::getLocale()]['code']) }}</span>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow animated">
+                                            <div class="local-menu">
+                                                @foreach (Config::get('locale') as $lang => $language)
+                                                    @if ($lang != App::getLocale())
+                                                        <a href="{{ route('locale', $lang) }}" class="dropdown-item d-flex">
+                                                            <div class="text-info"><i class="flag flag-{{ $language['flag'] }} mr-3"></i></div>
+                                                            <div>
+                                                                <span class="font-weight-normal fs-12">{{ $language['display'] }}</span>
+                                                            </div>
+                                                        </a>                                        
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <form method="POST" action="{{ route('register') }}">
+                                        @csrf                                
+                                        
+                                        <h3 class="text-center login-title mb-8">{{__('Sign Up to')}} <span class="text-info"><a href="{{ url('/') }}">{{ config('app.name') }}</a></span></h3>
+
+                                        @if (config('settings.oauth_login') == 'enabled')
+                                            <div class="divider">
+                                                <div class="divider-text text-muted">
+                                                    <small>{{__('Continue With Your Social Media Account')}}</small>
+                                                </div>
+                                            </div>
+
+                                            <div class="social-logins-box text-center">
+                                                @if(config('services.facebook.enable') == 'on')<a href="{{ url('/auth/redirect/facebook') }}" class="social-login-button" id="login-facebook"><i class="fa-brands fa-facebook mr-2 fs-16"></i>{{ __('Sign In with Facebook') }}</a>@endif
+                                                @if(config('services.twitter.enable') == 'on')<a href="{{ url('/auth/redirect/twitter') }}" class="social-login-button" id="login-twitter"><i class="fa-brands fa-twitter mr-2 fs-16"></i>{{ __('Sign In with Twitter') }}</a>@endif	
+                                                @if(config('services.google.enable') == 'on')<a href="{{ url('/auth/redirect/google') }}" class="social-login-button" id="login-google"><i class="fa-brands fa-google mr-2 fs-16"></i>{{ __('Sign In with Google') }}</a>@endif	
+                                                @if(config('services.linkedin.enable') == 'on')<a href="{{ url('/auth/redirect/linkedin') }}" class="social-login-button" id="login-linkedin"><i class="fa-brands fa-linkedin mr-2 fs-16"></i>{{ __('Sign In with Linkedin') }}</a>@endif	
+                                            </div>
+
+                                            <div class="divider">
+                                                <div class="divider-text text-muted">
+                                                    <small>{{ __('or register with email') }}</small>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="input-box mb-4">                             
+                                            <label for="name" class="fs-12 font-weight-bold text-md-right">{{ __('Full Name') }}</label>
+                                            <input id="name" type="name" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" autocomplete="off" autofocus placeholder="{{ __('First and Last Names') }}">
+                                            @error('name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    {{ $message }}
+                                                </span>
+                                            @enderror                            
+                                        </div>
+
+                                        <div class="input-box mb-4">                             
+                                            <label for="email" class="fs-12 font-weight-bold text-md-right">{{ __('Email Address') }}</label>
+                                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" autocomplete="off"  placeholder="{{ __('Email Address') }}" required>
+                                            @error('email')
+                                                <span class="invalid-feedback" role="alert">
+                                                    {{ $message }}
+                                                </span>
+                                            @enderror                            
+                                        </div>
+
+                                        <div class="input-box mb-4">                             
+                                            <label for="country" class="fs-12 font-weight-bold text-md-right">{{ __('Country') }}</label>
+                                            <select id="user-country" name="country" data-placeholder="{{ __('Select Your Country') }}" required>	
+                                                @foreach(config('countries') as $value)
+                                                    <option value="{{ $value }}" @if(config('settings.default_country') == $value) selected @endif>{{ $value }}</option>
+                                                @endforeach										
+                                            </select>
+                                            @error('country')
+                                                <span class="invalid-feedback" role="alert">
+                                                    {{ $message }}
+                                                </span>
+                                            @enderror                            
+                                        </div>
+
+                                        <div class="input-box">                            
+                                            <label for="password-input" class="fs-12 font-weight-bold text-md-right">{{ __('Password') }}</label>
+                                            <input id="password-input" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="off" placeholder="{{ __('Password') }}">
+                                            @error('password')
+                                                <span class="invalid-feedback" role="alert">
+                                                    {{ $message }}
+                                                </span>
+                                            @enderror                            
+                                        </div>
+
+                                        <div class="input-box">
+                                            <label for="password-confirm" class="fs-12 font-weight-bold text-md-right">{{ __('Confirm Password') }}</label>                       
+                                            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="off" placeholder="{{ __('Confirm Password') }}">                        
+                                        </div>
+
+                                        <div class="form-group mb-3">  
+                                            <div class="d-flex">                        
+                                                <label class="custom-switch">
+                                                    <input type="checkbox" class="custom-switch-input" name="agreement" id="agreement" {{ old('remember') ? 'checked' : '' }} required>
+                                                    <span class="custom-switch-indicator"></span>
+                                                    <span class="custom-switch-description fs-10 text-muted">{{__('By continuing, I agree with your')}} <a href="{{ route('terms') }}" class="text-info">{{__('Terms and Conditions')}}</a> {{__('and')}} <a href="{{ route('privacy') }}" class="text-info">{{__('Privacy Policies')}}</a></span>
+                                                </label>   
+                                            </div>
+                                        </div>
+
+                                        <input type="hidden" name="recaptcha" id="recaptcha">
+
+                                        <div class="text-center">
+                                            <div class="form-group mb-0">                        
+                                                <button type="submit" class="btn btn-primary font-weight-bold login-main-button">{{ __('Sign Up') }}</button>              
+                                            </div>                        
+                                        
+                                            <p class="fs-10 text-muted pt-3 mb-0">{{ __('Already have an account?') }}</p>
+                                            <a href="{{ route('login') }}"  class="fs-12 font-weight-bold">{{ __('Sign In') }}</a>                                             
+                                        </div>
+                                    </form>
+                                </div> 
+                            </div>      
+                        </div>
                     </div>
-                    
-                    <div class="col-md-5 col-sm-12 h-100" id="login-responsive">                
-                        <div class="card-body pr-10 pl-10 pt-10">
-                            <form method="POST" action="{{ route('register') }}">
-                                @csrf                                
-                                
-                                <h3 class="text-center font-weight-bold mb-8">{{__('Sign Up to')}} <span class="text-info"><a href="{{ url('/') }}">{{ config('app.name') }}</a></span></h3>
-
-                                @if (config('settings.oauth_login') == 'enabled')
-                                    <div class="divider">
-                                        <div class="divider-text text-muted">
-                                            <small>{{__('Register with Your Social Media Account')}}</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="actions-total text-center">
-                                        @if(config('services.facebook.enable') == 'on')<a href="{{ url('/auth/redirect/facebook') }}" data-tippy-content="{{ __('Login with Facebook') }}" class="btn mr-2" id="login-facebook"><i class="fa-brands fa-facebook-f"></i></a>@endif
-                                        @if(config('services.twitter.enable') == 'on')<a href="{{ url('/auth/redirect/twitter') }}" data-tippy-content="{{ __('Login with Twitter') }}" class="btn mr-2" id="login-twitter"><i class="fa-brands fa-twitter"></i></a>@endif	
-                                        @if(config('services.google.enable') == 'on')<a href="{{ url('/auth/redirect/google') }}" data-tippy-content="{{ __('Login with Google') }}" class="btn mr-2" id="login-google"><i class="fa-brands fa-google"></i></a>@endif	
-                                        @if(config('services.linkedin.enable') == 'on')<a href="{{ url('/auth/redirect/linkedin') }}" data-tippy-content="{{ __('Login with Linkedin') }}" class="btn mr-2" id="login-linkedin"><i class="fa-brands fa-linkedin-in"></i></a>@endif	
-                                    </div>
-
-                                    <div class="divider">
-                                        <div class="divider-text text-muted">
-                                            <small>{{ __('or register with email') }}</small>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <div class="input-box mb-4">                             
-                                    <label for="name" class="fs-12 font-weight-bold text-md-right">{{ __('Full Name') }}</label>
-                                    <input id="name" type="name" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" autocomplete="off" autofocus placeholder="{{ __('First and Last Names') }}">
-                                    @error('name')
-                                        <span class="invalid-feedback" role="alert">
-                                            {{ $message }}
-                                        </span>
-                                    @enderror                            
-                                </div>
-
-                                <div class="input-box mb-4">                             
-                                    <label for="email" class="fs-12 font-weight-bold text-md-right">{{ __('Email Address') }}</label>
-                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" autocomplete="off"  placeholder="{{ __('Email Address') }}" required>
-                                    @error('email')
-                                        <span class="invalid-feedback" role="alert">
-                                            {{ $message }}
-                                        </span>
-                                    @enderror                            
-                                </div>
-
-                                <div class="input-box mb-4">                             
-                                    <label for="country" class="fs-12 font-weight-bold text-md-right">{{ __('Country') }}</label>
-                                    <select id="user-country" name="country" data-placeholder="{{ __('Select Your Country') }}" required>	
-                                        @foreach(config('countries') as $value)
-											<option value="{{ $value }}" @if(config('settings.default_country') == $value) selected @endif>{{ $value }}</option>
-										@endforeach										
-                                    </select>
-                                    @error('country')
-                                        <span class="invalid-feedback" role="alert">
-                                            {{ $message }}
-                                        </span>
-                                    @enderror                            
-                                </div>
-
-                                <div class="input-box">                            
-                                    <label for="password-input" class="fs-12 font-weight-bold text-md-right">{{ __('Password') }}</label>
-                                    <input id="password-input" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="off" placeholder="{{ __('Password') }}">
-                                    @error('password')
-                                        <span class="invalid-feedback" role="alert">
-                                            {{ $message }}
-                                        </span>
-                                    @enderror                            
-                                </div>
-
-                                <div class="input-box">
-                                    <label for="password-confirm" class="fs-12 font-weight-bold text-md-right">{{ __('Confirm Password') }}</label>                       
-                                    <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="off" placeholder="{{ __('Confirm Password') }}">                        
-                                </div>
-
-                                <div class="form-group mb-3">  
-                                    <div class="d-flex">                        
-                                        <label class="custom-switch">
-                                            <input type="checkbox" class="custom-switch-input" name="agreement" id="agreement" {{ old('remember') ? 'checked' : '' }} required>
-                                            <span class="custom-switch-indicator"></span>
-                                            <span class="custom-switch-description fs-10 text-muted">{{__('By continuing, I agree with your')}} <a href="{{ route('terms') }}" class="text-info">{{__('Terms and Conditions')}}</a> {{__('and')}} <a href="{{ route('privacy') }}" class="text-info">{{__('Privacy Policies')}}</a></span>
-                                        </label>   
-                                    </div>
-                                </div>
-
-                                <input type="hidden" name="recaptcha" id="recaptcha">
-
-                                <div class="form-group mb-0">                        
-                                    <button type="submit" class="btn btn-primary mr-2">{{ __('Sign Up') }}</button> 
-                                    <p class="fs-10 text-muted mt-2">or <a class="text-info" href="{{ route('login') }}">{{ __('Login') }}</a></p>                               
-                                </div>
-                            </form>
-                        </div>       
+                        
+                    <div class="col-md-6 col-sm-12 text-center background-special align-middle p-0" id="login-background">
+                        <div class="login-bg">
+                            <img src="{{ URL::asset('img/frontend/backgrounds/login.webp') }}" alt="">
+                        </div>
                     </div>
                 </div>
             </div>

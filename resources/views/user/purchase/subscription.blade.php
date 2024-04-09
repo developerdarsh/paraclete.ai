@@ -66,6 +66,7 @@
 				"order": [[ 0, "desc" ]],
 				language: {
 					"emptyTable": "<div><br>{{ __('You do not have any subscriptions yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {

@@ -30,7 +30,7 @@
 							<div class="col-md-6 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('Invoice Currency') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="invoice-currency" name="invoice_currency" data-placeholder="{{ __('Select Currency') }}:">			
+									<select id="invoice-currency" name="invoice_currency" class="form-select" data-placeholder="{{ __('Select Currency') }}:">			
 										<option value="AFA" @if ($invoice['invoice_currency'] == 'AFA') selected @endif>Afghan Afghani</option>
 										<option value="ALL" @if ($invoice['invoice_currency'] == 'ALL') selected @endif>Albanian Lek</option>
 										<option value="DZD" @if ($invoice['invoice_currency'] == 'DZD') selected @endif>Algerian Dinar</option>
@@ -201,7 +201,7 @@
 							<div class="col-md-6 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('Invoice Language') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-			  						<select id="invoice-language" name="invoice_language" data-placeholder="{{ __('Select Language') }}:">			
+			  						<select id="invoice-language" name="invoice_language" class="form-select" data-placeholder="{{ __('Select Language') }}:">			
 										<option value="br" @if ($invoice['invoice_language'] == 'br') selected @endif>BR</option>
 										<option value="de" @if ($invoice['invoice_language'] == 'de') selected @endif>DE</option>
 										<option value="en" @if ($invoice['invoice_language'] == 'en') selected @endif>EN</option>
@@ -294,7 +294,7 @@
 							<div class="col-md-4 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('Country') }}</h6>
-									<select id="invoice-country" name="invoice_country" data-placeholder="{{ __('Select Invoice Country') }}:">	
+									<select id="invoice-country" name="invoice_country" class="form-select" data-placeholder="{{ __('Select Invoice Country') }}:">	
 										@foreach(config('countries') as $value)
 											<option value="{{ $value }}" @if($invoice['invoice_country'] == $value) selected @endif>{{ $value }}</option>
 										@endforeach																			

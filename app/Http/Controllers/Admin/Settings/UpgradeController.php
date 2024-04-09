@@ -42,7 +42,6 @@ class UpgradeController extends Controller
      */
     public function upgrade(Request $request)
     {
-
         $current_version = $this->api->get_current_version();
         $latest_version = $this->api->get_latest_version();
         
@@ -66,18 +65,18 @@ class UpgradeController extends Controller
             $this->storeConfiguration('APP_VERSION', $latest_version['latest_version']);
 
         }
-		
-		try {
+        
+        try {
                 Artisan::call('migrate', ['--force' => true]);
-              //  Artisan::call('db:seed');
+            //  Artisan::call('db:seed');
                 Artisan::call('view:clear');
                 Artisan::call('cache:clear');
                 Artisan::call('config:clear');
                 Log::info('Migration completed...');
 
-		} catch (\Exception $e) {
-			Log::info('Migration or Seed error: ' . $e->getMessage());
-		}
+        } catch (\Exception $e) {
+            Log::info('Migration or Seed error: ' . $e->getMessage());
+        }
 
         if ($request->ajax()) {
             return $response;
@@ -90,7 +89,7 @@ class UpgradeController extends Controller
             toastr()->error(__('Software was not updated correctly. Please try again or contact support'));
             return redirect()->back()->with('error', '');
         }
- 
+
     }
 
 

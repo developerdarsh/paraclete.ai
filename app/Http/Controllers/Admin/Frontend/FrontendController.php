@@ -60,6 +60,7 @@ class FrontendController extends Controller
         $this->storeSettings('FRONTEND_SOCIAL_FACEBOOK', request('facebook'));
         $this->storeSettings('FRONTEND_SOCIAL_LINKEDIN', request('linkedin'));
         $this->storeSettings('FRONTEND_SOCIAL_INSTAGRAM', request('instagram'));
+        $this->storeSettings('FRONTEND_SOCIAL_YOUTUBE', request('youtube'));
 
         $rows = ['css', 'js'];        
         foreach ($rows as $row) {

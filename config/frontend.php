@@ -33,5 +33,6 @@ return [
     'social_facebook' => env('FRONTEND_SOCIAL_FACEBOOK'),
     'social_linkedin' => env('FRONTEND_SOCIAL_LINKEDIN'),
     'social_instagram' => env('FRONTEND_SOCIAL_INSTAGRAM'),
+    'social_youtube' => env('FRONTEND_SOCIAL_YOUTUBE'),
 
 ];

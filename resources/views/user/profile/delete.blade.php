@@ -32,35 +32,41 @@
 						<h6 class="fotn-weight-bold fs-12">{{ auth()->user()->job_role }}</h6>
 					</div>
 				</div>
-				<div class="card-footer p-0">
-					<div class="row">
-						<div class="col-sm-12">
-							<div class="text-center p-4">
-								<div class="d-flex w-100">
-									<div class="flex w-100">
-										<div class="flex w-100">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableWords() }} / {{ App\Services\HelperService::userPlanTotalWords() }}</h4>
-											<h6 class="fs-12">{{ __('Words Left') }}</h6>
-										</div>
-										<div class="flex w-100 mt-4">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableImages() }} / {{ App\Services\HelperService::userPlanTotalImages() }}</h4>
-											<h6 class="fs-12">{{ __('Images Left') }}</h6>
-										</div>
-									</div>
-									<div class="flex w-100">
-										<div class="flex w-100">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableChars() }} / {{ App\Services\HelperService::userPlanTotalChars() }}</h4>
-											<h6 class="fs-12">{{ __('Characters Left') }}</h6>
-										</div>
-										<div class="flex w-100 mt-4">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableMinutes() }} / {{ App\Services\HelperService::userPlanTotalMinutes() }}</h4>
-											<h6 class="fs-12">{{ __('Minutes Left') }}</h6>
-										</div>
-									</div>
-								</div>
-							</div>
+				<div class="card-footer p-0">								
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Words Left') }}</h6>
 						</div>
+						@role('user|subscriber|admin')
+							@if (config('settings.image_feature_user') == 'allow')
+								<div class="col-sm">
+									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableImages() }} @endif</h4>
+									<h6 class="fs-12">{{ __('Images Left') }}</h6>
+								</div>
+							@endif
+						@endrole
 					</div>
+					@if (config('settings.voiceover_feature_user') == 'allow' || config('settings.whisper_feature_user') == 'allow')
+						<div class="row text-center pb-4">
+							@role('user|subscriber|admin')
+								@if (config('settings.voiceover_feature_user') == 'allow')
+									<div class="col-sm">
+										<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_chars == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableChars() }} @endif</h4>
+										<h6 class="fs-12">{{ __('Characters Left') }}</h6>
+									</div>
+								@endif
+							@endrole
+							@role('user|subscriber|admin')
+								@if (config('settings.whisper_feature_user') == 'allow')
+									<div class="col-sm">
+										<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_minutes == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableMinutes() }} @endif</h4>
+										<h6 class="fs-12">{{ __('Minutes Left') }}</h6>
+									</div>
+								@endif
+							@endrole
+						</div>
+					@endif															
 				</div>
 				<div class="card-footer p-0">
 					<div class="row" id="profile-pages">
@@ -84,6 +90,23 @@
 								<a href="{{ route('user.security.2fa') }}" class="fs-13"><i class="fa fa-shield-check mr-1"></i> {{ __('2FA Authentication') }}</a>
 							</div>
 						</div>
+						@if (auth()->user()->group == 'user' || auth()->user()->group == 'admin')
+							@if (config('settings.personal_openai_api') == 'allow' || config('settings.personal_sd_api') == 'allow')
+								<div class="col-sm-12">
+									<div class="text-center pb-3">
+										<a href="{{ route('user.profile.api') }}" class="fs-13"><i class="fa-solid fa-key mr-1"></i> {{ __('Personal API Keys') }}</a>
+									</div>
+								</div>
+							@endif
+						@elseif (!is_null(auth()->user()->plan_id))
+							@if ($check_api_feature->personal_openai_api || $check_api_feature->personal_sd_api)
+								<div class="col-sm-12">
+									<div class="text-center pb-3">
+										<a href="{{ route('user.profile.api') }}" class="fs-13"><i class="fa-solid fa-key mr-1"></i> {{ __('Personal API Keys') }}</a>
+									</div>
+								</div>
+							@endif
+						@endif	
 						<div class="col-sm-12">
 							<div class="text-center pb-4">
 								<a href="{{ route('user.profile.delete') }}" class="fs-13 text-primary"><i class="fa fa-user-xmark mr-1"></i> {{ __('Delete Account') }}</a>
@@ -95,7 +118,7 @@
 		</div>
 
 		<div class="col-xl-9 col-lg-8 col-sm-12">
-			<form method="POST" class="w-100" action="{{ route('user.profile.delete.account', [auth()->user()->id]) }}" enctype="multipart/form-data">
+			<form method="POST" class="w-100" action="{{ route('user.profile.delete.account') }}" enctype="multipart/form-data">
 				@csrf
 
 				<div class="card border-0">

@@ -3,12 +3,12 @@
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid justify-content-center">
     <div class="row h-100vh align-items-center background-white">
-        <div class="col-md-7 col-sm-12 text-center background-special h-100 align-middle p-0" id="login-background">
+        <div class="col-md-8 col-sm-12 text-center background-special h-100 align-middle p-0" id="login-background">
             <div class="login-bg"></div>
         </div>
         
-        <div class="col-md-5 col-sm-12 h-100" id="login-responsive">                
-            <div class="card-body pr-10 pl-10 pt-10">
+        <div class="col-md-4 col-sm-12 h-100" id="login-responsive">                
+            <div class="card-body pr-6 pl-6 pt-10">
                 <form method="POST" action="<?php echo e(route('login')); ?>">
                     <?php echo csrf_field(); ?>                                       
 

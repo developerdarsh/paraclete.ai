@@ -2,8 +2,11 @@
 	<!-- Sweet Alert CSS -->
 	<link href="<?php echo e(URL::asset('plugins/sweetalert/sweetalert2.min.css')); ?>" rel="stylesheet" />
 	<style>
+	.chat-message-container .d-flex .form-switch{
+		max-height: 1rem;
+	}
 	.audio_search a{
-		padding:0px 5px;
+		padding:0px 2px;
 		
 	}
     #audioPlayer{
@@ -47,6 +50,53 @@
 		border-radius: 100%;
 		top: 2px;
 	}
+	.audio_search a i {
+	    width: 24px;
+		height: 24px;
+		line-height: 24px;
+		text-align: center;
+		background: #520cae;
+		color: #fff;
+		border-radius: 100%;
+		font-size: 12px;
+	}
+
+  .card-footer .dropdown-selected {
+    margin: 20px 0;
+  }
+  .card-footer .dropdown-selected .btn:focus {
+	  box-shadow: none;
+  }
+  .card-footer .dropdown-selected .btn {
+        min-width: 100%;
+       border: 1px solid #ddd;
+       padding: 8px 40px;
+	    background: #4987f8c2;
+        color: #ffffff;
+  }
+.chat-main-container .card-footer {
+    min-height: auto !important;
+    height: auto !important;
+}
+.input-box.chats-input-b .form-control {
+	border-color: #007BFF;
+}
+
+.card-footer .dropdown-selected .s-dropdown-menu {
+    width: calc(100% - 24px); 
+    padding: 10px 30px 10px;
+	overflow-y: auto;
+    max-height: 340px;
+    height: max-content;
+
+}
+ .card-footer .dropdown-selected .s-dropdown-menu li {
+    font-size: 14px;
+    line-height: 24px;
+    font-weight: 400;
+    list-style: number;
+} 
+
 	</style>
 <?php $__env->stopSection(); ?>
 
@@ -133,22 +183,40 @@
 					<div class="card-footer mb-8">
 						<div class="row">						
 							<div class="col-sm-12">	
-                                <div class='d-flex justify-content-between'>
-								<div class="form-check form-switch">
-									<input class="form-check-input" type="checkbox" id="web_access_button">
-									<label class="form-check-label" for="web-access-button">Web access</label>
+								<div class='d-flex justify-content-between'>
+									<div class="form-check form-switch">
+										<input class="form-check-input" type="checkbox" id="web_access_button">
+										<label class="form-check-label" for="web-access-button">Web access</label>
+                                        <label class="form-check-label" >GPT 4</label>
+										<img src="<?php echo e(URL::asset("/img/svgs/chatgpt-icon.svg")); ?>" alt="ChatGPT-4 Icon" width="20px" height="20px">
+				
+									</div>
+
+									<div class="form-check form-switch d-flex">
+										<div class="audio_search">
+										<audio id="audioPlayer" controls style="visibility:hidden"></audio>
+										<input type="hidden" id="isAudioSearch" value="0">
+										<a id="pauseAudio" style="display:none"><i class="fa-regular fa-pause"></i></a>
+										<a id="playAudio" style="display:none"><i class="fa-solid fa-play"></i></a>
+										<a id="replayAudio" style="display:none"><i class="fa-solid fa-arrows-rotate"></i></a>
+										<p id="status"></p>
+										</div>
+										
+									</div>
                                 </div>
-								<div class="form-check form-switch d-flex">
-									
-                                    <div class="audio_search">
-									<input type="hidden" id="isAudioSearch" value="0">
-									<audio id="audioPlayer" style="visibility:hidden;" controls></audio>
-									<p id="status"></p>
-                                    </div>
-                                    
-                                </div>
-                                </div>
-                               <div class="input-box chats-input-b mb-0">								
+                                <?php if(isset($template)): ?>
+								<div class="dropdown-selected">
+										<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+											Select Template
+										</button>
+										<ul class="dropdown-menu s-dropdown-menu">
+                                            <?php $__currentLoopData = $template; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+											<li> <?php echo e($t->template); ?></li>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </ul>
+									</div>
+								<?php endif; ?>	
+								<div class="input-box chats-input-b mb-0">								
 									<div class="form-group file-browser">							    
 										<input type="message" class="form-control <?php $__errorArgs = ['message'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -208,7 +276,8 @@ unset($__errorArgs, $__bag); ?>
 	$(document).ready(function() {
 		$('#audio-player').hide();
 		$(".chat-sidebar-message").first().focus().trigger('click');
-        let check_messages = document.querySelectorAll('.chat-sidebar-message').length;
+
+		let check_messages = document.querySelectorAll('.chat-sidebar-message').length;
 		if (check_messages == 0) {
 			let id = makeid(10);
 			$('#chat-container').html('');
@@ -293,6 +362,138 @@ unset($__errorArgs, $__bag); ?>
 				}
 			});
 	});
+
+	// Create new chat message box
+	$("#new-chat-button").on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+		let id = makeid(10);
+		var element = document.getElementById(active_id);
+		if (element) {
+			element.classList.remove("selected-message");
+		}
+  		
+		$('#chat-container').html('');
+
+        $('.chat-sidebar-messages').prepend(`<div class="chat-sidebar-message selected-message" id=${id}>
+				<div class="chat-title" id="title-${id}">
+					<?php echo e(__('New Chat')); ?>
+
+				</div>
+				<div class="chat-info">
+					<div class="chat-count"><span>0</span> <?php echo e(__('messages')); ?></div>
+					<div class="chat-date"><?php echo e(__('Now')); ?></div>
+				</div>
+				<div class="chat-actions d-flex">
+					<a href="#" class="chat-edit id=${id} fs-12"><i class="fa-sharp fa-solid fa-pen-to-square" data-tippy-content="<?php echo e(__('Edit Name')); ?>"></i></a>
+					<a href="#" class="chat-delete id=${id} fs-12 ml-2"><i class="fa-sharp fa-solid fa-trash" data-tippy-content="<?php echo e(__('Delete Chat')); ?>"></i></a>
+				</div>
+			</div>`);
+		active_id = id;
+    });
+
+	$(function () {
+		
+		main_form.addEventListener("submit", event => {
+			event.preventDefault();
+			var webAccessBtn = $("#web_access_button").prop('checked') ? 1 : 0;
+			$('#audioPlayer').css('visibility','hidden');
+			
+			const message = input_text.value;
+			if (!message) return;
+
+			appendMessage(user_avatar, "right", message);
+			input_text.value = "";
+			process(message , webAccessBtn)
+		});
+
+	});
+
+
+	// Send chat message
+	function process(message , webAccessBtn){
+		msgerSendBtn.disabled = true
+		let formData = new FormData();
+		formData.append('message', message);
+		formData.append('chat_code', chat_code);
+		formData.append('message_code', active_id);
+		formData.append('webAccessBtn', webAccessBtn);
+		
+		let code = makeid(10);
+		appendMessage(bot_avatar, "left", "", code);
+		fetch('/user/chat/process', {
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				method: 'POST', 
+				body: formData
+			})		
+			.then(response => response.json())
+			.then(function(result){
+				
+				if (result['old'] && result['current']) {
+					animateValue("balance-number", result['old'], result['current'], 300);
+				}
+		
+				if (result['status'] == 'error') {
+					Swal.fire('<?php echo e(__('Chat Notification')); ?>', result['message'], 'warning');
+					clearConversationInvalid();
+				}
+			})	
+			.then(data => {
+				
+				const eventSource = new EventSource("/user/chat/generate?message_code=" + active_id);				
+				const response = document.getElementById(code);
+				const chatbubble = document.getElementById('chat-bubble-' + code);
+				
+				eventSource.onopen = function(e) {
+					response.innerHTML = '';
+				};
+
+				eventSource.onmessage = function (e) {
+
+					if (e.data == "[DONE]") {
+                        loadChat(active_id);
+						msgerSendBtn.disabled = false
+						eventSource.close();
+                        console.log( $('#isAudioSearch').val());
+						if( $('#isAudioSearch').val() == '1'){
+							fetch("/user/chat/audio-convert", { 
+								headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+								method: 'post',
+								 body: formData
+							 })
+                            .then(function(response){
+								return response.text();
+							})
+							.then(function(result){
+								const parsedResult = JSON.parse(result);
+								convertTextToSpeech(parsedResult.data, parsedResult.voice_code);
+							})
+                        }
+
+					} else {
+						let txt = JSON.parse(e.data).choices[0].delta.content
+						if (txt !== undefined) {
+							response.innerHTML += txt.replace(/(?:\r\n|\r|\n)/g, '<br>');
+						}
+						msgerChat.scrollTop += 100;
+					}
+				};
+				eventSource.onerror = function (e) {
+					msgerSendBtn.disabled = false
+					console.log(e);
+					eventSource.close();
+				};
+				
+			})
+			.catch(function (error) {
+				console.log(error);
+				msgerSendBtn.disabled = false
+			});
+
+	}
+
     function loadChat(active_id)
     {
         $.ajax({
@@ -347,134 +548,6 @@ unset($__errorArgs, $__bag); ?>
 				}
 			});
     }
-	// Create new chat message box
-	$("#new-chat-button").on('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-		let id = makeid(10);
-		var element = document.getElementById(active_id);
-		if (element) {
-			element.classList.remove("selected-message");
-		}
-  		
-		$('#chat-container').html('');
-
-        $('.chat-sidebar-messages').prepend(`<div class="chat-sidebar-message selected-message" id=${id}>
-				<div class="chat-title" id="title-${id}">
-					<?php echo e(__('New Chat')); ?>
-
-				</div>
-				<div class="chat-info">
-					<div class="chat-count"><span>0</span> <?php echo e(__('messages')); ?></div>
-					<div class="chat-date"><?php echo e(__('Now')); ?></div>
-				</div>
-				<div class="chat-actions d-flex">
-					<a href="#" class="chat-edit id=${id} fs-12"><i class="fa-sharp fa-solid fa-pen-to-square" data-tippy-content="<?php echo e(__('Edit Name')); ?>"></i></a>
-					<a href="#" class="chat-delete id=${id} fs-12 ml-2"><i class="fa-sharp fa-solid fa-trash" data-tippy-content="<?php echo e(__('Delete Chat')); ?>"></i></a>
-				</div>
-			</div>`);
-		active_id = id;
-    });
-
-	$(function () {
-		
-		main_form.addEventListener("submit", event => {
-			var webAccessBtn = $("#web_access_button").prop('checked') ? 1 : 0;
-			var audioSearchBtn = $("#isAudioSearch").val();
-            event.preventDefault();
-			const message = input_text.value;
-			if (!message) return;
-
-			appendMessage(user_avatar, "right", message);
-			input_text.value = "";
-			$('#audioPlayer').css('visibility','hidden');
-			process(message , webAccessBtn, audioSearchBtn)
-		});
-
-	});
-
-
-	// Send chat message
-	function process(message,webAccessBtn, audioSearchBtn) {
-		msgerSendBtn.disabled = true
-		let formData = new FormData();
-		formData.append('message', message);
-		formData.append('webAccessBtn', webAccessBtn);
-		formData.append('chat_code', chat_code);
-		formData.append('message_code', active_id);
-		formData.append('audioSearchBtn', audioSearchBtn);
-		
-		let code = makeid(10);
-		
-		appendMessage(bot_avatar, "left", "", code);
-		
-		fetch('/user/chat/process', {
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-				},
-				method: 'POST', 
-				body: formData
-			})		
-			.then(response => response.json())
-			.then(function(result){
-				
-				if (result['old'] && result['current']) {
-					animateValue("balance-number", result['old'], result['current'], 300);
-				}
-		
-				if (result['status'] == 'error') {
-					Swal.fire('<?php echo e(__('Chat Notification')); ?>', result['message'], 'warning');
-				}
-
-					 
-			})	
-			.then(data => {
-				const eventSource = new EventSource("/user/chat/generate?message="+message, {withCredentials: true});				
-				const response = document.getElementById(code);
-				const chatbubble = document.getElementById('chat-bubble-' + code);
-			 
- 				eventSource.onopen = function(e) {			 
-					response.innerHTML = '';
-				};
-				eventSource.onmessage = function (e) {
-					if (e.data == "[DONE]") {
-                        msgerSendBtn.disabled = false
-						eventSource.close();
-				        loadChat(active_id);
-						if( $('#isAudioSearch').val() == '1'){
-							$('#preloader').show();
-                            fetch("/user/chat/audio-convert", { 
-								headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-								method: 'post',
-								 body: formData
-							 })
-                            .then(function(response){
-								return response.text();
-							})
-							.then(function(result){
-								const parsedResult = JSON.parse(result);
-								ConvertaudioPlayer(parsedResult.data, parsedResult.voice_code);
-							})
-                        }
-					} else {
-						let txt = JSON.parse(e.data).choices[0].delta.content
-						if (txt !== undefined) {
-							response.innerHTML += txt.replace(/(?:\r\n|\r|\n)/g, '<br>');
-						}
-						msgerChat.scrollTop += 100;
-					}
-				};
-				eventSource.onerror = function (e) {
-					msgerSendBtn.disabled = false
-					eventSource.close();
-				};
-				
-			})
-			.catch(function (error) {
-				msgerSendBtn.disabled = false
-			});
-
-	}
 
 	function clearConversation() {
 		document.getElementById("chat-container").innerHTML = "";
@@ -494,6 +567,24 @@ unset($__errorArgs, $__bag); ?>
 
 			})	
 			.catch(function (error) {
+				console.log(error);
+				msgerSendBtn.disabled = false
+			});
+	}
+
+	function clearConversationInvalid() {
+		document.getElementById("chat-container").innerHTML = "";
+
+		fetch('/user/chat/clear', {
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				method: 'POST', 
+			})		
+			.then(response => response.json())
+			.then(function(result){})	
+			.catch(function (error) {
+				console.log(error);
 				msgerSendBtn.disabled = false
 			});
 	}
@@ -563,6 +654,7 @@ unset($__errorArgs, $__bag); ?>
 					processData: false,
 					contentType: false,
 					success: function (data) {
+						console.log(data)
 						if (data['status'] == 'success') {
 							Swal.fire('<?php echo e(__('Chat Deleted')); ?>', '<?php echo e(__('Chat history has been successfully deleted')); ?>', 'success');	
 							$("#" + active_id).remove();	
@@ -659,6 +751,7 @@ unset($__errorArgs, $__bag); ?>
 		return root.querySelector(selector);
 	}
 
+	// Generate a random value
 	function makeid(length) {
 		let result = '';
 		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -680,6 +773,7 @@ unset($__errorArgs, $__bag); ?>
         $('.chat-sidebar-container').toggleClass('extend');
     });
 
+	// Check if it is a json
 	function isJson(str) {
 		try {
 			JSON.parse(str);
@@ -689,107 +783,88 @@ unset($__errorArgs, $__bag); ?>
 		return true;
 	}
 
-const recordButton = document.getElementById('record-button');
-const statusElement = document.getElementById('status');
-
-let mediaRecorder;
-let audioChunks = [];
-
-recordButton.addEventListener('click', toggleRecording);
-
-function toggleRecording() {
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-	stopRecording();
-  } else {
-    $('#isAudioSearch').val(1);
-    startRecording();
-  }
-}
-
-function startRecording() {
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(function (stream) {
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.addEventListener('dataavailable', function (event) {
-        audioChunks.push(event.data);
-      });
-
-      mediaRecorder.addEventListener('stop', function () {
-        const audioBlob = new Blob(audioChunks);
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recorded_audio.wav');
-        fetch('/user/chat/save-audio', {
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.response) {
-              $('#message').val(data.response.text);
-              $('#chat-button').click();
-            } else {
-              console.log('Error saving audio');
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-
-        audioChunks = [];
-      });
-
-      mediaRecorder.start();
-      recordButton.innerHTML = '<i class="fa-solid fa-stop active"></i>';
-    })
-    .catch(function (error) {
-      console.error('Error:', error);
-    });
-}
-
-function stopRecording() {
-  if (mediaRecorder) {
-    mediaRecorder.stop();
-    recordButton.innerHTML = '<i class="fa-regular fa-microphone"></i>';
-  }
-}
-
-function ConvertaudioPlayer(text,code){
-	const url = (code === 0) ? "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream" : "https://api.elevenlabs.io/v1/text-to-speech/TxGEqnHWrfWFTfGW9XjX/stream";
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'Accept': '*/*',
-			'Xi-Api-Key': 'd2babf9c40d755b3190831cb00b3950c',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			text: text,
-			model_id: 'eleven_monolingual_v1',
-			voice_settings: {
-			stability: 0,
-			similarity_boost: 0,
-			style: 1,
-			use_speaker_boost: true
-			}
+	const recordButton = document.getElementById('record-button');
+	const statusElement = document.getElementById('status');
+	let mediaRecorder;
+	let audioChunks = [];
+	recordButton.addEventListener('click', toggleRecording);
+	function toggleRecording() {
+	if (mediaRecorder && mediaRecorder.state === 'recording') {
+		stopRecording();
+	} else {
+		$('#isAudioSearch').val(1);
+		startRecording();
+	}
+	}
+	function startRecording() {
+	navigator.mediaDevices.getUserMedia({ audio: true })
+		.then(function (stream) {
+		mediaRecorder = new MediaRecorder(stream);
+		mediaRecorder.addEventListener('dataavailable', function (event) {
+			audioChunks.push(event.data);
+		});
+		mediaRecorder.addEventListener('stop', function () {
+			const audioBlob = new Blob(audioChunks);
+			const formData = new FormData();
+			formData.append('audio', audioBlob, 'recorded_audio.wav');
+			fetch('/user/chat/save-audio', {
+				headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				method: 'POST',
+				body: formData
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.response) {
+				$('#message').val(data.response.text);
+				$('#chat-button').click();
+				} else {
+				console.log('Error saving audio');
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			});
+			audioChunks = [];
+		});
+		mediaRecorder.start();
+		recordButton.innerHTML = '<i class="fa-solid fa-stop active"></i>';
 		})
-	})
-  	.then(response => response.blob())
-  	.then(blob => {
-		$('#preloader').hide(); 
-		$('#audioPlayer').css('visibility','inherit');  
-		const audioUrl = URL.createObjectURL(blob);
-		const audioPlayer = document.getElementById('audioPlayer');
-		audioPlayer.src = audioUrl;
-		audioPlayer.play();
-  	})
-  	.catch(error => {
-    	console.error('Error:', error);
-  	});
-}
-    
+		.catch(function (error) {
+		console.error('Error:', error);
+		});
+	}
+	function stopRecording() {
+		if (mediaRecorder) {
+			mediaRecorder.stop();
+			recordButton.innerHTML = '<i class="fa-regular fa-microphone"></i>';
+		}
+	}
+		
+	function convertTextToSpeech(text, code){
+		$.get('<?php echo e(route("convert-text-to-audio")); ?>', { text: text, voiceCode: code })
+		.done(function (voices) {
+			console.log(voices);
+			$('#audioPlayer').css('visibility','inherit');  
+			const audioUrl = "https://staging.paraclete.ai/public/" + voices.result_url;
+			const audioPlayer = document.getElementById('audioPlayer');
+			audioPlayer.src = audioUrl;
+			audioPlayer.play();
+            $('#isAudioSearch').val(0);
+		})
+		.fail(function (error) {
+			console.error('Error fetching voices:', error);
+		});
+	}
+
+    $('.s-dropdown-menu li').on('click', function () {
+           var selectedTemplateText = $(this).text();
+           $('#message').val(selectedTemplateText);
+           $('#message').text(selectedTemplateText);
+
+     });       
+
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/customer/www/paraclete.ai/public_html/resources/views/user/chat/view.blade.php ENDPATH**/ ?>

@@ -48,24 +48,30 @@
 							<div class="tab-pane @if ((!$monthly && $prepaid) && (!$yearly && $prepaid)) active @else '' @endif" id="prepaid">
 
 								@if ($prepaids->count())
-
-									<h6 class="font-weight-normal fs-12 text-center mb-6">{{ __('Top up your subscription with more credits or start with Prepaid Plans credits only') }}</h6>
-									
+													
 									<div class="row justify-content-md-center">
 									
 										@foreach ( $prepaids as $prepaid )																			
-											<div class="col-lg-3 col-md-6 col-sm-12">
-												<div class="price-card pl-3 pr-3 pt-2 mb-7">
-													<div class="card border-0 p-4 pl-5">
+											<div class="col-lg-4 col-md-6 col-sm-12" data-aos="fade-up" data-aos-delay="200" data-aos-once="true" data-aos-duration="400">
+												<div class="price-card pl-3 pr-3 pt-2 mb-6">
+													<div class="card p-4 pl-5 prepaid-cards @if ($prepaid->featured) price-card-border @endif">
+														@if ($prepaid->featured)
+															<span class="plan-featured-prepaid">{{ __('Most Popular') }}</span>
+														@endif
 														<div class="plan prepaid-plan">
-															<div class="plan-title">{{ __($prepaid->plan_name) }} <span class="prepaid-currency-sign">{{ $prepaid->currency }}</span><span class="plan-cost">@if (config('payment.decimal_points') == 'allow') {{ number_format((float)$prepaid->price, 2) }} @else {{ number_format($prepaid->price) }} @endif</span><span class="prepaid-currency-sign">{!! config('payment.default_system_currency_symbol') !!}</span></div>
-																<p class="fs-12 mt-2 mb-0">{{ __('Words Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->words) }}</span></p>
-																<p class="fs-12 mt-2 mb-0">{{ __('Images Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->images) }}</span></p>																								
-																<p class="fs-12 mt-2 mb-0">{{ __('Characters Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->characters) }}</span></p>																								
-																<p class="fs-12 mt-2 mb-4">{{ __('Minutes Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->minutes) }}</span></p>																								
-															<div class="text-center action-button mt-2 mb-2">
-																<a href="{{ route('user.prepaid.checkout', ['type' => 'prepaid', 'id' => $prepaid->id]) }}" class="btn btn-cancel">{{ __('Purchase') }}</a> 
+															<div class="plan-title">{{ $prepaid->plan_name }} </div>
+															<div class="plan-cost-wrapper mt-2 text-center mb-3 p-1"><span class="plan-cost">@if (config('payment.decimal_points') == 'allow') {{ number_format((float)$prepaid->price, 2) }} @else {{ number_format($prepaid->price) }} @endif</span><span class="prepaid-currency-sign text-muted">{{ $prepaid->currency }}</span></div>
+															
+															<p class="fs-12 mb-3 text-muted">{{ __('Included Credits') }}</p>	
+															<div class="credits-box">
+																@if ($prepaid->words != 0) <p class="fs-12 mt-2 mb-0"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ __('Words Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->words) }}</span></p>@endif
+																 @if ($prepaid->images != 0) <p class="fs-12 mt-2 mb-0"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ __('Images Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->images) }}</span></p>@endif
+																 @if ($prepaid->characters != 0) <p class="fs-12 mt-2 mb-0"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ __('Characters Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->characters) }}</span></p>@endif																							
+																 @if ($prepaid->minutes != 0) <p class="fs-12 mt-2 mb-0"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ __('Minutes Included') }}: <span class="ml-2 font-weight-bold text-primary">{{ number_format($prepaid->minutes) }}</span></p>@endif	
 															</div>
+															<div class="text-center action-button mt-2 mb-2">
+																<a href="{{ route('user.prepaid.checkout', ['type' => 'prepaid', 'id' => $prepaid->id]) }}" class="btn btn-primary-pricing">{{ __('Select Package') }}</a> 
+															</div>																								                                                                          
 														</div>							
 													</div>	
 												</div>							
@@ -89,35 +95,81 @@
 							<div class="tab-pane @if (($monthly && $prepaid) || ($monthly && !$prepaid) || ($monthly && !$yearly)) active @else '' @endif" id="monthly_plans">
 
 								@if ($monthly_subscriptions->count())		
-									
-									<h6 class="font-weight-normal fs-12 text-center mb-6">{{ __('Subscribe to our Monthly Subscription Plans and enjoy ton of benefits') }}</h6>
 
 									<div class="row justify-content-md-center">
 
 										@foreach ( $monthly_subscriptions as $subscription )																			
-											<div class="col-lg-3 col-md-6 col-sm-12">
-												<div class="pl-6 pr-6 pt-2 mb-7 prices-responsive">
-													<div class="card border-0 p-4 pl-5 pr-5 pt-7 price-card @if ($subscription->featured) price-card-border @endif">
+											<div class="col-lg-4 col-md-6 col-sm-12" data-aos="fade-up" data-aos-delay="200" data-aos-once="true" data-aos-duration="400">
+												<div class="pt-2 ml-2 mr-2 h-100 prices-responsive pb-6">
+													<div class="card p-5 mb-4 pl-7 pr-7 h-100 price-card @if ($subscription->featured) price-card-border @endif">
 														@if ($subscription->featured)
 															<span class="plan-featured">{{ __('Most Popular') }}</span>
 														@endif
 														<div class="plan">			
-															<div class="plan-title text-center">{{ __($subscription->plan_name) }}</div>		
-															<p class="fs-12 text-center mb-3">{{ __($subscription->primary_heading) }}</p>																					
-															<p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!} @if (config('payment.decimal_points') == 'allow') {{ number_format((float)$subscription->price, 2) }} @else {{ number_format($subscription->price) }} @endif</p>
-															<p class="fs-12 text-center mb-3">{{ $subscription->currency }} / {{ __('Month') }}</p>
+															<div class="plan-title">{{ $subscription->plan_name }}</div>	
+															<p class="plan-cost mb-5">																					
+																@if ($subscription->free)
+																	{{ __('Free') }}
+																@else
+																	{!! config('payment.default_system_currency_symbol') !!}@if(config('payment.decimal_points') == 'allow'){{ number_format((float)$subscription->price, 2) }} @else{{ number_format($subscription->price) }} @endif<span class="fs-12 text-muted"><span class="mr-1">/</span> {{ __('per month') }}</span>
+																@endif   
+															</p>  																				
 															<div class="text-center action-button mt-2 mb-5">
 																@if (auth()->user()->plan_id == $subscription->id)
-																	<button type="button" class="btn btn-cancel">{{ __('Subscribed') }}</button> 
+																	<a href="#" class="btn btn-primary-pricing">{{ __('Subscribed') }}</a> 
 																@else
-																	<a href="{{ route('user.plan.subscribe', $subscription->id) }}" class="btn btn-primary">{{ __('Subscribe Now') }}</a>
-																@endif															
+																	<a href="{{ route('user.plan.subscribe', $subscription->id) }}" class="btn btn-primary-pricing">{{ __('Subscribe Now') }}</a>
+																@endif                                               														
 															</div>
-															<p class="fs-12 text-center mb-3">{{ __($subscription->secondary_heading )}}</p>																	
-															<ul class="fs-12 pl-3">														
+															<p class="fs-12 mb-3 text-muted">{{ __('Included Features') }}</p>																		
+															<ul class="fs-12 pl-3">	
+																@if ($subscription->words == -1)
+																	<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('words / month') }}</span></li>
+																@else	
+																	@if($subscription->words != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->words }}</span> <span class="plan-feature-text">{{ __('words / month') }}</span></li> @endif
+																@endif
+																@if (config('settings.image_feature_user') == 'allow')
+																	@if ($subscription->images == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('images / month') }}</span></li>
+																	@else
+																		@if($subscription->images != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->images }}</span> <span class="plan-feature-text">{{ __('images / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																@if (config('settings.whisper_feature_user') == 'allow')
+																	@if ($subscription->minutes == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('minutes / month') }}</span></li>
+																	@else
+																		@if($subscription->minutes != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->minutes }}</span> <span class="plan-feature-text">{{ __('minutes / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																@if (config('settings.voiceover_feature_user') == 'allow')
+																	@if ($subscription->characters == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('characters / month') }}</span></li>
+																	@else
+																		@if($subscription->characters != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->characters }}</span> <span class="plan-feature-text">{{ __('characters / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																	@if($subscription->team_members != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->team_members }}</span> <span class="plan-feature-text">{{ __('team members') }}</span></li> @endif
+																
+																@if (config('settings.chat_feature_user') == 'allow')
+																	@if($subscription->chat_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Chats Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.image_feature_user') == 'allow')
+																	@if($subscription->image_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Images Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.voiceover_feature_user') == 'allow')
+																	@if($subscription->voiceover_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Voiceover Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.whisper_feature_user') == 'allow')
+																	@if($subscription->transcribe_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Speech to Text Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.code_feature_user') == 'allow')
+																	@if($subscription->code_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Code Feature') }}</span></li> @endif
+																@endif
+																@if($subscription->team_members) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('Team Members Option') }}</span></li> @endif
 																@foreach ( (explode(',', $subscription->plan_features)) as $feature )
 																	@if ($feature)
-																		<li><i class="fa-solid fa-circle-small fs-10 text-muted"></i> {{ __($feature) }}</li>
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ $feature }}</li>
 																	@endif																
 																@endforeach															
 															</ul>																
@@ -143,42 +195,88 @@
 							<div class="tab-pane @if (($yearly && $prepaid) && ($yearly && !$prepaid) && ($yearly && !$monthly)) active @else '' @endif" id="yearly_plans">
 
 								@if ($yearly_subscriptions->count())		
-									
-									<h6 class="font-weight-normal fs-12 text-center mb-6">{{ __('Subscribe to our Yearly Subscription Plans and enjoy ton of benefits') }}</h6>
 
 									<div class="row justify-content-md-center">
 
 										@foreach ( $yearly_subscriptions as $subscription )																			
-											<div class="col-lg-3 col-md-6 col-sm-12">
-												<div class="pl-6 pr-6 pt-2 mb-7 prices-responsive">
-													<div class="card border-0 p-4 pl-5 pr-5 pt-7 price-card @if ($subscription->featured) price-card-border @endif">
+											<div class="col-lg-4 col-md-6 col-sm-12" data-aos="fade-up" data-aos-delay="200" data-aos-once="true" data-aos-duration="400">
+												<div class="pt-2 ml-2 mr-2 h-100 prices-responsive pb-6">
+													<div class="card p-5 mb-4 pl-7 pr-7 h-100 price-card @if ($subscription->featured) price-card-border @endif">
 														@if ($subscription->featured)
 															<span class="plan-featured">{{ __('Most Popular') }}</span>
 														@endif
 														<div class="plan">			
-															<div class="plan-title text-center">{{ __($subscription->plan_name) }}</div>		
-															<p class="fs-12 text-center mb-3">{{ __($subscription->primary_heading) }}</p>																					
-															<p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!} @if (config('payment.decimal_points') == 'allow') {{ number_format((float)$subscription->price, 2) }} @else {{ number_format($subscription->price) }} @endif</p>
-															<p class="fs-12 text-center mb-3">{{ $subscription->currency }} / {{ __('Year') }}</p>
-															<div class="text-center action-button mt-2 mb-4">
-																@if (auth()->user()->plan_id == $subscription->id)
-																	<button type="button" class="btn btn-cancel">{{ __('Subscribed') }}</button> 
+															<div class="plan-title">{{ $subscription->plan_name }}</div>	
+															<p class="plan-cost mb-5">
+																@if ($subscription->free)
+																	{{ __('Free') }}
 																@else
-																	<a href="{{ route('user.plan.subscribe', $subscription->id) }}" class="btn btn-primary">{{ __('Subscribe Now') }}</a>
-																@endif															
+																	{!! config('payment.default_system_currency_symbol') !!}@if(config('payment.decimal_points') == 'allow'){{ number_format((float)$subscription->price, 2) }} @else{{ number_format($subscription->price) }} @endif<span class="fs-12 text-muted"><span class="mr-1">/</span> {{ __('per year') }}</span>
+																@endif    
+															</p> 																				
+															<div class="text-center action-button mt-2 mb-5">
+																@if (auth()->user()->plan_id == $subscription->id)
+																	<a href="#" class="btn btn-primary-pricing">{{ __('Subscribed') }}</a> 
+																@else
+																	<a href="{{ route('user.plan.subscribe', $subscription->id) }}" class="btn btn-primary-pricing">{{ __('Subscribe Now') }}</a>
+																@endif                                                														
 															</div>
-															<p class="fs-12 text-center mb-3">{{ __($subscription->secondary_heading) }}</p>																	
-															<ul class="fs-12 pl-3">														
+															<p class="fs-12 mb-3 text-muted">{{ __('Included Features') }}</p>																	
+															<ul class="fs-12 pl-3">		
+																@if ($subscription->words == -1)
+																	<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('words / month') }}</span></li>
+																@else	
+																	@if($subscription->words != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->words }}</span> <span class="plan-feature-text">{{ __('words / month') }}</span></li> @endif
+																@endif
+																@if (config('settings.image_feature_user') == 'allow')
+																	@if ($subscription->images == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('images / month') }}</span></li>
+																	@else
+																		@if($subscription->images != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->images }}</span> <span class="plan-feature-text">{{ __('images / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																@if (config('settings.whisper_feature_user') == 'allow')
+																	@if ($subscription->minutes == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('minutes / month') }}</span></li>
+																	@else
+																		@if($subscription->minutes != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->minutes }}</span> <span class="plan-feature-text">{{ __('minutes / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																@if (config('settings.voiceover_feature_user') == 'allow')
+																	@if ($subscription->characters == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('characters / month') }}</span></li>
+																	@else
+																		@if($subscription->characters != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->characters }}</span> <span class="plan-feature-text">{{ __('characters / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																	@if($subscription->team_members != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->team_members }}</span> <span class="plan-feature-text">{{ __('team members') }}</span></li> @endif
+																
+																@if (config('settings.chat_feature_user') == 'allow')
+																	@if($subscription->chat_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Chats Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.image_feature_user') == 'allow')
+																	@if($subscription->image_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Images Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.voiceover_feature_user') == 'allow')
+																	@if($subscription->voiceover_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Voiceover Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.whisper_feature_user') == 'allow')
+																	@if($subscription->transcribe_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Speech to Text Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.code_feature_user') == 'allow')
+																	@if($subscription->code_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Code Feature') }}</span></li> @endif
+																@endif
+																@if($subscription->team_members) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('Team Members Option') }}</span></li> @endif
 																@foreach ( (explode(',', $subscription->plan_features)) as $feature )
 																	@if ($feature)
-																		<li><i class="fa-solid fa-circle-small fs-10 text-muted"></i> {{ __($feature) }}</li>
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ $feature }}</li>
 																	@endif																
 																@endforeach															
 															</ul>																
 														</div>					
 													</div>	
 												</div>							
-											</div>										
+											</div>											
 										@endforeach
 
 									</div>	
@@ -196,44 +294,90 @@
 						@if ($lifetime)
 							<div class="tab-pane @if ((!$monthly && $lifetime) && (!$yearly && $lifetime)) active @else '' @endif" id="lifetime">
 
-								@if ($lifetime_subscriptions->count())
-
-									<h6 class="font-weight-normal fs-12 text-center mb-6">{{ __('Sign up and enjoy Lifetime Plans') }}</h6>
+								@if ($lifetime_subscriptions->count())                                                    
 									
 									<div class="row justify-content-md-center">
 									
 										@foreach ( $lifetime_subscriptions as $subscription )																			
-												<div class="col-lg-3 col-md-6 col-sm-12">
-													<div class="pl-6 pr-6 pt-2 mb-7 prices-responsive">
-														<div class="card border-0 p-4 pl-5 pr-5 pt-7 price-card @if ($subscription->featured) price-card-border @endif">
-															@if ($subscription->featured)
-																<span class="plan-featured">{{ __('Most Popular') }}</span>
-															@endif
-															<div class="plan">			
-																<div class="plan-title text-center">{{ __($subscription->plan_name) }}</div>		
-																<p class="fs-12 text-center mb-3">{{ __($subscription->primary_heading) }}</p>																					
-																<p class="plan-cost text-center mb-0"><span class="plan-currency-sign"></span>{!! config('payment.default_system_currency_symbol') !!}{{ number_format((float)$subscription->price, 2) }}</p>
-																<p class="fs-12 text-center mb-3">{{ $subscription->currency }} / {{ __('Lifetime') }}</p>
-																<div class="text-center action-button mt-2 mb-4">
-																	@if (auth()->user()->plan_id == $subscription->id)
-																		<button type="button" class="btn btn-cancel">{{ __('Subscribed') }}</button> 
+											<div class="col-lg-4 col-md-6 col-sm-12" data-aos="fade-up" data-aos-delay="200" data-aos-once="true" data-aos-duration="400">
+												<div class="pt-2 ml-2 mr-2 h-100 prices-responsive pb-6">
+													<div class="card p-5 mb-4 pl-7 pr-7 h-100 price-card @if ($subscription->featured) price-card-border @endif">
+														@if ($subscription->featured)
+															<span class="plan-featured">{{ __('Most Popular') }}</span>
+														@endif
+														<div class="plan">			
+															<div class="plan-title">{{ $subscription->plan_name }}</div>	
+															<p class="plan-cost mb-5">
+																@if ($subscription->free)
+																	{{ __('Free') }}
+																@else
+																	{!! config('payment.default_system_currency_symbol') !!}@if(config('payment.decimal_points') == 'allow'){{ number_format((float)$subscription->price, 2) }} @else{{ number_format($subscription->price) }} @endif<span class="fs-12 text-muted"><span class="mr-1">/</span> {{ __('for lifetime') }}</span>
+																@endif
+															</p>																					
+															<div class="text-center action-button mt-2 mb-5">
+																@if (auth()->user()->plan_id == $subscription->id)
+																	<a href="#" class="btn btn-primary-pricing">{{ __('Subscribed') }}</a> 
+																@else
+																	<a href="{{ route('user.prepaid.checkout', ['type' => 'lifetime', 'id' => $subscription->id]) }}" class="btn btn-primary-pricing">{{ __('Subscribe Now') }}</a>
+																@endif                                                 														
+															</div>
+															<p class="fs-12 mb-3 text-muted">{{ __('Included Features') }}</p>																	
+															<ul class="fs-12 pl-3">		
+																@if ($subscription->words == -1)
+																	<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('words / month') }}</span></li>
+																@else	
+																	@if($subscription->words != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->words }}</span> <span class="plan-feature-text">{{ __('words / month') }}</span></li> @endif
+																@endif
+																@if (config('settings.image_feature_user') == 'allow')
+																	@if ($subscription->images == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('images / month') }}</span></li>
 																	@else
-																		<a href="{{ route('user.prepaid.checkout', ['type' => 'lifetime', 'id' => $subscription->id]) }}" class="btn btn-primary">{{ __('Subscribe Now') }}</a>
-																	@endif															
-																</div>
-																<p class="fs-12 text-center mb-3">{{ __($subscription->secondary_heading) }}</p>																	
-																<ul class="fs-12 pl-3">														
-																	@foreach ( (explode(',', $subscription->plan_features)) as $feature )
-																		@if ($feature)
-																			<li><i class="fa-solid fa-circle-small fs-10 text-muted"></i> {{ __($feature) }}</li>
-																		@endif																
-																	@endforeach															
-																</ul>																
-															</div>					
-														</div>	
-													</div>							
-												</div>										
-											@endforeach					
+																		@if($subscription->images != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->images }}</span> <span class="plan-feature-text">{{ __('images / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																@if (config('settings.whisper_feature_user') == 'allow')
+																	@if ($subscription->minutes == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('minutes / month') }}</span></li>
+																	@else
+																		@if($subscription->minutes != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->minutes }}</span> <span class="plan-feature-text">{{ __('minutes / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																@if (config('settings.voiceover_feature_user') == 'allow')
+																	@if ($subscription->characters == -1)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ __('Unlimited') }}</span> <span class="plan-feature-text">{{ __('characters / month') }}</span></li>
+																	@else
+																		@if($subscription->characters != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->characters }}</span> <span class="plan-feature-text">{{ __('characters / month') }}</span></li> @endif
+																	@endif																	
+																@endif
+																	@if($subscription->team_members != 0) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="font-weight-bold">{{ $subscription->team_members }}</span> <span class="plan-feature-text">{{ __('team members') }}</span></li> @endif
+																
+																@if (config('settings.chat_feature_user') == 'allow')
+																	@if($subscription->chat_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Chats Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.image_feature_user') == 'allow')
+																	@if($subscription->image_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Images Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.voiceover_feature_user') == 'allow')
+																	@if($subscription->voiceover_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Voiceover Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.whisper_feature_user') == 'allow')
+																	@if($subscription->transcribe_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Speech to Text Feature') }}</span></li> @endif
+																@endif
+																@if (config('settings.code_feature_user') == 'allow')
+																	@if($subscription->code_feature) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('AI Code Feature') }}</span></li> @endif
+																@endif
+																@if($subscription->team_members) <li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> <span class="plan-feature-text">{{ __('Team Members Option') }}</span></li> @endif
+																@foreach ( (explode(',', $subscription->plan_features)) as $feature )
+																	@if ($feature)
+																		<li class="fs-14 mb-3"><i class="fa-solid fa-check fs-14 mr-2 text-success"></i> {{ $feature }}</li>
+																	@endif																
+																@endforeach															
+															</ul>																
+														</div>					
+													</div>	
+												</div>							
+											</div>											
+										@endforeach					
 
 									</div>
 

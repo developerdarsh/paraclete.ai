@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        
     ];
 
     /**
@@ -75,5 +76,6 @@ class Kernel extends HttpKernel
         'installed' => \App\Http\Middleware\Installed::class,
         '2fa' => \PragmaRX\Google2FALaravel\Middleware::class,
         '2fa.verify' => \App\Http\Middleware\TwoFactorAuthentication::class,
+        'cors' => \App\Http\Middleware\Cors::class, 
     ];
 }

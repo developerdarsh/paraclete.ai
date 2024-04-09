@@ -16,6 +16,10 @@
 
 <?php echo $__env->yieldContent('js'); ?>
 
+<!-- Awselect JS -->
+<script src="<?php echo e(URL::asset('plugins/awselect/awselect-custom.js')); ?>"></script>
+<script src="<?php echo e(URL::asset('js/awselect.js')); ?>"></script>
+
 <!-- Simplebar JS -->
 <script src="<?php echo e(URL::asset('plugins/simplebar/js/simplebar.min.js')); ?>"></script>
 
@@ -26,12 +30,13 @@
 <!-- Toastr JS -->
 <script src="<?php echo e(URL::asset('plugins/toastr/toastr.min.js')); ?>"></script>
 
-<!-- Awselect JS -->
-<script src="<?php echo e(URL::asset('plugins/awselect/awselect-custom.js')); ?>"></script>
-<script src="<?php echo e(URL::asset('js/awselect.js')); ?>"></script>
+<!-- multiselect select  -->
+
+ <script src="<?php echo e(URL::asset('plugins/bootstrap-5.0.2/js/bootstrap-multiselect.min.js')); ?>"></script>
 
 <!-- Custom js-->
 <script src="<?php echo e(URL::asset('js/custom.js')); ?>"></script>
+
 
 <!-- Google Analytics -->
 <?php if(config('services.google.analytics.enable') == 'on'): ?>
@@ -54,8 +59,8 @@
             data: {"_token": "<?php echo e(csrf_token()); ?>", id}
         });
     }
-	
-	function changeTemplate(value) {
+
+    function changeTemplate(value) {
 		let url = '<?php echo e(url('user/templates')); ?>/' + value;
 		window.location.href=url;
 	}
@@ -113,4 +118,63 @@
     toastr.options.hideMethod = 'slideUp';
     toastr.options.progressBar = true;
 
-</script><?php /**PATH /home/customer/www/paraclete.ai/public_html/resources/views/layouts/footer-backend.blade.php ENDPATH**/ ?>
+    document.querySelector(".btn-theme-toggle > span").classList.add("fa-moon-stars");
+    var myCookie = (document.cookie.match(/^(?:.*;)?\s*theme\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1];
+    if (myCookie == 'dark') {
+            document.querySelector(".btn-theme-toggle > span").classList.remove("fa-moon-stars");
+            document.querySelector(".btn-theme-toggle > span").classList.add("fa-sun-bright");  
+            //var logo = document.querySelector(".desktop-lgo");
+           // logo.src = '../img/brand/logo-white.png'
+    }
+
+    const btn = document.querySelector(".btn-theme-toggle");
+    btn.addEventListener("click", function() {
+        if (document.body.classList.contains('light-theme')) {
+            document.body.classList.remove('light-mode');
+            document.body.classList.add('dark-mode');
+            document.querySelector(".btn-theme-toggle > span").classList.remove("fa-moon-stars");
+            document.querySelector(".btn-theme-toggle > span").classList.add("fa-sun-bright");
+            //var logo = document.querySelector(".desktop-lgo");
+            //logo.src = '../img/brand/logo.png';
+            var theme = "dark";
+        } else if(document.body.classList.contains('dark-theme')) {
+            document.body.classList.remove('dark-mode');
+            document.body.classList.add('light-mode');
+            document.querySelector(".btn-theme-toggle > span").classList.remove("fa-sun-bright");
+            document.querySelector(".btn-theme-toggle > span").classList.add("fa-moon-stars");
+            //var logo = document.querySelector(".desktop-lgo");
+            //logo.src = '../img/brand/logo-white.png';
+            var theme = "light";
+        } else {
+            document.querySelector(".btn-theme-toggle > span").classList.remove("fa-moon-stars");
+            document.querySelector(".btn-theme-toggle > span").classList.add("fa-sun-bright");
+            document.body.classList.add('dark-mode');
+            //var logo = document.querySelector(".desktop-lgo");
+            //logo.src = '../img/brand/logo-white.png';
+            var theme = "dark";
+        }
+    
+        document.cookie = "theme=" + theme + ";path=/";
+
+        location.reload();
+    });
+   
+</script>
+
+<!-- Live Chat -->
+<?php if(config('settings.live_chat') == 'on'): ?>
+    <script type="text/javascript">
+        let link = "<?php echo e(config('settings.live_chat_link')); ?>";
+        let embed_link = link.replace('https://tawk.to/chat/', 'https://embed.tawk.to/');
+
+        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+        (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src=embed_link;
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+        })();
+    </script>
+<?php endif; ?><?php /**PATH /home/customer/www/paraclete.ai/public_html/resources/views/layouts/footer-backend.blade.php ENDPATH**/ ?>

@@ -60,10 +60,10 @@
 						</div>	
 
 						<div class="row pt-7">
-							<div class="col-lg-6 col-md-6 col-sm-12">
+							<div class="col-sm-12">
 								<h6 class="font-weight-bold mb-3">{{ __('Payout Status') }} <span class="text-muted">({{ __('Required') }})</span></h6>						
 								<div class="input-box">										
-									<select id="notification-action" name="status" data-placeholder="{{ __('Select Payment Request Status') }}:">			
+									<select id="notification-action" name="status" class="form-select" data-placeholder="{{ __('Select Payment Request Status') }}:">			
 										<option value="processing" @if ($id->status == 'processing') selected @endif>{{ __('Processing') }}</option>
 										<option value="completed" @if ($id->status == 'completed') selected @endif>{{ __('Completed') }}</option>
 										<option value="declined" @if ($id->status == 'declined') selected @endif>{{ __('Declined') }}</option>

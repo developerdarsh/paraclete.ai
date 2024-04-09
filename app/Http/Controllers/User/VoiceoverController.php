@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use App\Services\MergeService;
 use App\Services\AzureTTSService;
 use App\Services\GCPTTSService;
+use App\Services\OpenaiTTSService;
+use App\Services\ElevenlabsTTSService;
 use App\Models\VoiceoverResult;
 use App\Models\User;
 use App\Models\VoiceoverLanguage;
@@ -50,23 +52,23 @@ class VoiceoverController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>
-                                        <a href="'. route("user.voiceover.show", $row["id"] ). '"><i class="fa-solid fa-list-music table-action-buttons view-action-button" title="View Result"></i></a>
-                                        <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Result"></i></a>
+                                        <a href="'. route("user.voiceover.show", $row["id"] ). '"><i class="fa-solid fa-list-music table-action-buttons view-action-button" title="'. __('View Result') .'"></i></a>
+                                        <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Result') .'"></i></a>
                                     </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["created_at"], 'd M Y').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span>';
                         return $created_on;
                     })
                     ->addColumn('download', function($row){
                         $url = ($row['storage'] == 'local') ? URL::asset($row['result_url']) : $row['result_url'];
-                        $result = '<a class="" href="' . $url . '" download><i class="fa fa-cloud-download table-action-buttons download-action-button" title="Download Result"></i></a>';
+                        $result = '<a class="" href="' . $url . '" download><i class="fa fa-cloud-download table-action-buttons download-action-button" title="'. __('Download Result') .'"></i></a>';
                         return $result;
                     })
                     ->addColumn('single', function($row){
                         $url = ($row['storage'] == 'local') ? URL::asset($row['result_url']) : $row['result_url'];
-                        $result = '<button type="button" class="result-play p-0" onclick="resultPlay(this)" src="' . $url . '" type="'. $row['audio_type'].'" id="'. $row['id'] .'"><i class="fa fa-play table-action-buttons view-action-button" title="Play Result"></i></button>';
+                        $result = '<button type="button" class="result-play p-0" onclick="resultPlay(this)" src="' . $url . '" type="'. $row['audio_type'].'" id="'. $row['id'] .'"><i class="fa fa-play table-action-buttons view-action-button" title="'. __('Play Result') .'"></i></button>';
                         return $result;
                     })
                     ->addColumn('result', function($row){ 
@@ -100,7 +102,6 @@ class VoiceoverController extends Controller
             ->orderBy('voices.voice_type', 'desc')
             ->orderBy('voices.voice', 'asc')
             ->get();
-
         
 
         $projects = Workbook::where('user_id', auth()->user()->id)->get();
@@ -149,13 +150,15 @@ class VoiceoverController extends Controller
 
             # Protection from overusage of credits
             if ($total_characters > config('settings.voiceover_max_chars_limit')) {
-                return response()->json(["error" => __("Total characters of your text is more than allowed. Please decrese the length of your text.")], 422);
+                return response()->json(["error" => __("Total characters of your text is more than allowed. Please decrease the length of your text.")], 422);
             }
             
             
             # Check if user has enough characters to proceed
-            if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
-                return response()->json(["error" => __("Not enough available characters to process")], 422);
+            if (auth()->user()->available_chars != -1) {
+                if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
+                    return response()->json(["error" => __("Not enough available characters to process")], 422);
+                }
             }
 
 
@@ -165,9 +168,8 @@ class VoiceoverController extends Controller
             $total_text_characters = 0;
             $inputAudioFiles = [];
             $plan_type = (Auth::user()->group == 'subscriber') ? 'paid' : 'free'; 
-            $user = new Service();
-            $upload = $user->upload();
-            if (!$upload['status']) return;  
+            $prompt = $this->api->prompt();
+            if($prompt['dota']!=622220){return;}
 
             # Audio Format
             if (request('format') == 'mp3') {
@@ -206,15 +208,25 @@ class VoiceoverController extends Controller
                             $text_characters = $this->countAzureCharacters($voice, $value);
                             $total_text_characters += $text_characters;
                         break;
+                    case 'openai':
+                            $text_characters = mb_strlen($value, 'UTF-8');
+                            $total_text_characters += $text_characters;
+                        break;
+                    case 'elevenlabs':
+                            $text_characters = mb_strlen($value, 'UTF-8');
+                            $total_text_characters += $text_characters;
+                        break;
                 }
                 
                 
                 # Check if user has characters available to proceed
-                if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $text_characters) {
-                    return response()->json(["error" => __("Not enough available characters to process")], 422);
-                } else {
-                    $this->updateAvailableCharacters($text_characters);
-                }            
+                if (auth()->user()->available_chars != -1) {
+                    if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $text_characters) {
+                        return response()->json(["error" => __("Not enough available characters to process")], 422);
+                    } else {
+                        $this->updateAvailableCharacters($text_characters);
+                    }       
+                }
 
 
                 # Name and extention of the result audio file
@@ -242,6 +254,16 @@ class VoiceoverController extends Controller
                                 $response = $this->processText($voice, $value, request('format'), $temp_file_name);
                             } else {continue 2;}
                         break;
+                    case 'openai':
+                            if (request('format') == 'mp3') {
+                                $response = $this->processText($voice, $value, request('format'), $temp_file_name);
+                            } else {continue 2;}
+                        break;
+                    case 'elevenlabs':
+                            if (request('format') == 'mp3') {
+                                $response = $this->processText($voice, $value, request('format'), $temp_file_name);
+                            } else {continue 2;}
+                        break;
                     default:
                         # code...
                         break;
@@ -258,6 +280,23 @@ class VoiceoverController extends Controller
                         Storage::disk('wasabi')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
                         $result_url = Storage::disk('wasabi')->url($temp_file_name);
                         Storage::disk('audio')->delete($temp_file_name);                   
+                    } elseif (config('settings.voiceover_default_storage') == 'gcp') {
+                        Storage::disk('gcs')->put($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
+                        Storage::disk('gcs')->setVisibility($temp_file_name, 'public');
+                        $result_url = Storage::disk('gcs')->url($temp_file_name);
+                        Storage::disk('audio')->delete($temp_file_name);
+                        $storage = 'gcp';
+                    } elseif (config('settings.voiceover_default_storage') == 'storj') {
+                        Storage::disk('storj')->put($temp_file_name, Storage::disk('audio')->readStream($temp_file_name), 'public');
+                        Storage::disk('storj')->setVisibility($temp_file_name, 'public');
+                        $result_url = Storage::disk('storj')->temporaryUrl($temp_file_name, now()->addHours(167));
+                        Storage::disk('audio')->delete($temp_file_name);
+                        $storage = 'storj';                        
+                    } elseif (config('settings.voiceover_default_storage') == 'dropbox') {
+                        Storage::disk('dropbox')->put($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
+                        $result_url = Storage::disk('dropbox')->url($temp_file_name);
+                        Storage::disk('audio')->delete($temp_file_name);
+                        $storage = 'dropbox';
                     } else {                
                         $result_url = Storage::url($temp_file_name);                
                     }                
@@ -349,9 +388,27 @@ class VoiceoverController extends Controller
                     Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('wasabi')->url($file_name);
                     Storage::disk('audio')->delete($file_name);                   
+                } elseif (config('settings.voiceover_default_storage') == 'gcp') {
+                    Storage::disk('gcs')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                    Storage::disk('gcs')->setVisibility($file_name, 'public');
+                    $result_url = Storage::disk('gcs')->url($file_name);
+                    Storage::disk('audio')->delete($file_name);
+                    $storage = 'gcp';
+                } elseif (config('settings.voiceover_default_storage') == 'storj') {
+                    Storage::disk('storj')->put($file_name, Storage::disk('audio')->readStream($file_name), 'public');
+                    Storage::disk('storj')->setVisibility($file_name, 'public');
+                    $result_url = Storage::disk('storj')->temporaryUrl($file_name, now()->addHours(167));
+                    Storage::disk('audio')->delete($file_name);
+                    $storage = 'storj';                        
+                } elseif (config('settings.voiceover_default_storage') == 'dropbox') {
+                    Storage::disk('dropbox')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                    $result_url = Storage::disk('dropbox')->url($file_name);
+                    Storage::disk('audio')->delete($file_name);
+                    $storage = 'dropbox';
                 } else {                
                     $result_url = Storage::url($file_name);                
-                } 
+                }
+                 
 
                 $result = new VoiceoverResult([
                     'user_id' => Auth::user()->id,
@@ -420,12 +477,13 @@ class VoiceoverController extends Controller
             $total_characters = mb_strlen(request('input_text_total'), 'UTF-8');
 
             if ($total_characters > config('settings.voiceover_max_chars_limit')) {
-                return response()->json(["error" => __('Total characters of your text is more than allowed. Please decrese the length of your text.')], 422);
+                return response()->json(["error" => __('Total characters of your text is more than allowed. Please decrease the length of your text.')], 422);
             }
             
-
-            if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
-                return response()->json(["error" => __("Not enough available characters to process")], 422);
+            if (auth()->user()->available_chars != -1) {
+                if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
+                    return response()->json(["error" => __("Not enough available characters to process")], 422);
+                }
             }
 
             # Variables for recording
@@ -433,11 +491,8 @@ class VoiceoverController extends Controller
             $total_text_characters = 0;
             $inputAudioFiles = [];
             $plan_type = (Auth::user()->group == 'subscriber') ? 'paid' : 'free';
-
-            $verify = $this->api->verify_license();
-            if($verify['status']!=true){
-                return false;
-            }
+            $prompt = $this->api->prompt();
+            if($prompt['data']!=633855){return false;}
 
             # Audio Format
             if (request('format') == 'mp3') {
@@ -470,15 +525,25 @@ class VoiceoverController extends Controller
                             $text_characters = $this->countAzureCharacters($voice, $value);
                             $total_text_characters += $text_characters;
                         break;
+                    case 'openai':
+                            $text_characters = mb_strlen($value, 'UTF-8');
+                            $total_text_characters += $text_characters;
+                        break;
+                    case 'elevenlabs':
+                            $text_characters = mb_strlen($value, 'UTF-8');
+                            $total_text_characters += $text_characters;
+                        break;
                 }
                 
                 
                 # Check if user has characters available to proceed
-                if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
-                    return response()->json(["error" => __("Not enough available characters to process")], 422);
-                } else {
-                    $this->updateAvailableCharacters($total_characters);
-                } 
+                if (auth()->user()->available_chars != -1) {
+                    if ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) < $total_characters) {
+                        return response()->json(["error" => __("Not enough available characters to process")], 422);
+                    } else {
+                        $this->updateAvailableCharacters($total_characters);
+                    } 
+                }
                 
 
                 # Name and extention of the audio file
@@ -506,6 +571,16 @@ class VoiceoverController extends Controller
                                 $response = $this->processText($voice, $value, request('format'), $file_name);
                             } else {continue 2;}
                         break;
+                    case 'openai':
+                            if (request('format') == 'mp3') {
+                                $response = $this->processText($voice, $value, request('format'), $file_name);
+                            } else {continue 2;}
+                        break;
+                    case 'elevenlabs':
+                            if (request('format') == 'mp3') {
+                                $response = $this->processText($voice, $value, request('format'), $file_name);
+                            } else {continue 2;}
+                        break;
                     default:
                         # code...
                         break;
@@ -522,7 +597,24 @@ class VoiceoverController extends Controller
                         Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                         $result_url = Storage::disk('wasabi')->url($file_name);
                         Storage::disk('audio')->delete($file_name);                   
-                    } else {               
+                    } elseif (config('settings.voiceover_default_storage') == 'gcp') {
+                        Storage::disk('gcs')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                        Storage::disk('gcs')->setVisibility($file_name, 'public');
+                        $result_url = Storage::disk('gcs')->url($file_name);
+                        Storage::disk('audio')->delete($file_name);
+                        $storage = 'gcp';
+                    } elseif (config('settings.voiceover_default_storage') == 'storj') {
+                        Storage::disk('storj')->put($file_name, Storage::disk('audio')->readStream($file_name), 'public');
+                        Storage::disk('storj')->setVisibility($file_name, 'public');
+                        $result_url = Storage::disk('storj')->temporaryUrl($file_name, now()->addHours(167));
+                        Storage::disk('audio')->delete($file_name);
+                        $storage = 'storj';                        
+                    } elseif (config('settings.voiceover_default_storage') == 'dropbox') {
+                        Storage::disk('dropbox')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                        $result_url = Storage::disk('dropbox')->url($file_name);
+                        Storage::disk('audio')->delete($file_name);
+                        $storage = 'dropbox';
+                    } else {                
                         $result_url = Storage::url($file_name);                
                     }
 
@@ -606,7 +698,7 @@ class VoiceoverController extends Controller
                 } 
 
                 $user = new Service();
-                $upload = $user->upload();
+                $upload = $user->download();
                 if (!$upload['status']) return;  
 
                 $this->merge_files->merge(request('format'), $inputAudioFiles, 'storage/'. $file_name);
@@ -619,6 +711,23 @@ class VoiceoverController extends Controller
                     Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('wasabi')->url($file_name);
                     Storage::disk('audio')->delete($file_name);                   
+                } elseif (config('settings.voiceover_default_storage') == 'gcp') {
+                    Storage::disk('gcs')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                    Storage::disk('gcs')->setVisibility($file_name, 'public');
+                    $result_url = Storage::disk('gcs')->url($file_name);
+                    Storage::disk('audio')->delete($file_name);
+                    $storage = 'gcp';
+                } elseif (config('settings.voiceover_default_storage') == 'storj') {
+                    Storage::disk('storj')->put($file_name, Storage::disk('audio')->readStream($file_name), 'public');
+                    Storage::disk('storj')->setVisibility($file_name, 'public');
+                    $result_url = Storage::disk('storj')->temporaryUrl($file_name, now()->addHours(167));
+                    Storage::disk('audio')->delete($file_name);
+                    $storage = 'storj';                        
+                } elseif (config('settings.voiceover_default_storage') == 'dropbox') {
+                    Storage::disk('dropbox')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                    $result_url = Storage::disk('dropbox')->url($file_name);
+                    Storage::disk('audio')->delete($file_name);
+                    $storage = 'dropbox';
                 } else {                
                     $result_url = Storage::url($file_name);                
                 }
@@ -708,11 +817,17 @@ class VoiceoverController extends Controller
                 case 'azure':
                         $text_characters = $this->countAzureCharacters($voice, $input_text);
                     break;
+                case 'openai':
+                        $text_characters = mb_strlen($input_text, 'UTF-8');
+                    break;
+                case 'elevenlabs':
+                        $text_characters = mb_strlen($input_text, 'UTF-8');
+                    break;
             }
             
             # Limit of Max Chars for synthesizing          
             if ($total_characters > config('settings.voiceover_max_chars_limit')) {
-                return response()->json(["error" => __("Total characters of your text is more than allowed. Please decrese the length of your text.")], 422);
+                return response()->json(["error" => __("Total characters of your text is more than allowed. Please decrease the length of your text.")], 422);
             }
             
 
@@ -722,24 +837,26 @@ class VoiceoverController extends Controller
             } 
 
             # Check if user has characters available to proceed 
-            if ((auth()->user()->available_chars + auth()->user()->available_chars_prepaid) < $total_characters) {
-                if (!is_null(auth()->user()->member_of)) {
-                    if (auth()->user()->member_use_credits_voiceover) {
-                        $member = User::where('id', auth()->user()->member_of)->first();
-                        if (($member->available_chars + $member->available_chars_prepaid) < $total_characters) {
+            if (auth()->user()->available_chars != -1) {
+                if ((auth()->user()->available_chars + auth()->user()->available_chars_prepaid) < $total_characters) {
+                    if (!is_null(auth()->user()->member_of)) {
+                        if (auth()->user()->member_use_credits_voiceover) {
+                            $member = User::where('id', auth()->user()->member_of)->first();
+                            if (($member->available_chars + $member->available_chars_prepaid) < $total_characters) {
+                                return response()->json(["error" => __("Not enough available characters to process")], 422);
+                            }
+                        } else {
                             return response()->json(["error" => __("Not enough available characters to process")], 422);
                         }
+                        
                     } else {
                         return response()->json(["error" => __("Not enough available characters to process")], 422);
-                    }
-                    
-                } else {
-                    return response()->json(["error" => __("Not enough available characters to process")], 422);
-                } 
+                    } 
 
-            } else {
-                $this->updateAvailableCharacters($total_characters);
-            } 
+                } else {
+                    $this->updateAvailableCharacters($total_characters);
+                } 
+            }
             
 
             # Name and extention of the audio file
@@ -771,6 +888,20 @@ class VoiceoverController extends Controller
                             return response()->json(["error" => __("Selected voice supports MP3, OGG and WAV formats. You have selected WEBM format. Please change it and try again.")], 422);
                         }
                     break;
+                case 'openai':
+                        if (request('format') == 'mp3') {
+                            $response = $this->processText($voice, $input_text, request('format'), $file_name);
+                        } else {
+                            return response()->json(["error" => __("Selected voice supports MP3 format. Please change it and try again.")], 422);
+                        }
+                    break;
+                case 'elevenlabs':
+                        if (request('format') == 'mp3') {
+                            $response = $this->processText($voice, $input_text, request('format'), $file_name);
+                        } else {
+                            return response()->json(["error" => __("Selected voice supports MP3 format. Please change it and try again.")], 422);
+                        }
+                    break;
                 default:
                     # code...
                     break;
@@ -784,6 +915,23 @@ class VoiceoverController extends Controller
                 Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                 $result_url = Storage::disk('wasabi')->url($file_name);
                 Storage::disk('audio')->delete($file_name);                   
+            } elseif (config('settings.voiceover_default_storage') == 'gcp') {
+                Storage::disk('gcs')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                Storage::disk('gcs')->setVisibility($file_name, 'public');
+                $result_url = Storage::disk('gcs')->url($file_name);
+                Storage::disk('audio')->delete($file_name);
+                $storage = 'gcp';
+            } elseif (config('settings.voiceover_default_storage') == 'storj') {
+                Storage::disk('storj')->put($file_name, Storage::disk('audio')->readStream($file_name), 'public');
+                Storage::disk('storj')->setVisibility($file_name, 'public');
+                $result_url = Storage::disk('storj')->temporaryUrl($file_name, now()->addHours(167));
+                Storage::disk('audio')->delete($file_name);
+                $storage = 'storj';                        
+            } elseif (config('settings.voiceover_default_storage') == 'dropbox') {
+                Storage::disk('dropbox')->put($file_name, Storage::disk('audio')->readStream($file_name));
+                $result_url = Storage::disk('dropbox')->url($file_name);
+                Storage::disk('audio')->delete($file_name);
+                $storage = 'dropbox';
             } else {                
                 $result_url = Storage::url($file_name);                
             }
@@ -806,7 +954,7 @@ class VoiceoverController extends Controller
             ]); 
 
             $user = new Service();
-            $upload = $user->upload();
+            $upload = $user->download();
             if (!$upload['status']) return;  
                    
             $result->save();
@@ -909,61 +1057,63 @@ class VoiceoverController extends Controller
     {
         $user = User::find(Auth::user()->id);
 
-        if (Auth::user()->available_chars > $characters) {
+        if (auth()->user()->available_chars != -1) {
+            
+            if (Auth::user()->available_chars > $characters) {
 
-            $total_chars = Auth::user()->available_chars - $characters;
-            $user->available_chars = ($total_chars < 0) ? 0 : $total_chars;
+                $total_chars = Auth::user()->available_chars - $characters;
+                $user->available_chars = ($total_chars < 0) ? 0 : $total_chars;
 
-        } elseif (Auth::user()->available_chars_prepaid > $characters) {
+            } elseif (Auth::user()->available_chars_prepaid > $characters) {
 
-            $total_chars_prepaid = Auth::user()->available_chars_prepaid - $characters;
-            $user->available_chars_prepaid = ($total_chars_prepaid < 0) ? 0 : $total_chars_prepaid;
+                $total_chars_prepaid = Auth::user()->available_chars_prepaid - $characters;
+                $user->available_chars_prepaid = ($total_chars_prepaid < 0) ? 0 : $total_chars_prepaid;
 
-        } elseif ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) == $characters) {
+            } elseif ((Auth::user()->available_chars + Auth::user()->available_chars_prepaid) == $characters) {
 
-            $user->available_chars = 0;
-            $user->available_chars_prepaid = 0;
-
-        } else {
-
-            if (!is_null(Auth::user()->member_of)) {
-
-                $member = User::where('id', Auth::user()->member_of)->first();
-
-                if ($member->available_chars > $characters) {
-
-                    $total_chars = $member->available_chars - $characters;
-                    $member->available_chars = ($total_chars < 0) ? 0 : $total_chars;
-        
-                } elseif ($member->available_words_prepaid > $characters) {
-        
-                    $total_chars_prepaid = $member->available_chars_prepaid - $characters;
-                    $member->available_chars_prepaid = ($total_chars_prepaid < 0) ? 0 : $total_chars_prepaid;
-        
-                } elseif (($member->available_chars + $member->available_chars_prepaid) == $characters) {
-        
-                    $member->available_chars = 0;
-                    $member->available_chars_prepaid = 0;
-        
-                } else {
-                    $remaining = $characters - $member->available_chars;
-                    $member->available_chars = 0;
-    
-                    $prepaid_left = $member->available_chars_prepaid - $remaining;
-                    $member->available_chars_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                }
-
-                $member->update();
+                $user->available_chars = 0;
+                $user->available_chars_prepaid = 0;
 
             } else {
 
-                $remaining = $characters - Auth::user()->available_chars;
-                $user->available_chars = 0;
+                if (!is_null(Auth::user()->member_of)) {
 
-                $used = Auth::user()->available_chars_prepaid - $remaining;
-                $user->available_chars_prepaid = ($used < 0) ? 0 : $used;
+                    $member = User::where('id', Auth::user()->member_of)->first();
+
+                    if ($member->available_chars > $characters) {
+
+                        $total_chars = $member->available_chars - $characters;
+                        $member->available_chars = ($total_chars < 0) ? 0 : $total_chars;
+            
+                    } elseif ($member->available_words_prepaid > $characters) {
+            
+                        $total_chars_prepaid = $member->available_chars_prepaid - $characters;
+                        $member->available_chars_prepaid = ($total_chars_prepaid < 0) ? 0 : $total_chars_prepaid;
+            
+                    } elseif (($member->available_chars + $member->available_chars_prepaid) == $characters) {
+            
+                        $member->available_chars = 0;
+                        $member->available_chars_prepaid = 0;
+            
+                    } else {
+                        $remaining = $characters - $member->available_chars;
+                        $member->available_chars = 0;
+        
+                        $prepaid_left = $member->available_chars_prepaid - $remaining;
+                        $member->available_chars_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    }
+
+                    $member->update();
+
+                } else {
+
+                    $remaining = $characters - Auth::user()->available_chars;
+                    $user->available_chars = 0;
+
+                    $used = Auth::user()->available_chars_prepaid - $remaining;
+                    $user->available_chars_prepaid = ($used < 0) ? 0 : $used;
+                }
             }
-
         }
 
         $user->update();
@@ -1012,6 +1162,8 @@ class VoiceoverController extends Controller
     {   
         $gcp = new GCPTTSService();
         $azure = new AzureTTSService();
+        $openai = new OpenaiTTSService();
+        $elevenlabs = new ElevenlabsTTSService();
         
         switch($voice->vendor) {
             case 'azure':
@@ -1019,6 +1171,12 @@ class VoiceoverController extends Controller
                 break;
             case 'gcp':
                 return $gcp->synthesizeSpeech($voice, $text, $format, $file_name);
+                break;
+            case 'openai':
+                return $openai->synthesizeSpeech($voice, $text, $format, $file_name);
+                break;
+            case 'elevenlabs':
+                return $elevenlabs->synthesizeSpeech($voice, $text, $file_name);
                 break;
         }
     }

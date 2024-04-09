@@ -36,7 +36,7 @@
 						</div>
 						<div class="col-lg-4 col-md-4 col-12">
 							<h6 class="font-weight-bold mb-1">{{ __('Payment Status') }}: </h6>
-							<span class="fs-14">{{ ucfirst($id->status) }}</span>
+							<span class="fs-14">{{ __(ucfirst($id->status)) }}</span>
 						</div>
 					</div>
 

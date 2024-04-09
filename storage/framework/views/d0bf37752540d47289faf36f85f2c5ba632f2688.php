@@ -43,9 +43,10 @@
 										<th width="3%"><?php echo e(__('Status')); ?></th> 
 										<th width="7%"><?php echo e(__('Template Name')); ?></th>
 										<th width="15%"><?php echo e(__('Template Description')); ?></th>
-										<th width="3%"><?php echo e(__('Package')); ?></th>						
+										<th width="2%"><?php echo e(__('Package')); ?></th>						
+										<th width="1%"><?php echo e(__('New')); ?></th>						
 										<th width="3%"><?php echo e(__('Updated On')); ?></th>	    										 						           	
-										<th width="5%"><?php echo e(__('Actions')); ?></th>
+										<th width="6%"><?php echo e(__('Actions')); ?></th>
 									</tr>
 								</thead>
 						</table> <!-- END SET DATATABLE -->
@@ -112,7 +113,13 @@
 						name: 'custom-package',
 						orderable: true,
 						searchable: true
-					},						
+					},		
+					{
+						data: 'custom-new',
+						name: 'custom-new',
+						orderable: true,
+						searchable: true
+					},					
 					{
 						data: 'updated-on',
 						name: 'updated-on',
@@ -180,10 +187,11 @@
 					title: '<?php echo e(__('Update Template Package')); ?>',
 					input: 'select',
 					inputOptions: {
-						all: '<?php echo e(__('All')); ?>',
-						free: '<?php echo e(__('Free')); ?>',
-						professional: '<?php echo e(__('Professional')); ?>',
-						premium: '<?php echo e(__('Premium')); ?>'
+						all: '<?php echo e(__('All Templates')); ?>',
+						free: '<?php echo e(__('Only Free Templates')); ?>',
+						standard: '<?php echo e(__('Up to Standard Templates')); ?>',
+						professional: '<?php echo e(__('Up to Professional Templates')); ?>',
+						premium: '<?php echo e(__('Up to Premium Templates')); ?>'
 					},
 					inputPlaceholder: '<?php echo e(__('Set Template Package')); ?>',
 					showCancelButton: true,
@@ -215,6 +223,38 @@
 						})
 					} 
 				})
+			});
+
+
+			// SET AS NEW TEMPLATE
+			$(document).on('click', '.newButton', function(e) {
+
+				e.preventDefault();
+
+				var formData = new FormData();
+				formData.append("id", $(this).attr('id'));
+
+				$.ajax({
+					headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+					method: 'post',
+					url: 'templates/template/setnew',
+					data: formData,
+					processData: false,
+					contentType: false,
+					success: function (data) {
+						if (data == 'success') {
+							Swal.fire('<?php echo e(__('Template Update')); ?>', '<?php echo e(__('Template has been successfully set as new')); ?>', 'success');
+							$("#allTemplates").DataTable().ajax.reload();
+						} else {
+							Swal.fire('<?php echo e(__('Template Update')); ?>', '<?php echo e(__('New tag has been successfully removed from template')); ?>', 'success');
+							$("#allTemplates").DataTable().ajax.reload();
+						}      
+					},
+					error: function(data) {
+						Swal.fire({ type: 'error', title: 'Oops...', text: 'Something went wrong!' })
+					}
+				})
+
 			});
 
 

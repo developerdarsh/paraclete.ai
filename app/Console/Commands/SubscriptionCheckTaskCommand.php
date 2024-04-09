@@ -48,7 +48,7 @@ class SubscriptionCheckTaskCommand extends Command
             # Give extra 2 days to make a payment, otherwise suspend subscription
             # and move the user to free tier
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $row->active_until);
-            $date = $date->addDays(3);
+            $date = $date->addDays(1);
 
             $result = Carbon::createFromFormat('Y-m-d H:i:s', $date)->isPast();
 

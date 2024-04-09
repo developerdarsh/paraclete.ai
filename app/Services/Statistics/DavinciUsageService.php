@@ -489,6 +489,19 @@ class DavinciUsageService
         return $total_voiceover[0]['data'];
     }
 
+    /**
+     * Total usage per user id
+     */
+    public function userTotalCharactersSynthesized($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = VoiceoverResult::select(DB::raw("sum(characters) as data"))
+                ->where('user_id', $user_id)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
 
     /**
      * Current month total usage per user id
@@ -520,6 +533,19 @@ class DavinciUsageService
         return $total_voiceover[0]['data'];
     }
 
+    /**
+     * Total usage per user id
+     */
+    public function userTotalMinutesTranscribed($user = null)
+    {
+        $user_id = (is_null($user)) ? Auth::user()->id : $user;
+
+        $total_voiceover = Transcript::select(DB::raw("sum(length) as data"))
+                ->where('user_id', $user_id)
+                ->get();  
+        
+        return $total_voiceover[0]['data'];
+    }
 
     /**
      * Current month total usage per user id

@@ -55,10 +55,7 @@
 	border-radius: 0 0 5px 5px;
 
 	.price-card {
-		border-radius: 0!important;
-		border-top-right-radius: 30px!important;
-		border-top-left-radius: 1rem!important;
-		border-bottom-left-radius: 30px!important;
+		border-radius: 30px;
 	}
 
 	.price-card-border {
@@ -66,8 +63,12 @@
 	}
 
 	.card {
-		box-shadow: $special-shadow!important;
+		box-shadow: none !important;
 		transition: all 0.2s;
+		min-width: 260px;
+		max-width: 350px;
+		margin-left: auto;
+		margin-right: auto;
 
 		&:hover, &:focus {
 
@@ -79,7 +80,7 @@
 
 			.prepaid-plan {
 				.plan-cost {
-					color:rgb(102, 102, 102);
+					color:$primaryTextColor;
 				}
 
 				.plan-title {
@@ -98,12 +99,28 @@
 			color: #fff;
 			position: absolute;
 			top: 0;
-			left: 0;
+			right: 0;
 			height: 25px;
-			border-bottom-right-radius: 1rem;
-			border-top-left-radius: 0.8rem;
+			border-bottom-left-radius: 30px;
+    		border-top-right-radius: 30px;
 			min-width: 40%;
-			padding-top: 3px;
+			padding-top: 2px;
+			text-align: center;
+			background-color: $primaryTextActiveColor;
+		}
+
+		.plan-featured-prepaid {
+			font-size: 12px;
+			font-weight: 700;
+			color: #fff;
+			position: absolute;
+			top: 0;
+			right: 0;
+			height: 25px;
+			border-bottom-left-radius: 8px;
+    		border-top-right-radius: 5px;
+			min-width: 40%;
+			padding-top: 2px;
 			text-align: center;
 			background-color: $primaryTextActiveColor;
 		}
@@ -111,8 +128,9 @@
 		.plan-cost {
 			font-size: 40px;
 			font-weight: 800;
-			color: rgb(102, 102, 102);
+			color: $primaryTextColor;
 			font-family: 'Open Sans', sans-serif;
+			line-height: 1.1;
 		}
 
 		.plan-currency-sign {
@@ -133,10 +151,11 @@
 		}
 
 		.plan-title {
-			font-size: 24px;
+			font-size: 18px;
 			font-weight: 800;
-			font-family: 'Open Sans';
+			font-family: 'Poppins', sans-serif;
 			margin-bottom: 1rem;
+			color: #007bff;
 		}
 
 		ul li {
@@ -158,6 +177,20 @@
 			}
 		}
 
+		.price-currency {
+			font-size: 20px;
+			color: #728096;
+			vertical-align: super;
+		}
+
+		.prepaid-cards {
+			min-height: 304px;
+		}
+
+		.credits-box {
+			min-height: 112px;
+		}
+
 		.prepaid-plan {
 			min-height: auto!important;
 
@@ -166,25 +199,27 @@
 			}
 
 			.plan-cost {
-				float: right;
-				padding-left: 2px!important;
-				padding-right: 2px!important;
 				font-size: 24px!important;
-				font-family: "Open Sans", sans-serif;
+				font-family: "Poppins", sans-serif;
 			}
 
 			.prepaid-currency-sign {
 				font-size: 10px!important;
-				float: right;
 				vertical-align: super;
-				color: #ccc;
-				margin-top: 6px;
 				font-weight: 800;
 				font-family: 'Poppins', sans-serif;
 			}
 
+			.plan-cost-wrapper {
+				background: #f5f9fc;
+			}
+
 			.plan-note {
 				margin-top: -5px;
+			}
+
+			p {
+				color: #525963;
 			}
 
 			.action-button {

@@ -24,8 +24,8 @@ class ReviewController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                            <a href="'. route("admin.settings.review.edit", $row["id"] ). '"><i class="fa-solid fa-pencil-square table-action-buttons edit-action-button" title="Edit Review"></i></a>
-                                            <a class="deleteReviewButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Review"></i></a>
+                                            <a href="'. route("admin.settings.review.edit", $row["id"] ). '"><i class="fa-solid fa-pencil-square table-action-buttons edit-action-button" title="'. __('Edit Review') .'"></i></a>
+                                            <a class="deleteReviewButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Review') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })
@@ -80,13 +80,17 @@ class ReviewController extends Controller
             $this->uploadImage($image, $folder, 'public', $name);
 
             $path = $folder . $name . '.' . request()->file('image')->getClientOriginalExtension();
-        }  
+        } else {
+            $path = '';
+        }
 
         Review::create([
             'name' => $request->name,
             'position' => $request->position,
             'text' => $request->text,
             'image_url' => $path,
+            'row' => $request->row,
+            'rating' => $request->rating,
         ]);
 
         toastr()->success(__('Review successfully created'));
@@ -143,6 +147,8 @@ class ReviewController extends Controller
         $review->image_url = ($path != '') ? $path : $review->image;
         $review->position = request('position');
         $review->text = request('text');
+        $review->row = request('row');
+        $review->rating = request('rating');
         $review->save();    
 
         toastr()->success(__('Review successfully updated'));

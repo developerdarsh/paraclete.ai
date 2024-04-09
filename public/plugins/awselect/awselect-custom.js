@@ -125,7 +125,9 @@ var mobile_width = 800;
                     options_html += '<li><a class="' + usage_status + ' ' + data_class + ' ' + data_lang + '" style="padding: 2px '+ horizontal_padding +'"><img class="awselect-img voice-avatar-img" src="' + current_img +'">' + $(this).text() + '<span class="text-muted fs-10">(' + data_gender + ')</span><span class="voice-neural-sign"> (Neural)</span></a></li>'; 
                 } else if(data_type == 'standard') {
                     options_html += '<li><a class="' + usage_status + ' ' + data_class + ' ' + data_lang + '" style="padding: 2px '+ horizontal_padding +'"><img class="awselect-img voice-avatar-img" src="' + current_img +'">' + $(this).text() + '<span class="text-muted fs-10">(' + data_gender + ')</span></a></li>'; 
-                } else {
+                } else if(data_type != '' && data_type != undefined) {
+                    options_html += '<li><a class="' + usage_status + ' ' + data_class + ' ' + data_lang + '" style="padding: 2px '+ horizontal_padding +'"><img class="awselect-img voice-avatar-img" src="' + current_img +'">' + $(this).text() + '<span class="text-muted fs-10">(' + data_gender + ')</span><span class="voice-neural-sign">(' + data_type + ')</span></a></li>'; 
+                }else {
                     if(current_icon !== undefined) {
                         options_html += '<li><a class="' + usage_status + ' ' + data_class + ' ' + data_lang + '" style="padding: 2px '+ horizontal_padding +'"><span class="awselect-icon-style mr-3">' + current_icon + '</span><img class="awselect-img" src="' + current_img +'">' + $(this).text() + '</a></li>'; 
                     } else {

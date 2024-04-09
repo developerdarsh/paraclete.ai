@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('group')->nullable();
             $table->string('language_name')->nullable();
             $table->string('language_flag')->nullable();
+            $table->string('image')->nullable();
             $table->integer('tokens')->nullable();
             $table->integer('words')->nullable();
             $table->string('plan_type')->comment('free|paid')->default('free');

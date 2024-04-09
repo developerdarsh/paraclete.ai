@@ -15,7 +15,7 @@
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
 				<li class="breadcrumb-item" aria-current="page"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
-				<li class="breadcrumb-item" aria-current="page"><a href="#"> {{ __('Davinci Settings') }}</a></li>
+				<li class="breadcrumb-item" aria-current="page"><a href="{{ route('admin.davinci.configs') }}"> {{ __('Davinci Settings') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('API Keys') }}</a></li>
 			</ol>
 		</div>
@@ -29,7 +29,7 @@
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Openai and Stable Diffusion API Keys') }}</h3>
-					<a href="{{ route('admin.davinci.configs.keys.create') }}" id="createButton" class="btn btn-primary text-right right">{{ __('Store New') }}</a>
+					<a href="{{ route('admin.davinci.configs.keys.create') }}" id="createButton" class="btn btn-primary right">{{ __('Store New') }}</a>
 				</div>
 				<div class="card-body pt-2">
 					<!-- BOX CONTENT -->

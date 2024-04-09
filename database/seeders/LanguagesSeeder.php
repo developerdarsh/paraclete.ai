@@ -67,6 +67,7 @@ class LanguagesSeeder extends Seeder
             ['id' => 50, 'language' => 'Serbian (Serbia)', 'language_code' => 'sr-RS', 'language_flag' => '/img/flags/rs.svg', 'status' => 1],
             ['id' => 51, 'language' => 'Maltese (Malta)', 'language_code' => 'mt-MT', 'language_flag' => '/img/flags/mt.svg', 'status' => 1],
             ['id' => 52, 'language' => 'Irish (Ireland)', 'language_code' => 'ga-IE', 'language_flag' => '/img/flags/ie.svg', 'status' => 1],
+            ['id' => 53, 'language' => 'Macedonian (Macedonia)', 'language_code' => 'mk-MK', 'language_flag' => '/img/flags/mk.svg', 'status' => 1],
         ];
 
 

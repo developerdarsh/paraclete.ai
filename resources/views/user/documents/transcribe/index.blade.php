@@ -11,7 +11,7 @@
 		<ol class="breadcrumb mb-2">
 			<li class="breadcrumb-item"><a href="{{route('user.dashboard')}}"><i class="fa-solid fa-folder-bookmark mr-2 fs-12"></i>{{ __('AI Panel') }}</a></li>
 			<li class="breadcrumb-item"><a href="{{route('user.documents')}}"> {{ __('Documents') }}</a></li>
-			<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('All Transcripts') }}</a></li>
+			<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('Transcribe Results') }}</a></li>
 		</ol>
 	</div>
 </div>
@@ -95,6 +95,7 @@
 			colReorder: true,
 			language: {
 				"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>{{ __('No trascribe tasks created yet') }}</div>",
+				"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 				search: "<i class='fa fa-search search-icon'></i>",
 				lengthMenu: '_MENU_ ',
 				paginate : {

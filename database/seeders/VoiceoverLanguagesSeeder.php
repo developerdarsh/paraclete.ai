@@ -156,6 +156,8 @@ class VoiceoverLanguagesSeeder extends Seeder
             ['id' => 142, 'language' => 'Bosnian (Bosnia and Herzegovina)', 'language_code' => 'bs-BA', 'language_flag' => '/img/flags/ba.svg'],
             ['id' => 143, 'language' => 'Arabic (Oman)', 'language_code' => 'ar-OM', 'language_flag' => '/img/flags/om.svg'],
             ['id' => 144, 'language' => 'Tamil (Malaysia)', 'language_code' => 'ta-MY', 'language_flag' => '/img/flags/my.svg'],
+            ['id' => 145, 'language' => 'Armenian (Armenia)', 'language_code' => 'hy-AM', 'language_flag' => '/img/flags/am.svg'],
+            ['id' => 146, 'language' => 'Belarusian (Belarus)', 'language_code' => 'be-BY', 'language_flag' => '/img/flags/by.svg'],
         ];
 
 

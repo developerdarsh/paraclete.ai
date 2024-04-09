@@ -65,7 +65,7 @@ class MidtransService
             \Midtrans\Config::$isSanitized = true;
             // Set 3DS transaction for credit card to true
             \Midtrans\Config::$is3ds = true;
-            \Midtrans\Config::$overrideNotifUrl = config('app.url') . '/user/payments/approved';
+            \Midtrans\Config::$overrideNotifUrl = route('user.payments.approved.midtrans');
             
             $order_id = Str::random(10);
             $params = array(
@@ -104,7 +104,7 @@ class MidtransService
         $type = session()->get('type');  
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
 
 

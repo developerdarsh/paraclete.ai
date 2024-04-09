@@ -28,7 +28,7 @@
                 <div id="form-group">
                     <select id="template-selection" name="template-selection" data-placeholder="<?php echo e(__('Create AI Document')); ?>" data-callback="changeTemplate">
                         <?php $__currentLoopData = App\Services\HelperService::listTemplates(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $temp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option data-id="<?php echo e($temp->template_code); ?>" value="<?php echo e($temp->slug); ?>" data-icon="<?php echo e($temp->icon); ?>"><?php echo e(__($temp->name)); ?></option>
+                            <option data-id="<?php echo e($temp->template_code); ?>" value="original-template/<?php echo e($temp->slug); ?>" data-icon="<?php echo e($temp->icon); ?>"><?php echo e(__($temp->name)); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>	
                         <?php $__currentLoopData = App\Services\HelperService::listCustomTemplates(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $temp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <option data-id="<?php echo e($temp->template_code); ?>" value="<?php echo e($temp->slug); ?>/<?php echo e($temp->template_code); ?>" data-icon="<?php echo e($temp->icon); ?>"><?php echo e(__($temp->name)); ?></option>
@@ -56,7 +56,7 @@
                         <?php if(\Spatie\Permission\PermissionServiceProvider::bladeMethodWrapper('hasRole', 'admin')): ?>
                             <?php if(auth()->user()->unreadNotifications->where('type', '<>', 'App\Notifications\GeneralNotification')->count()): ?>
                                 <div class="dropdown-header">
-                                    <h6 class="mb-0 fs-12 font-weight-bold"><span id="total-notifications"></span> <span class="text-primary"><?php echo e(__('New')); ?></span> <?php echo e(__('Notification(s)')); ?></h6>
+                                    <h6 class="mb-0 fs-12 font-weight-bold notification-dark-theme"><span id="total-notifications"></span> <span class="text-primary"><?php echo e(__('New')); ?></span> <?php echo e(__('Notification(s)')); ?></h6>
                                     <a href="#" class="mb-1 badge badge-primary ml-auto pl-3 pr-3 mark-read" id="mark-all"><?php echo e(__('Mark All Read')); ?></a>
                                 </div>
                                 <div class="notify-menu">
@@ -68,7 +68,7 @@
                                                         <a href="<?php echo e(route('admin.notifications.systemShow', [$notification->id])); ?>" class="d-flex">
                                                             <div class="notifyimg bg-info-transparent text-info"> <i class="fa-solid fa-user-check fs-18"></i></div>
                                                             <div class="mr-6">
-                                                                <div class="font-weight-bold fs-12"><?php echo e(__('New User Registered')); ?></div>
+                                                                <div class="font-weight-bold fs-12 notification-dark-theme"><?php echo e(__('New User Registered')); ?></div>
                                                                 <div class="text-muted fs-10"><?php echo e(__('Name')); ?>: <?php echo e($notification->data['name']); ?></div>
                                                                 <div class="small text-muted fs-10"><?php echo e($notification->created_at->diffForHumans()); ?></div>
                                                             </div>                                            
@@ -83,7 +83,7 @@
                                                         <a href="<?php echo e(route('admin.notifications.systemShow', [$notification->id])); ?>" class="d-flex">
                                                             <div class="notifyimg bg-info-green"> <i class="fa-solid fa-sack-dollar leading-loose"></i></div>
                                                             <div class="mr-4">
-                                                                <div class="font-weight-bold fs-12"><?php echo e(__('New User Payment')); ?></div>
+                                                                <div class="font-weight-bold fs-12 notification-dark-theme"><?php echo e(__('New User Payment')); ?></div>
                                                                 <div class="text-muted fs-10"><?php echo e(__('From')); ?>: <?php echo e($notification->data['name']); ?></div>
                                                                 <div class="small text-muted fs-10"><?php echo e($notification->created_at->diffForHumans()); ?></div>
                                                             </div>                                            
@@ -98,7 +98,7 @@
                                                         <a href="<?php echo e(route('admin.notifications.systemShow', [$notification->id])); ?>" class="d-flex">
                                                             <div class="notifyimg bg-info-green"> <i class="fa-solid fa-face-tongue-money fs-20 leading-loose"></i></div>
                                                             <div class="mr-4">
-                                                                <div class="font-weight-bold fs-12"><?php echo e(__('New Payout Request')); ?></div>
+                                                                <div class="font-weight-bold fs-12 notification-dark-theme"><?php echo e(__('New Payout Request')); ?></div>
                                                                 <div class="text-muted fs-10"><?php echo e(__('From')); ?>: <?php echo e($notification->data['name']); ?></div>
                                                                 <div class="small text-muted fs-10"><?php echo e($notification->created_at->diffForHumans()); ?></div>
                                                             </div>                                            
@@ -113,11 +113,11 @@
                                     </div>                              
                                 </div>
                                 <div class="view-all-button text-center">                            
-                                    <a href="<?php echo e(route('admin.notifications.system')); ?>" class="fs-12 font-weight-bold"><?php echo e(__('View All Notifications')); ?></a>
+                                    <a href="<?php echo e(route('admin.notifications.system')); ?>" class="fs-12 font-weight-bold notification-dark-theme"><?php echo e(__('View All Notifications')); ?></a>
                                 </div>                            
                             <?php else: ?>
                                 <div class="view-all-button text-center">
-                                    <h6 class=" fs-12 font-weight-bold mb-1"><?php echo e(__('There are no new notifications')); ?></h6>                                    
+                                    <h6 class=" fs-12 font-weight-bold mb-1 notification-dark-theme"><?php echo e(__('There are no new notifications')); ?></h6>                                    
                                 </div>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -125,7 +125,7 @@
                             <?php if(\Spatie\Permission\PermissionServiceProvider::bladeMethodWrapper('hasRole', 'user|subscriber')): ?>
                                 <?php if(auth()->user()->unreadNotifications->where('type', 'App\Notifications\GeneralNotification')->count()): ?>
                                     <div class="dropdown-header">
-                                        <h6 class="mb-0 fs-12 font-weight-bold"><?php echo e(auth()->user()->unreadNotifications->where('type', 'App\Notifications\GeneralNotification')->count()); ?> <span class="text-primary">New</span> Notification(s)</h6>
+                                        <h6 class="mb-0 fs-12 font-weight-bold notification-dark-theme"><?php echo e(auth()->user()->unreadNotifications->where('type', 'App\Notifications\GeneralNotification')->count()); ?> <span class="text-primary">New</span> Notification(s)</h6>
                                         <a href="#" class="mb-1 badge badge-primary ml-auto pl-3 pr-3 mark-read" id="mark-all"><?php echo e(__('Mark All Read')); ?></a>
                                     </div>
                                     <div class="notify-menu">
@@ -136,7 +136,7 @@
                                                         <a href="<?php echo e(route('user.notifications.show', [$notification->id])); ?>" class="d-flex">
                                                             <div class="notifyimg bg-info-transparent text-info"> <i class="fa fa-bell fs-18"></i></div>
                                                             <div>
-                                                                <div class="font-weight-bold fs-12 mt-2"><?php echo e(__('New')); ?> <?php echo e($notification->data['type']); ?> <?php echo e(__('Notification')); ?></div>
+                                                                <div class="font-weight-bold fs-12 mt-2 notification-dark-theme"><?php echo e(__('New')); ?> <?php echo e($notification->data['type']); ?> <?php echo e(__('Notification')); ?></div>
                                                                 <div class="small text-muted fs-10"><?php echo e($notification->created_at->diffForHumans()); ?></div>
                                                             </div>                                            
                                                         </a>
@@ -146,16 +146,21 @@
                                         </div>
                                     </div>
                                     <div class="view-all-button text-center">                            
-                                        <a href="<?php echo e(route('user.notifications')); ?>" class="fs-12 font-weight-bold"><?php echo e(__('View All Notifications')); ?></a>
+                                        <a href="<?php echo e(route('user.notifications')); ?>" class="fs-12 font-weight-bold notification-dark-theme"><?php echo e(__('View All Notifications')); ?></a>
                                     </div>                             
                                 <?php else: ?>
                                     <div class="view-all-button text-center">
-                                        <h6 class=" fs-12 font-weight-bold mb-1"><?php echo e(__('There are no new notifications')); ?></h6>                                    
+                                        <h6 class=" fs-12 font-weight-bold mb-1 notification-dark-theme"><?php echo e(__('There are no new notifications')); ?></h6>                                    
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
                         <?php endif; ?>                        
                     </div>
+                </div>
+                <div class="dropdown items-center flex">
+                    <a href="#" class="nav-link icon btn-theme-toggle">
+                        <span class="header-icon fa-sharp fa-solid"></span>
+                    </a>
                 </div>
                 <div class="dropdown header-expand" >
                     <a  class="nav-link icon" id="fullscreen-button">
@@ -192,6 +197,22 @@
                             <span class="text-center user fs-12 pb-0 font-weight-bold"><?php echo e(Auth::user()->name); ?></span><br>
                             <span class="text-center fs-12 text-muted"><?php echo e(Auth::user()->job_role); ?></span>
                             <div class="dropdown-divider mt-3"></div>
+                            <li class="mt-3 mb-2 fs-12 font-weight-bold"><?php echo e(__('Plan')); ?>: <?php if(is_null(auth()->user()->plan_id)): ?><?php echo e(__('Free Trial')); ?> <?php else: ?> <?php echo e(__(App\Services\HelperService::getPlanName())); ?>  <?php endif; ?> <?php if(is_null(auth()->user()->plan_id)): ?> <br><a href="<?php echo e(route('user.plans')); ?>" class="text-yellow upgrade-action-button"><?php echo e(__('Upgrade Now')); ?></a> <?php endif; ?></li>
+                            <div class="inline-flex w-100 text-left pl-6">
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-solid fa-message-lines text-primary mr-2"></i><span class="text-muted"><?php echo e(__('Words')); ?></span> <span class="text-primary ml-1" id="available-words"><?php echo e(App\Services\HelperService::userAvailableWords()); ?></span></span>
+                                </div> 
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-sharp fa-solid fa-message-image text-primary mr-2"></i><span class="text-muted"><?php echo e(__('Images')); ?></span> <span class="text-primary ml-1" id="available-images"><?php echo e(App\Services\HelperService::userAvailableImages()); ?></span></span>
+                                </div> 
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-sharp fa-solid fa-message-music text-primary mr-2"></i><span class="text-muted"><?php echo e(__('Minutes')); ?></span> <span class="text-primary ml-1" id="available-minutes"><?php echo e(App\Services\HelperService::userAvailableMinutes()); ?></span></span>
+                                </div> 
+                                <div class="flex w-100">
+                                    <span class="fs-11 font-weight-600"><i class="fa-solid fa-message-captions text-primary mr-2"></i><span class="text-muted"><?php echo e(__('Characters')); ?></span> <span class="text-primary ml-1" id="available-characters"><?php echo e(App\Services\HelperService::userAvailableChars()); ?></span></span>
+                                </div>                    
+                            </div>
+                            <div class="dropdown-divider mt-3"></div>     
                         </div>
                         <a class="dropdown-item d-flex" href="<?php echo e(route('user.plans')); ?>">
                             <span class="profile-icon fa-solid fa-box-circle-check"></span>

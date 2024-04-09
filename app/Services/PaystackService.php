@@ -77,7 +77,7 @@ class PaystackService
         $price = intval($id->price * 100);
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
 
         try {
@@ -117,7 +117,7 @@ class PaystackService
         $price = intval($total_value * 100);
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
 
         try {

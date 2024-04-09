@@ -31,7 +31,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">				
 								<div class="input-box">	
 									<h6>{{ __('Notification Type') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="notification-type" name="notification-type" data-placeholder="{{ __('Select Notification Type') }}:">			
+									<select id="notification-type" name="notification-type" class="form-select" data-placeholder="{{ __('Select Notification Type') }}:">			
 										<option value="Info" selected>{{ __('Info') }}</option>
 										<option value="Announcement">{{ __('Announcement') }}</option>
 										<option value="Marketing">{{ __('Marketing') }}</option>
@@ -46,7 +46,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">						
 								<div class="input-box">	
 									<h6>{{ __('Notification Action') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="notification-action" name="notification-action" data-placeholder="{{ __('Select User Action Type') }}:">			
+									<select id="notification-action" name="notification-action" class="form-select" data-placeholder="{{ __('Select User Action Type') }}:">			
 										<option value="No Action Needed" selected>{{ __('No Action Needed') }}</option>
 										<option value="Action Required">{{ __('Action Required') }}</option>
 									</select>

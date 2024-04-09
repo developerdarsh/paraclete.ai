@@ -50,7 +50,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('FAQ Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-			  						<select id="smtp-encryption" name="status" data-placeholder="FAQ Status:">			
+			  						<select id="smtp-encryption" name="status" class="form-select" data-placeholder="FAQ Status:">			
 										<option value="visible" @if ($id->status == 'visible') selected @endif>{{ __('Visible') }}</option>
 										<option value="hidden" @if ($id->status == 'hidden') selected @endif>{{ __('Hidden') }}</option>
 									</select>

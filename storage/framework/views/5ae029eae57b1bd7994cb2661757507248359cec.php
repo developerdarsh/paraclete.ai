@@ -1,3 +1,66 @@
+<?php $__env->startSection('css'); ?>
+
+<style>
+ .list-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .list-item-text {
+      flex-grow: 1;
+    }
+    .close-button {
+      cursor: pointer;
+      color: red;
+    }
+	.add_templates-sec input {
+		    background-color: #f5f9fc;
+		border-color: transparent;
+		border-radius: 0.5rem;
+		border-width: 1px;
+		padding: 0.375rem 1rem;
+		    border-color: #007BFF;
+	}
+	.add_templates-sec .btn.btn-primary {
+		padding: 0.575rem 1rem;
+		    min-width: 60px;
+	}
+	.add_templates-sec .btn.btn-primary:focus {
+		box-shadow: none;
+		outline: none;
+	}
+	.add_templates-sec .form-group .form-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.add_templates-sec .form-group .form-input input {
+	    flex: 1;
+    margin-right: 10px;
+}
+
+.add_templates-sec .list-item {
+       background-color: #f2f2f2;
+    border-color: rgba(0, 123, 255, 0.4);
+    padding: 4px 8px;
+    border-radius: 5px;
+}
+.add_templates-sec .list-item-text {
+    font-size: 14px;
+    color: #000000;
+}
+.output_dropdown {  
+	width: 100%;
+	max-height: 205px;
+	height: max-content;
+	overflow-y: auto;
+	}
+
+
+
+</style>
+<?php $__env->stopSection(); ?>
 <?php $__env->startSection('page-header'); ?>
 	<!-- PAGE HEADER -->
 	<div class="page-header mt-5-7"> 
@@ -52,7 +115,7 @@ unset($__errorArgs, $__bag); ?>
 						  </div>					
 					  
 						</div>
-					    <div class="gender-select-b d-flex">
+					  <div class="gender-select-b d-flex">
 							<div class="form-check me-4">
 								<input value="1" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
 								<label class="form-check-label" for="flexRadioDefault1">
@@ -75,6 +138,7 @@ unset($__errorArgs, $__bag); ?>
 							</label>
 						  </div>
 						</div>
+						
 						<div class="row">
 						  <div class="col-md-12 col-sm-12">													
 							<div class="input-box">								
@@ -136,7 +200,7 @@ unset($__errorArgs, $__bag); ?>
 								<option value="free" ><?php echo e(__('Free Chat Bot')); ?></option>																																											
 								<option value="standard"> <?php echo e(__('Standard Chat Bot')); ?></option>
 								<option value="professional"> <?php echo e(__('Professional Chat Bot')); ?></option>
-								<option value="premium"> <?php echo e(__('Premuim Chat Bot')); ?></option>																																																														
+								<option value="premium"> <?php echo e(__('Premium Chat Bot')); ?></option>																																																														
 							  </select>
 							</div>
 						  </div>
@@ -194,6 +258,36 @@ unset($__errorArgs, $__bag); ?>
 							  </div> 
 							</div> 
 						  </div>
+
+						  <div class="col-sm-12">								
+							<div class="input-box add_templates-sec">								
+							  <h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Templates')); ?> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+							  <div class="form-group">
+							  	<?php if(isset($templates)): ?>
+								<select name="templates[]" multiple>
+									
+									<?php $__currentLoopData = $templates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $template): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+										<option value="<?php echo e($template->id); ?>"><?php echo e($template->name); ?></option>
+									<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+								</select>
+								<?php endif; ?>
+							  </div> 
+
+								<div class="form-group">
+									 <div class="form-input">
+										<input type="text" name="template_name" id="template_name">
+										<input type="hidden" name="dataArrayField" id="dataArrayField">
+										<button type="button" id="addTemplateBtn" class="btn btn-primary">Add</button>
+									</div>
+								</div>
+
+								<!-- Button to add a new template -->
+								
+								<div id="output" class="output_dropdown"></div>
+
+							</div> 
+						  </div>
+
 						</div>
 					  
 						<div class="modal-footer d-inline">
@@ -211,7 +305,62 @@ unset($__errorArgs, $__bag); ?>
 		</div>
 	</div>
 <?php $__env->stopSection(); ?>
+<?php $__env->startSection('js'); ?>
+	<!-- Data Tables JS -->
+	<script src="<?php echo e(URL::asset('plugins/datatable/datatables.min.js')); ?>"></script>
+	<script src="<?php echo e(URL::asset('plugins/sweetalert/sweetalert2.all.min.js')); ?>"></script>
+	<script type="text/javascript">
+	$(document).ready(function() {
+    var dataArray = [];
+		$(document).on('click', '#addTemplateBtn', function(e) {
+			e.preventDefault();
+			var text = $('#template_name').val();
+			dataArray.push(text);
+			$('#template_name').val('');
+			updateOutput();
+			
+			// $.ajax({
+			// 	headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+			// 	method: 'post',
+			// 	url: '/admin/chats/chat/add-template',
+			// 	data: {text : text},
+			// 	processData: false,
+			// 	contentType: false,
+			// 	success: function (data) {
+            //         console.log(data);
+			// 	},
+			// 	error: function(data) {
+			// 		Swal.fire({ type: 'error', title: 'Oops...', text: 'Something went wrong!' })
+			// 	}
+			// })
 
+		});	
+		function updateOutput() {
+			$('#output').empty();
+			$('#dataArrayField').val(dataArray);
+			for (var i = 0; i < dataArray.length; i++) {
+				var listItem = $('<div class="list-item">' +
+								'<div class="list-item-text">' + dataArray[i] + '</div>' +
+								'<div class="close-button"><i class="fa-solid fa-circle-xmark"></i></div>' +
+								'</div>');
+
+				// Attach a click event to the close button
+				listItem.find('.close-button').click(createCloseHandler(i));
+
+				$('#output').append(listItem);
+			}
+			}
+
+			function createCloseHandler(index) {
+			return function() {
+				dataArray.splice(index, 1);
+				updateOutput();
+			};
+			}
+		
+	});	
+	</script>
+<?php $__env->stopSection(); ?>
 
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/customer/www/paraclete.ai/public_html/resources/views/admin/davinci/chats/create.blade.php ENDPATH**/ ?>

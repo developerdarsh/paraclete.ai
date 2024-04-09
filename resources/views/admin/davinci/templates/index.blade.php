@@ -76,6 +76,7 @@
 				colReorder: true,
 				language: {
 					"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>All Templates</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {
@@ -103,8 +104,8 @@
 						searchable: true
 					},				
 					{
-						data: 'description',
-						name: 'description',
+						data: 'custom-description',
+						name: 'custom-description',
 						orderable: true,
 						searchable: true
 					},

@@ -16,4 +16,26 @@ class Payment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'order_id',
+        'plan_id',
+        'price',
+        'currency',
+        'gateway',
+        'status',
+        'plan_name',
+        'words',
+        'valid_until',
+        'images',
+        'characters',
+        'minutes'
+    ];
 }

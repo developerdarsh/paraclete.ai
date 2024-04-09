@@ -48,6 +48,10 @@
    display: none;
  }
 
+ .show-chat-loader {
+	display: block!important;
+ }
+
  .copy-code {
 	float: right;
     background: none;
@@ -291,8 +295,12 @@
 			}
 
 			.selected-message {
-				border: 1px solid #EDF8FD;
+				border: 1px solid $primaryTextActiveColor;
 				background-color: #FFF;
+
+				.chat-title {
+					color: $primaryTextActiveColor;
+				}
 			}
 
 			
@@ -318,8 +326,7 @@
 
 	.card-footer {
 		border-top: 1px solid #ebecf1!important;
-		min-height: 75px;
-		height: 75px;
+		height: 75px!important;
 	}
  } 
 

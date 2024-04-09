@@ -20,6 +20,7 @@
 				<div class="card-body p-5 pb-0">
 
 					<div class="row">
+						<div class="text-center"><a class="info-btn-alt" data-bs-toggle="modal" data-bs-target="#info-alert-model" href="javascript:void(0)">How It works ?</a></div>
 						<div class="template-view">
 							<div class="template-icon mb-2 d-flex">
 								<div>
@@ -38,7 +39,7 @@
 					<div class="row">
 						<div class="col-sm-12">
 							<div class="text-left mb-5" id="balance-status">
-								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">{{ number_format(auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid) }}</span> {{ __('Minutes') }}</span>
+								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_minutes == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid) }} {{ __('Minutes') }} @endif</span></span>
 							</div>							
 						</div>	
 						<div class="col-sm-12">								
@@ -58,7 +59,7 @@
 						<div class="col-sm-12">
 							<div class="form-group">	
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Audio Language') }} <span class="text-muted">({{ __('Optional') }})</span></h6>								
-								<select id="language" name="language" data-placeholder="{{ __('Specify Audio language') }}">
+								<select id="language" name="language" class="form-select" data-placeholder="{{ __('Specify Audio language') }}">
 									<option value="" selected> {{ __('Auto Detect') }}</option>							
 									<option value="af" data-img="/img/flags/za.svg"> {{ __('Afrikaans') }}</option>							
 									<option value="ar" data-img="/img/flags/ae.svg"> {{ __('Arabic') }}</option>							
@@ -126,16 +127,16 @@
 						<div class="col-sm-12">
 							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Task Type') }} <span class="text-muted">({{ __('Optional') }})</span></h6>
-								<select id="creativity" name="task" data-placeholder="{{ __('Specify Task Type') }}">
+								<select id="creativity" name="task" class="form-select" data-placeholder="{{ __('Specify Task Type') }}">
 									<option value='transcribe' selected>{{ __('Transcribe Audio File') }}</option>
 									<option value='translate'> {{ __('Generate Transcription in English') }}</option>																																																													
 								</select>
 							</div>
 						</div>
 						<div class="col-sm-12">
-							<div class="form-group">
+							<div class="form-group mt-5">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Workbook') }} <span class="text-muted">({{ __('Optional') }})</span></h6>
-								<select id="project" name="project" data-placeholder="{{ __('Select Workbook Name') }}">	
+								<select id="project" name="project" class="form-select" data-placeholder="{{ __('Select Workbook Name') }}">	
 									<option value="all"> {{ __('All Workbooks') }}</option>
 									@foreach ($projects as $project)
 										<option value="{{ $project->name }}" @if (strtolower(auth()->user()->project) == strtolower($project->name)) selected @endif> {{ ucfirst($project->name) }}</option>
@@ -149,7 +150,7 @@
 						<div class="w-100 pt-2 pb-2">
 							<div class="text-center">
 								<span id="processing" class="processing-image"><img src="{{ URL::asset('/img/svgs/upgrade.svg') }}" alt=""></span>
-								<button type="submit" name="submit" class="btn btn-primary  pl-7 pr-7 fs-11 pt-2 pb-2" id="generate">{{ __('Transcribe') }}</button>
+								<button type="submit" name="submit" class="btn btn-primary mt-4 pl-7 pr-7 fs-11 pt-2 pb-2" id="generate">{{ __('Transcribe') }}</button>
 							</div>
 						</div>							
 					</div>	
@@ -232,6 +233,23 @@
 		</div>
 	</div>
 </form>
+<div class="modal fade" id="info-alert-model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-modal="true" role="dialog">
+		<div class="modal-dialog modal-dialog-centered modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+				<h2></h2>
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+			<div class="modal-body">
+				<div class="row">
+					<div style="position: relative; padding-bottom: calc(46.925329428989755% + 41px); height: 0; width: 100%"><iframe src="https://demo.arcade.software/pKW6lSdfLVsENFCLPlow?embed" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;color-scheme: light;" title="Paraclete AI templates"></iframe></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 @endsection
 
 @section('js')

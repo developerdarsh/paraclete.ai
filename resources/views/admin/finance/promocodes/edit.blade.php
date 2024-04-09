@@ -50,7 +50,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">						
 								<div class="input-box">	
 									<h6>{{ __('Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="promo-status" name="status" data-placeholder="{{ __('Select Promocode Status') }}:">			
+									<select id="promo-status" name="status" class="form-select" data-placeholder="{{ __('Select Promocode Status') }}:">			
 										<option value="valid" @if ($data->status == 'valid') selected @endif>{{ __('Valid') }}</option>
 										<option value="invalid" @if ($data->status == 'invalid') selected @endif>{{ __('Invalid') }}</option>
 									</select>
@@ -66,7 +66,7 @@
 							<div class="col-lg-6 col-md-6col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Promocode Type') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="promo-type" name="promo-type" data-placeholder="{{ __('Select Promocode Type') }}:">			
+									<select id="promo-type" name="promo-type" class="form-select" data-placeholder="{{ __('Select Promocode Type') }}:">			
 										<option value="percentage" @if ($data->type == 'percentage') selected @endif>{{ __('Percentage Discount') }}</option>
 										<option value="fixed" @if ($data->type == 'fixed') selected @endif>{{ __('Fixed Discount') }}</option>
 									</select> 
@@ -103,7 +103,7 @@
 							<div class="col-lg-6 col-md-6col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Multi Usage by the same User') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span> <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Allow or Deny the same promocode usage by the same user multiple times') }}"></i></h6>
-									<select id="languages" name="multi_use" data-placeholder="{{ __('Set Multi Usage by the same User') }}:">			
+									<select id="multi_use" name="multi_use" class="form-select" data-placeholder="{{ __('Set Multi Usage by the same User') }}:">			
 										<option value=1 @if ($id->multi_use == true) selected @endif>{{ __('Allow') }}</option>
 										<option value=0 @if ($id->multi_use == false) selected @endif>{{ __('Deny') }}</option>
 									</select> 

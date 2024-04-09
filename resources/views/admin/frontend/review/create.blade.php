@@ -43,7 +43,7 @@
 
 							<div class="col-lg-12 col-md-12 col-sm-12">							
 								<div class="input-box">								
-									<h6>{{ __('Customer Location or Company Name') }} <span class="text-muted">({{ __('Optional') }})</span></h6>
+									<h6>{{ __('Customer Location or Company Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 									<div class="form-group">							    
 										<input type="text" class="form-control" id="position" name="position" value="{{ old('position') }}" required>
 									</div> 
@@ -53,11 +53,11 @@
 								</div> 						
 							</div>
 
-							<div class="col-lg-6 col-md-6 col-sm-12">
+							<div class="col-sm-12">
 								<div class="input-box">
 									<h6>{{ __('Customer Avatar') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 									<div class="input-group file-browser">									
-										<input type="text" class="form-control border-right-0 browse-file" placeholder="Image File Name" readonly required>
+										<input type="text" class="form-control border-right-0 browse-file" placeholder="{{ __('Image File Name') }}" readonly required>
 										<label class="input-group-btn">
 											<span class="btn btn-primary special-btn">
 												{{ __('Browse') }} <input type="file" name="image" style="display: none;">
@@ -69,6 +69,29 @@
 									@enderror
 								</div>
 							</div>
+
+							<div class="col-lg-6 col-md-6 col-sm-12">							
+								<div class="input-box">								
+									<h6>{{ __('Rating') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+									<div class="form-group">							    
+										<input type="text" class="form-control" id="rating" name="rating" value="{{ old('rating') }}" placeholder="Ex: 5.0" required>
+									</div> 
+									@error('rating')
+										<p class="text-danger">{{ $errors->first('rating') }}</p>
+									@enderror	
+								</div> 						
+							</div>
+
+							<div class="col-lg-6 col-md-6 col-sm-12">							
+								<div class="input-box">	
+									<h6>{{ __('Review Line Group') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+			  						<select id="faq-status" name="row" class="form-select" data-placeholder="{{ __('Select Review Line Group') }}:">			
+										<option value="first" selected>{{ __('First') }}</option>
+										<option value="second">{{ __('Second') }}</option>
+									</select>
+								</div> 							
+							</div>
+
 						</div>
 
 						<div class="row mt-2">

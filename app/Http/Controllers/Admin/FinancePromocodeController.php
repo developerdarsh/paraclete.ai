@@ -32,9 +32,9 @@ class FinancePromocodeController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                        <a href="'. route("admin.finance.promocodes.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons edit-action-button" title="View Promocode"></i></a>
-                                        <a href="'. route("admin.finance.promocodes.edit", $row["id"] ). '"><i class="fa-solid fa-file-pen table-action-buttons view-action-button" title="Update Promocode"></i></a>
-                                        <a data-toggle="modal" id="deleteSubscriptionButton" data-target="#deleteModal" href="" data-attr="'. route("admin.finance.promocodes.delete", $row["id"] ). '"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Promocode"></i></a>
+                                        <a href="'. route("admin.finance.promocodes.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons edit-action-button" title="'. __('View Promocode') .'"></i></a>
+                                        <a href="'. route("admin.finance.promocodes.edit", $row["id"] ). '"><i class="fa-solid fa-file-pen table-action-buttons view-action-button" title="'. __('Update Promocode') .'"></i></a>
+                                        <a data-toggle="modal" id="deleteSubscriptionButton" data-target="#deleteModal" href="" data-attr="'. route("admin.finance.promocodes.delete", $row["id"] ). '"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Promocode') .'"></i></a>
                                     </div>';
                         return $actionBtn;
                     })

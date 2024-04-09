@@ -71,7 +71,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">									
 										<div class="input-box">								
 											<h6>{{ __('Time Zone') }}</h6>
-											<select id="time-zone" name="time-zone" data-placeholder="Select Time Zone">
+											<select id="time-zone" name="time-zone" class="form-select" data-placeholder="Select Time Zone">
 												<option value="Pacific/Midway" @if (config('app.timezone') == 'Pacific/Midway') selected @endif>(UTC-11:00) Midway</option>
 												<option value="Pacific/Niue" @if (config('app.timezone') == 'Pacific/Niue') selected @endif>(UTC-11:00) Niue</option>
 												<option value="Pacific/Pago_Pago" @if (config('app.timezone') == 'Pacific/Pago_Pago') selected @endif>(UTC-11:00) Pago Pago</option>
@@ -500,9 +500,8 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">									
 										<div class="input-box">								
 											<h6>{{ __('Default Group for New Users') }}</h6>
-											<select id="user-group" name="user-group" data-placeholder="{{ __('Select Default New User Group') }}">	
+											<select id="user-group" name="user-group" class="form-select" data-placeholder="{{ __('Select Default New User Group') }}">	
 												<option value="user" {{ (config('settings.default_user') == 'user') ? 'selected' : '' }}>{{ __('User') }}</option>
-												<option value="subscriber" {{ (config('settings.default_user') == 'subscriber') ? 'selected' : '' }}>{{ __('Subscriber') }}</option>
 												<option value="admin" {{ (config('settings.default_user') == 'admin') ? 'selected' : '' }}>{{ __('Administrator') }}</option>																		
 											</select> 
 										</div> 
@@ -511,7 +510,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">									
 										<div class="input-box">								
 											<h6>{{ __('Email for Support Tickets') }}</h6>
-											<select id="support-ticket" name="support-ticket" data-placeholder="{{ __('Enable/Disable Email Sending for Support Ticket Statuses') }}">	
+											<select id="support-ticket" name="support-ticket" class="form-select" data-placeholder="{{ __('Enable/Disable Email Sending for Support Ticket Statuses') }}">	
 												<option value="enabled" {{ (config('settings.support_email') == 'enabled') ? 'selected' : '' }}>{{ __('Enable') }}</option>
 												<option value="disabled" {{ (config('settings.support_email') == 'disabled') ? 'selected' : '' }}>{{ __('Disable') }}</option>																		
 											</select> 
@@ -521,7 +520,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">									
 										<div class="input-box">								
 											<h6>{{ __('User Notifications Panel') }}</h6>
-											<select id="user-notification" name="user-notification" data-placeholder="{{ __('Enable/Disable User Notification View Panel') }}">	
+											<select id="user-notification" name="user-notification" class="form-select" data-placeholder="{{ __('Enable/Disable User Notification View Panel') }}">	
 												<option value="enabled" {{ (config('settings.user_notification') == 'enabled') ? 'selected' : '' }}>{{ __('Enable') }}</option>
 												<option value="disabled" {{ (config('settings.user_notification') == 'disabled') ? 'selected' : '' }}>{{ __('Disable') }}</option>																		
 											</select> 
@@ -531,7 +530,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">									
 										<div class="input-box">								
 											<h6>{{ __('User Support Request Panel') }}</h6>
-											<select id="user-support" name="user-support" data-placeholder="Enable/Disable User Support Ticket Panel">	
+											<select id="user-support" name="user-support" class="form-select" data-placeholder="Enable/Disable User Support Ticket Panel">	
 												<option value="enabled" {{ (config('settings.user_support') == 'enabled') ? 'selected' : '' }}>{{ __('Enable') }}</option>
 												<option value="disabled" {{ (config('settings.user_support') == 'disabled') ? 'selected' : '' }}>{{ __('Disable') }}</option>																		
 											</select> 

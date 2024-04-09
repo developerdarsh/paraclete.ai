@@ -29,6 +29,10 @@ return new class extends Migration
                     'name' => 'terms',
                     'value' => ''
                 ],
+                [
+                    'name' => 'about',
+                    'value' => ''
+                ],
 
             ]
         );

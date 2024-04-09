@@ -12,25 +12,45 @@ class HelperService
 {
     public static function getTotalWords()
     {   
-        $value = number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid);
+        if (auth()->user()->available_words != -1) {
+            $value = number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid);
+        } else {
+            $value = __('Unlimited');
+        }
+        
         return $value;
     }
 
     public static function getTotalImages()
     {   
-        $value = number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid);
+        if (auth()->user()->available_images != -1) {
+            $value = number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid);
+        } else {
+            $value = __('Unlimited');
+        }
+        
         return $value;
     }
 
     public static function getTotalMinutes()
     {   
-        $value = number_format(auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid);
+        if (auth()->user()->available_minutes != -1) {
+            $value = number_format(auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid);
+        } else {
+            $value = __('Unlimited');
+        }
+
         return $value;
     }
 
     public static function getTotalCharacters()
     {   
-        $value = number_format(auth()->user()->available_chars + auth()->user()->available_chars_prepaid);
+        if (auth()->user()->available_chars != -1) {
+            $value = number_format(auth()->user()->available_chars + auth()->user()->available_chars_prepaid);
+        } else {
+            $value = __('Unlimited');
+        }
+
         return $value;
     }
 

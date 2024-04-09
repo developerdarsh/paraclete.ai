@@ -81,60 +81,70 @@
 						</div>
 
 						<div class="row border-top pt-4 mt-3">
-							<div class="col-sm-12 col-md-4">
+							<div class="col-sm-12 col-md-4 pt-3 pb-3">
 								<div class="form-group">
-									<label class="custom-switch">
+									<label class="custom-switch mb-0">
 										<input type="checkbox" name="template" class="custom-switch-input" checked>
 										<span class="custom-switch-indicator"></span>
 										<span class="custom-switch-description">{{ __('Allow Credits for Templates') }}</span>
 									</label>
 								</div>
 							</div>
-							<div class="col-sm-12 col-md-4">
-								<div class="form-group">
-									<label class="custom-switch">
-										<input type="checkbox" name="chat" class="custom-switch-input" checked>
-										<span class="custom-switch-indicator"></span>
-										<span class="custom-switch-description">{{ __('Allow Credits for AI Chat') }}</span>
-									</label>
+							@if (config('settings.chat_feature_user') == 'allow')
+								<div class="col-sm-12 col-md-4 pt-3 pb-3">
+									<div class="form-group">
+										<label class="custom-switch mb-0">
+											<input type="checkbox" name="chat" class="custom-switch-input" checked>
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Allow Credits for AI Chat') }}</span>
+										</label>
+									</div>
 								</div>
-							</div>
-							<div class="col-sm-12 col-md-4">
-								<div class="form-group">
-									<label class="custom-switch">
-										<input type="checkbox" name="image" class="custom-switch-input" checked>
-										<span class="custom-switch-indicator"></span>
-										<span class="custom-switch-description">{{ __('Allow Credits for AI Images') }}</span>
-									</label>
+							@endif
+							@if (config('settings.image_feature_user') == 'allow')
+								<div class="col-sm-12 col-md-4 pt-3 pb-3">
+									<div class="form-group">
+										<label class="custom-switch mb-0">
+											<input type="checkbox" name="image" class="custom-switch-input" checked>
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Allow Credits for AI Images') }}</span>
+										</label>
+									</div>
 								</div>
-							</div>
-							<div class="col-sm-12 col-md-4 mt-3">
-								<div class="form-group">
-									<label class="custom-switch">
-										<input type="checkbox" name="code" class="custom-switch-input" checked>
-										<span class="custom-switch-indicator"></span>
-										<span class="custom-switch-description">{{ __('Allow Credits for AI Code') }}</span>
-									</label>
+							@endif
+							@if (config('settings.code_feature_user') == 'allow')
+								<div class="col-sm-12 col-md-4 pt-3 pb-3">
+									<div class="form-group">
+										<label class="custom-switch mb-0">
+											<input type="checkbox" name="code" class="custom-switch-input" checked>
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Allow Credits for AI Code') }}</span>
+										</label>
+									</div>
 								</div>
-							</div>
-							<div class="col-sm-12 col-md-4 mt-3">
-								<div class="form-group">
-									<label class="custom-switch">
-										<input type="checkbox" name="voiceover" class="custom-switch-input" checked>
-										<span class="custom-switch-indicator"></span>
-										<span class="custom-switch-description">{{ __('Allow Credits for AI Voiceovers') }}</span>
-									</label>
+							@endif
+							@if (config('settings.voiceover_feature_user') == 'allow')
+								<div class="col-sm-12 col-md-4 pt-3 pb-3">
+									<div class="form-group">
+										<label class="custom-switch mb-0">
+											<input type="checkbox" name="voiceover" class="custom-switch-input" checked>
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Allow Credits for AI Voiceovers') }}</span>
+										</label>
+									</div>
 								</div>
-							</div>
-							<div class="col-sm-12 col-md-4 mt-3">
-								<div class="form-group">
-									<label class="custom-switch">
-										<input type="checkbox" name="speech" class="custom-switch-input" checked>
-										<span class="custom-switch-indicator"></span>
-										<span class="custom-switch-description">{{ __('Allow Credits for AI Speech to Text') }}</span>
-									</label>
+							@endif
+							@if (config('settings.whisper_feature_user') == 'allow')
+								<div class="col-sm-12 col-md-4 pt-3 pb-3">
+									<div class="form-group">
+										<label class="custom-switch mb-0">
+											<input type="checkbox" name="speech" class="custom-switch-input" checked>
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Allow Credits for AI Speech to Text') }}</span>
+										</label>
+									</div>
 								</div>
-							</div>
+							@endif
 						</div>
 
 						<div class="row border-top pt-4 mt-3">

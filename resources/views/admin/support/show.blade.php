@@ -23,7 +23,7 @@
 				<div class="card-header p-4 pl-5 block">
 					<p class="card-title mb-4">{{ __('Ticket Subject') }}: <span class="text-info">{{ $ticket->subject }}</span></p>
 					<p class="card-title">{{ __('Ticket') }} ID: <span class="text-info">{{ $ticket->ticket_id }}</span></p>
-					<span class="cell-box fs-14 support-header support-{{ strtolower($ticket->status) }}">{{ $ticket->status }}</span>
+					<span class="cell-box fs-14 support-header support-{{ strtolower($ticket->status) }}">{{ __($ticket->status) }}</span>
 				</div>
 				<div class="card-body pt-5">	
 					<div class="row">	
@@ -32,7 +32,7 @@
 								@if ($message->role != 'admin')
 									<div class="background-white support-message mb-5">
 										<p class="font-weight-bold fs-11"><i class="fa-sharp fa-solid fa-calendar-clock mr-2"></i>{{ date_format($message->created_at, 'd M Y H:i A') }} <span>{{ __('Your Message') }}</span></p>
-										<p class="fs-14 mb-1">{{ $message->message }}</p>
+										<p class="fs-14 mb-1">{!! nl2br(html_entity_decode($message->message))!!}</p>
 										@if ($message->attachment)
 											<p class="font-weight-bold fs-11 mb-1">{{ __('Attachment') }}</p>
 											<a class="font-weight-bold fs-11 text-primary" href="{{ URL::asset($message->attachment) }}">{{ __('View Attached Image') }}</a>
@@ -41,7 +41,7 @@
 								@else
 									<div class="background-white support-message support-response mb-5">
 										<p class="font-weight-bold fs-11"><i class="fa-sharp fa-solid fa-calendar-clock mr-2"></i>{{ date_format($message->created_at, 'd M Y H:i A') }} <span class="text-primary">{{ __('Admin Response') }}</span></p>
-										<p class="fs-14 mb-1">{{ $message->message }}</p>
+										<p class="fs-14 mb-1">{!! nl2br(html_entity_decode($message->message))!!}</p>
 										@if ($message->attachment)
 											<p class="font-weight-bold fs-11 mt-3 mb-1">{{ __('Attachment') }}</p>
 											<a class="font-weight-bold fs-11 text-primary" href="{{ URL::asset($message->attachment) }}">{{ __('View Attached Image') }}</a>

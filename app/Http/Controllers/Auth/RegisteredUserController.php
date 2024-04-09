@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Str;
 use App\Models\Setting;
+use Http;
 
 use Spatie\Permission\Traits\HasRoles;
 
@@ -22,17 +23,21 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        $information_rows = ['title', 'author', 'keywords', 'description', 'css', 'js'];
-        $information = [];
-        $settings = Setting::all();
+        if (auth()->user()) {
+            return redirect()->route('user.dashboard');
+        } else {
+            $information_rows = ['title', 'author', 'keywords', 'description', 'css', 'js'];
+            $information = [];
+            $settings = Setting::all();
 
-        foreach ($settings as $row) {
-            if (in_array($row['name'], $information_rows)) {
-                $information[$row['name']] = $row['value'];
+            foreach ($settings as $row) {
+                if (in_array($row['name'], $information_rows)) {
+                    $information[$row['name']] = $row['value'];
+                }
             }
-        }
 
-        return view('auth.register', compact('information'));
+            return view('auth.register', compact('information'));
+        }
     }
 
     /**
@@ -118,19 +123,36 @@ class RegisteredUserController extends Controller
         $user->assignRole(config('settings.default_user'));
         $user->status = $status;
         $user->group = config('settings.default_user');
-        $user->available_words_prepaid = config('settings.free_tier_words');
-        $user->available_images_prepaid = config('settings.free_tier_images');
-        $user->available_chars_prepaid = config('settings.voiceover_welcome_chars');
-        $user->available_minutes_prepaid = config('settings.whisper_welcome_minutes');
+        $user->available_words = config('settings.free_tier_words');
+        $user->available_images = config('settings.free_tier_images');
+        $user->available_chars = config('settings.voiceover_welcome_chars');
+        $user->available_minutes = config('settings.whisper_welcome_minutes');
         $user->default_voiceover_language = config('settings.voiceover_default_language');
         $user->default_voiceover_voice = config('settings.voiceover_default_voice');
+        $user->default_template_language = config('settings.default_language');
         $user->job_role = 'Happy Person';
         $user->referral_id = strtoupper(Str::random(15));
         $user->referred_by = $referrer_id;
+		$this->addToGetResponse($request->name, $request->email);
         $user->save();      
      
     }
 
+	protected function addToGetResponse($name, $email)
+    {
+        $apiKey = config('services.getResponse.key');
+        $listId = config('services.getResponse.list_id');
+        $response = Http::withHeaders([
+            "X-Auth-Token" => "api-key " . $apiKey,
+            "Content-Type" => "application/json", 
+        ])->post('https://api.getresponse.com/v3/contacts', [
+            "name" => $name,
+            "email" => $email,
+            "campaign" => [
+                "campaignId" => $listId
+            ]
+        ]);
+    }
 
     /**
      * Validate reCaptcha (if enabled)

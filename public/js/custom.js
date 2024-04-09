@@ -64,10 +64,7 @@
         }
     });
     $("#back-to-top").on("click", function(e){
-        $("html, body").animate({
-            scrollTop: 0
-        }, 600);
-        return false;
+        $('html,body').animate({ scrollTop: 0 }, 'fast');
     });
 
 
@@ -173,6 +170,17 @@
 		}).done(function(data) {})
 	});
 
+     /*===========================================================================
+      *
+      *  RICH TEXT BOX in resume file
+      *
+      *============================================================================*/
+
+   
+// var editor1 = new RichTextEditor("#div_editor1");
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
 
 })(jQuery);
 

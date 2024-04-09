@@ -30,6 +30,7 @@ class Content extends Model
         'language_flag',
         'template_name',
         'icon',
-        'group'
+        'group',
+        'image'
     ];
 }

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('minutes')->default(0);
             $table->boolean('featured')->nullable()->default(false);
             $table->string('pricing_plan')->default('prepaid');
+            $table->string('model')->nullable();
             $table->timestamps();
         });
     }

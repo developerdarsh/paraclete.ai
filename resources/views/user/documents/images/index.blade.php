@@ -1,10 +1,7 @@
 @extends('layouts.app')
 @section('css')
-	<!-- Data Table CSS -->
-	<link href="{{URL::asset('plugins/datatable/datatables.min.css')}}" rel="stylesheet" />
 	<!-- Sweet Alert CSS -->
 	<link href="{{URL::asset('plugins/sweetalert/sweetalert2.min.css')}}" rel="stylesheet" />
-	<link href="{{URL::asset('plugins/photoviewer/photoviewer.min.css')}}" rel="stylesheet" />
 @endsection
 @section('page-header')
 <!-- PAGE HEADER -->
@@ -21,99 +18,62 @@
 <!-- END PAGE HEADER -->
 @endsection
 @section('content')
-	<div class="col-lg-12 col-md-12 col-sm-12">
-		<div class="card border-0">
-			<div class="card-header">
-				<h3 class="card-title"><i class="fa-solid fa-image-landscape mr-2 text-info"></i>{{ __('All My Generated Images') }}</h3>
+	<div class="row mt-5">
+		@foreach ($data as $image)
+			<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 image-container">				
+				<div class="grid-item">
+					<div class="grid-image-wrapper">
+						<div class="flex grid-buttons text-center">
+							<a href="{{ url($image->image) }}" class="grid-image-view text-center" download><i class="fa-sharp fa-solid fa-arrow-down-to-line" title="{{ __('Download Image') }}"></i></a>
+							<a href="#" class="grid-image-view text-center viewImageResult" id="{{ $image->id }}"><i class="fa-sharp fa-solid fa-camera-viewfinder" title="{{ __('View Image') }}"></i></a>
+							<a href="#" class="grid-image-view text-center deleteResultButton" id="{{ $image->id }}"><i class="fa-solid fa-trash-xmark" title="{{ __('Delete Image') }}"></i></a>							
+						</div>
+						<div>
+							<span class="grid-image">
+								<img class="loaded" src="@if($image->storage == 'local') {{ URL::asset($image->image) }} @else {{ $image->image }} @endif" alt="" >
+							</span>
+						</div>
+						<div class="grid-description">
+							<span class="fs-9 text-primary">@if ($image->vendor == 'sd') {{ __('Stable Diffusion') }} @else {{ __('Dalle') }} @endif</span>
+							<p class="fs-10 mb-0">{{ substr($image->description, 0, 63) }}...</p>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="card-body">
-				<!-- SET DATATABLE -->
-				<table id='resultsTable' class='table' width='100%'>
-					<thead>
-						<tr>
-							<th width="15%">{{ __('Image') }}</th> 
-							<th width="5%">{{ __('Resolution') }}</th>
-							<th width="5%">{{ __('Created On') }}</th> 								           								    						           	
-							<th width="3%">{{ __('Actions') }}</th>
-						</tr>
-					</thead>
-			</table> <!-- END SET DATATABLE -->	
+		@endforeach
+
+		<input type="hidden" id="start" name="start" value="12">
+		<input type="hidden" id="rowperpage" value="6">
+		<input type="hidden" id="totalrecords" value="{{ $records }}">
+	</div>
+
+	<div class="image-modal">
+		<div class="modal fade" id="image-view-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6>{{ __('Image View') }}</h6>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					
+				</div>
 			</div>
-		</div>
+			</div>
+	  	</div>
 	</div>
 @endsection
 
 @section('js')
 <script src="{{URL::asset('plugins/sweetalert/sweetalert2.all.min.js')}}"></script>
-<script src="{{URL::asset('plugins/character-count/jquery-simple-txt-counter.min.js')}}"></script>
-<script src="{{URL::asset('plugins/datatable/datatables.min.js')}}"></script>
-<script src="{{URL::asset('plugins/photoviewer/photoviewer.min.js')}}"></script>
 <script type="text/javascript">
 	$(function () {
 
 		"use strict";
 
-		let table = $('#resultsTable').DataTable({
-				"lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
-				responsive: true,
-				colReorder: true,	
-				"order": [[ 3, "desc" ]],	
-				language: {
-					"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>{{ __('Looks like you do not have any images created yet') }}</div>",
-					search: "<i class='fa fa-search search-icon'></i>",
-					lengthMenu: '_MENU_ ',
-					paginate : {
-						first    : '<i class="fa fa-angle-double-left"></i>',
-						last     : '<i class="fa fa-angle-double-right"></i>',
-						previous : '<i class="fa fa-angle-left"></i>',
-						next     : '<i class="fa fa-angle-right"></i>'
-					}
-				},
-				pagingType : 'full_numbers',
-				processing: true,
-				serverSide: true,
-				ajax: "{{ route('user.images') }}",
-				columns: [
-					{
-						data: 'custom-image',
-						name: 'custom-image',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'resolution',
-						name: 'resolution',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'created-on',
-						name: 'created-on',
-						orderable: true,
-						searchable: true
-					},												
-					{
-						data: 'actions',
-						name: 'actions',
-						orderable: false,
-						searchable: false
-					},
-				]
-		});
+		checkWindowSize();
 
-
-		$(document).ready(function() {
-
-			$('#title').simpleTxtCounter({
-				maxLength: 200,
-				countElem: '<div class="form-text"></div>',
-				lineBreak: false,
-			});
-
-		});	
-
-
-		$(document).on('click', '.file-name', function(e) {
+		$(document).on('click', '.viewImageResult', function(e) {
 
 			"use strict";
 
@@ -124,36 +84,21 @@
 			$.ajax({
 				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 				method: 'post',
-				url: '/user/images/view',
+				url: 'images/view',
 				data:{
 					id: id,
 				},
 				success:function(data) {   
-
-					var items = [{src: data['url']}];
-
-					var viewer = new PhotoViewer(items, {
-						
-						footerToolbar: [
-							'zoomIn','zoomOut','fullscreen','actualSize',
-							'customButton'
-						],
-						customButtons: {
-							customButton: {
-							text: '<i class="fas fa-cloud-download-alt" ></i>',
-							title: 'Download Image',
-							click: function (context, e) {
-								getFile(data['url']);
-							}
-							}
-						}
-
-					});
+					if (data['status'] == 'success') {
+						$("#image-view-modal .modal-body").html(data['modal']);
+						var myModal = new bootstrap.Modal(document.getElementById('image-view-modal'))
+						myModal.show();
+					} else {
+						toastr.error(data['message']);
+					}
 				
 				}
-
 			});
-
 		});
 
 
@@ -182,11 +127,11 @@
 						contentType: false,
 						success: function (data) {
 							if (data['status'] == 'success') {
-								Swal.fire('{{ __('Image Deleted') }}', '{{ __('Selected image has been successfully deleted') }}', 'success');	
-								$("#resultsTable").DataTable().ajax.reload();								
+								toastr.success('{{ __('Selected image has been successfully deleted') }}');	
+								location.replace(location.href);								
 							} else {
-								Swal.fire('{{ __('Delete Failed') }}', '{{ __('There was an error while deleting this image') }}', 'error');
-							}      
+								toastr.error('{{ __('There was an error while deleting this image') }}');
+							}       
 						},
 						error: function(data) {
 							Swal.fire('Oops...','{{ __('Something went wrong') }}!', 'error')
@@ -195,7 +140,26 @@
 				} 
 			})
 		});
+
+
+		// FETCH IMAGES FOR MOBILE
+		$(document).on('touchmove', onScroll);         
+				
+		$(window).scroll(function(){
+			let position = $(window).scrollTop();
+			let bottom = $(document).height() - $(window).height();	
+			if( position == bottom ){
+				fetchData(); 
+			}
+		});
+		
 	});
+
+	function onScroll(){
+		if($(window).scrollTop() > $(document).height() - $(window).height()-100) {
+			fetchData(); 
+		}
+	}
 
 	function getFile(uri) {
 		//window.open(data,'_blank');
@@ -209,6 +173,37 @@
             delete link;
 		return false;
 	}
+
+	// Check if the page has enough content or not. If not then fetch records
+    function checkWindowSize(){
+        if($(window).height() >= $(document).height()){
+            fetchData();
+        }
+    }
+ 
+    // Fetch records
+    function fetchData(){
+        var start = Number($('#start').val());
+        var allcount = Number($('#totalrecords').val());
+        var rowperpage = Number($('#rowperpage').val());
+        start = start + rowperpage;
+ 
+        if(start <= allcount){
+            $('#start').val(start);
+ 
+            $.ajax({
+                url:"{{route('user.images.load')}}",
+                data: {start:start},
+                dataType: 'json',
+                    success: function(response){
+                    $(".image-container:last").after(response.html).show().fadeIn("slow");
+ 
+                    // Check if the page has enough content or not. If not then fetch records
+                    checkWindowSize();
+                }
+            });
+        }
+    }
 
 </script>
 @endsection

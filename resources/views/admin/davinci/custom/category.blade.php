@@ -15,7 +15,6 @@
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
 				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
-				<li class="breadcrumb-item" aria-current="page"><a href="{{ route('admin.davinci.custom') }}"> {{ __('Custom Templates') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Category Manager') }}</a></li>
 			</ol>
 		</div>
@@ -102,8 +101,8 @@
 						searchable: true
 					},	
 					{
-						data: 'description',
-						name: 'description',
+						data: 'custom-description',
+						name: 'custom-description',
 						orderable: true,
 						searchable: true
 					},							

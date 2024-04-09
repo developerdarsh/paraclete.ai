@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('position')->nullable();
             $table->longText('text');
             $table->string('image_url')->nullable();
+            $table->string('row')->default('first')->nullable();
+            $table->string('rating')->default('5.0')->nullable();
             $table->timestamps();
         });
     }

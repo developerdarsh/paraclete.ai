@@ -44,7 +44,7 @@
 
 							<div class="col-lg-12 col-md-12 col-sm-12">							
 								<div class="input-box">								
-									<h6>{{ __('Customer Location or Company Name') }} <span class="text-muted">({{ __('Optional') }})</span></h6>
+									<h6>{{ __('Customer Location or Company Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 									<div class="form-group">							    
 										<input type="text" class="form-control" id="position" name="position" value="{{ $id->position }}" required>
 									</div> 
@@ -54,7 +54,7 @@
 								</div> 						
 							</div>
 
-							<div class="col-lg-6 col-md-6 col-sm-12">
+							<div class="col-lg-12 col-md-12 col-sm-12">
 								<div class="input-box">
 									<h6>{{ __('Customer Avatar') }}</h6>
 									<div class="input-group file-browser">									
@@ -69,6 +69,28 @@
 										<p class="text-danger">{{ $errors->first('image') }}</p>
 									@enderror
 								</div>
+							</div>
+
+							<div class="col-lg-6 col-md-6 col-sm-12">							
+								<div class="input-box">								
+									<h6>{{ __('Rating') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+									<div class="form-group">							    
+										<input type="text" class="form-control" id="rating" name="rating" value="{{ $id->rating }}" placeholder="Ex: 5.0" required>
+									</div> 
+									@error('rating')
+										<p class="text-danger">{{ $errors->first('rating') }}</p>
+									@enderror	
+								</div> 						
+							</div>
+
+							<div class="col-lg-6 col-md-6 col-sm-12">							
+								<div class="input-box">	
+									<h6>{{ __('Review Line Group') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+			  						<select id="faq-status" name="row" class="form-select" data-placeholder="{{ __('Select Review Line Group') }}:">			
+										<option value="first" @if($id->row == 'first') selected @endif>{{ __('First') }}</option>
+										<option value="second" @if($id->row == 'second') selected @endif>{{ __('Second') }}</option>
+									</select>
+								</div> 							
 							</div>
 						</div>
 

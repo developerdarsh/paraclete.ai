@@ -42,7 +42,7 @@
 									<th width="7%">{{ __('Discount') }}</th>
 									<th width="7%">{{ __('Quantity Left') }}</th>																																												
 									<th width="10%">{{ __('Valid Until') }}</th>
-									<th width="7%">{{ __('Action') }}</th>
+									<th width="7%">{{ __('Actions') }}</th>
 								</tr>
 							</thead>
 					</table> <!-- END SET DATATABLE -->
@@ -88,7 +88,8 @@
 				colReorder: true,
 				"order": [[ 7, "asc" ]],
 				language: {
-					"emptyTable": "{{ __('No promocodes created yet') }}",
+					"emptyTable": "<div><br>{{ __('No promocodes created yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {

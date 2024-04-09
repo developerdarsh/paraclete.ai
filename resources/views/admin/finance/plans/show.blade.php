@@ -10,7 +10,7 @@
 					<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-sack-dollar mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
 					<li class="breadcrumb-item" aria-current="page"><a href="{{ route('admin.finance.dashboard') }}"> {{ __('Finance Management') }}</a></li>
 					<li class="breadcrumb-item" aria-current="page"><a href="{{ route('admin.finance.plans') }}"> {{ __('Subscription Plans') }}</a></li>
-					<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('Plan') }}</a></li>
+					<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('Plan Details') }}</a></li>
 				</ol>
 			</ol>
 		</div>
@@ -32,7 +32,8 @@
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5"><span class="font-weight-bold">{{ __('Plan Status') }}</span><span class="cell-box plan-{{ $id->status }}">{{ ucfirst($id->status) }}</span></td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Payment Frequency') }}</span><span class="cell-box payment-{{ $id->payment_frequency }}">{{ ucfirst($id->payment_frequency) }}</span></td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Price') }}</span><span>{{ $id->price }} {{ $id->currency }}</span></td></tr>
-							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('OpenAI Model for Text') }}</span><span class="font-weight-bold">{{ $id->model }}</span></td></tr>
+							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('OpenAI Model for Templates') }}</span><span class="font-weight-bold">{{ $id->model }}</span></td></tr>
+							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('OpenAI Model for AI Chat') }}</span><span class="font-weight-bold">{{ $id->model_chat }}</span></td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Paypal Plan ID') }}</span><span>{{ $id->paypal_gateway_plan_id }}</span></td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Stripe Plan ID') }}</span><span>{{ $id->stripe_gateway_plan_id }}</span></td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Razorpay Plan ID') }}</span><span>{{ $id->razorpay_gateway_plan_id }}</span></td></tr>
@@ -50,6 +51,8 @@
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('AI Speech to Text Feature') }}</span>@if($id->transcribe_feature)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('AI Chat Feature') }}</span>@if($id->chat_feature)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('AI Code Feature') }}</span>@if($id->code_feature)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
+							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('AI Article Wizard Feature') }}</span>@if($id->wizard_feature)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
+							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('AI Vision Feature') }}</span>@if($id->vision_feature)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Free Plan') }}</span>@if($id->free)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Featured Plan') }}</span>@if($id->featured)<i class="fa-solid fa-circle-check table-info-button green fs-20"></i>@else <i class="fa-solid fa-circle-xmark red table-info-button fs-20"></i> @endif</td></tr>
 							<tr><td class="justify-content-between d-flex align-items-center pl-5 pr-5 pt-4 pb-4"><span class="font-weight-bold">{{ __('Primary Heading') }}</span><span>{{ ucfirst($id->primary_heading) }}</span></td></tr>

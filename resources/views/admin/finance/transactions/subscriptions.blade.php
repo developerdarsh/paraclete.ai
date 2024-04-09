@@ -35,12 +35,12 @@
 							<thead>
 								<tr>
 									<th width="15%">{{ __('User') }}</th>
-									<th width="10%">{{ __('Plan Name') }}</th>									
 									<th width="8%">{{ __('Status') }}</th>	
+									<th width="10%">{{ __('Plan Name') }}</th>								
 									<th width="10%">{{ __('Subscribed On') }}</th>								
 									<th width="10%">{{ __('Subscription ID') }}</th>
 									<th width="10%">{{ __('Paid By') }}</th>																
-									<th width="10%">{{ __('Words') }}</th>
+									<th width="8%">{{ __('Words') }}</th>
 									<th width="10%">{{ __('Pricing Plan') }}</th>
 									<th width="10%">{{ __('Next Payment') }}</th>
 									<th width="7%">{{ __('Actions') }}</th>
@@ -67,8 +67,10 @@
 				"lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
 				responsive: true,
 				colReorder: true,
-				"order": [[ 0, "desc" ]],
+				"order": [[ 1, "asc" ]],
 				language: {
+					"emptyTable": "<div><br>{{ __('There are no subscribers yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {
@@ -90,17 +92,17 @@
 						searchable: true
 					},	
 					{
-						data: 'custom-plan-name',
-						name: 'custom-plan-name',
-						orderable: true,
-						searchable: true
-					},
-					{
 						data: 'custom-status',
 						name: 'custom-status',
 						orderable: true,
 						searchable: true
 					},
+					{
+						data: 'custom-plan-name',
+						name: 'custom-plan-name',
+						orderable: true,
+						searchable: true
+					},					
 					{
 						data: 'created-on',
 						name: 'created-on',

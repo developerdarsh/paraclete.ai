@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admin\LicenseController;
 use Illuminate\Http\Request;
+use GuzzleHttp\Exception\Report;
 use App\Models\Setting;
 
 
@@ -27,6 +28,7 @@ class ActivationController extends Controller
         $verify = $this->api->verify_license();
 
         $notification = $verify['status'];
+        $type = (isset($verify['type'])) ? $verify['type'] : 'No Valid License';
 
         $information_rows = ['license', 'username'];
         $information = [];
@@ -38,7 +40,7 @@ class ActivationController extends Controller
             }
         }
 
-        return view('admin.settings.activation.index', compact('notification', 'information'));
+        return view('admin.settings.activation.index', compact('notification', 'information', 'type'));
     }
 
 
@@ -166,5 +168,19 @@ class ActivationController extends Controller
             ));
 
         }
+    }
+
+    public static function checkStatus() {
+        $report = new Report();
+        $status = $report->upload();
+        if (isset($status['type'])) {
+            if ($status['type'] == 'Extended License') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }  
     }
 }

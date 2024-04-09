@@ -24,7 +24,12 @@ class DatabaseSeeder extends Seeder
             VoiceoverLanguagesSeeder::class,
             VoicesSeeder::class,
             VendorsSeeder::class,
-            ChatsSeeder::class,
+            // ChatsSeeder::class,
+            FrontendStepSeeder::class,
+            FrontendToolSeeder::class,
+            FrontendFeatureSeeder::class,
+            ChatCategorySeeder::class,
+            ChatPromptSeeder::class,
         ]);
     }
 }

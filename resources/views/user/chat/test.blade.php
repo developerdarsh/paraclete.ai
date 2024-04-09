@@ -1,53 +1,34 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech Demo</title>
+</head>
+<body>
+    <label for="textInput">Enter Text:</label>
+    <textarea id="textInput" rows="4" cols="50">Hello, this is a test.</textarea>
+    <br>
+    <button id="playButton">Play Audio</button>
+    <audio id="audioPlayer" controls></audio>
 
-
-@section('content')
-<input type="text" id="textToConvert">
-<button id="convertButton">Convert to Speech</button>
-<audio id="audioPlayer" controls></audio>
-@endsection
-@section('js')
-<script src="{{URL::asset('plugins/sweetalert/sweetalert2.all.min.js')}}"></script>
-<script src="{{URL::asset('plugins/pdf/html2canvas.min.js')}}"></script>
-<script src="{{URL::asset('plugins/pdf/jspdf.umd.min.js')}}"></script>
-<script src="{{URL::asset('js/export-chat.js')}}"></script>
-<script type="text/javascript">
-$(document).ready(function() {
- $('#convertButton').click(function() {
-  	var text = $('#textToConvert').val();
-
-	fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream?optimize_streaming_latency=0', {
-  method: 'POST',
-  headers: {
-    'Accept': '*/*',
-    'Xi-Api-Key': 'd2babf9c40d755b3190831cb00b3950c',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    text: text,
-    model_id: 'eleven_monolingual_v1',
-    voice_settings: {
-      stability: 0,
-      similarity_boost: 0,
-      style: 0.5,
-      use_speaker_boost: true
-    }
-  })
-})
-  .then(response => response.blob())
-  .then(blob => {
-    const audioUrl = URL.createObjectURL(blob);
-    const audioPlayer = document.getElementById('audioPlayer');
-    audioPlayer.src = audioUrl;
-    audioPlayer.play();
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-
-});
-
-});
-
-</script>
-@endsection
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#playButton').click(function () {
+                $.get('{{ route("convert-text-to-audio") }}', function (voices) {
+                    console.log(voices);
+                     const audioUrl = "https://paraclete.ai/public/"+voices.result_url;
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+                })
+                .fail(function(error) {
+                    console.error('Error fetching voices:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

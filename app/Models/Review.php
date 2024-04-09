@@ -18,6 +18,8 @@ class Review extends Model
         'name',
         'position',
         'text',
-        'image_url',      
+        'image_url',   
+        'row',
+        'rating'
     ];
 }

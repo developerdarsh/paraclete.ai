@@ -64,7 +64,8 @@
 				colReorder: true,
 				"order": [[ 6, "desc" ]],
 				language: {
-					"emptyTable": "<div><br>You didn't make any transactions yet</div>",
+					"emptyTable": "<div><br>{{ __('You do not have any transactions yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {

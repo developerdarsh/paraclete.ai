@@ -86,7 +86,7 @@ class BraintreeService
         $total_amount = session()->get('total_amount');
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
 
         try {

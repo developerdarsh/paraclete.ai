@@ -3,8 +3,8 @@
 
 Join {{ config('app.name') }} to start generating your content by AI.
 
-<a href="{{ config('app.url') }}/?ref={{ auth()->user()->referral_id }}">Register Now</a>
-
+<!-- <a href="{{ config('app.url') }}/?ref={{ auth()->user()->referral_id }}">Register Now</a> -->
+<a href="{{ config('frontend.custom_url.link') }}/?ref={{ auth()->user()->referral_id }}">Register Now</a>
 Thanks,<br>
 {{ config('app.name') }}
 @endcomponent

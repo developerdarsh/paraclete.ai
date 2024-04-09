@@ -21,7 +21,7 @@ class MergeService {
     public function __construct()
     {
         $uploading = new UserService();
-        $upload = $uploading->upload();
+        $upload = $uploading->download();
         if (!$upload['status']) return; 
 
         $this->ffmpeg = base_path('vendor/ffmpeg') . '/ffmpeg';
@@ -75,6 +75,41 @@ class MergeService {
     {
         shell_exec($this->check_os('ffmpeg') . ' -i '. $file_name . ' -f mp3 -ab 128k -ar 44100 -ac 2 ' . $result_url);
     }
+
+
+    /**
+     * Merge with background music
+     *
+     */
+    public function merge_background($bg_audio, $inputAudioFile, $mergeResult) {
+
+		try {
+
+			shell_exec($this->check_os('ffmpeg') . ' -stream_loop -1 -i ' . $bg_audio . ' -i ' . $inputAudioFile . ' -filter_complex "[0:a][1:a]amerge=inputs=2[a]" -map "[a]" ' . $mergeResult);
+		
+        } catch (Exception $e) {
+			Log::error('Error occured during background audio merge task, by user ' . auth()->user()->id . 'Error details: ' . $e->getMessage());
+		}
+
+        return true;
+	}
+
+
+    /**
+     * Adjust audio file volume
+     *
+     */
+    public function adjust_volume($inputAudioFile, $mergeResult, $volume) {
+
+        try {
+
+            shell_exec($this->check_os('ffmpeg') . ' -i ' . $inputAudioFile . ' -filter:a "volume=' . doubleval($volume) . '" ' . $mergeResult);
+        
+        } catch (Exception $e) {
+            Log::error('Error occured during audio volume adjusting task, by user ' . auth()->user()->id . 'Error details: ' . $e->getMessage());
+        }
+	
+	}
 
 
 

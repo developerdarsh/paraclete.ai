@@ -41,64 +41,8 @@
         }
     });
     $("#back-to-top").on("click", function(e){
-        $("html, body").animate({
-            scrollTop: 0
-        }, 600);
-        return false;
+        $('html,body').animate({ scrollTop: 0 }, 'fast');
     });
-
-
-
-/* ===================================================================
-
-    Feedbacks Section Image Slider 
-
-   =================================================================== */
-
-   $(document).ready(function()  {
-
-    "use strict";
-  
-    $('#feedbacks').slick({
-       slidesToShow: 3,
-       slidesToScroll: 1,
-       dots: true,
-       arrows: true,
-       nextArrow: $('.offers-next'),
-       prevArrow: $('.offers-prev'),
-       autoplay: false,
-       autoplaySpeed: 2000, 
-       speed: 1000,
-       infinite: true,
-       responsive: [
-        {
-          breakpoint: 992,
-          settings: {
-            slidesToShow: 3,
-            slidesToScroll: 1,
-            infinite: true,         
-          }
-        },
-        {
-          breakpoint: 768,
-          settings: {
-            slidesToShow: 2,
-            slidesToScroll: 1,
-            infinite: true,
-          }
-        },
-        {
-          breakpoint: 480,
-          settings: {
-            slidesToShow: 1,
-            slidesToScroll: 1,
-            infinite: true,
-          }
-        },
-      ]
-    });
-  
-  });
 
 
 
@@ -170,7 +114,7 @@
        slidesToScroll: 1,
        dots: false,
        arrows: false,
-       autoplay: true,
+       autoplay: false,
        autoplaySpeed: 2000, 
        speed: 1000,
        infinite: true,
@@ -186,7 +130,7 @@
         {
           breakpoint: 768,
           settings: {
-            slidesToShow: 2,
+            slidesToShow: 3,
             slidesToScroll: 1,
             infinite: true,
           }
@@ -194,7 +138,7 @@
         {
           breakpoint: 480,
           settings: {
-            slidesToShow: 1,
+            slidesToShow: 2,
             slidesToScroll: 1,
             infinite: true,
           }
@@ -249,4 +193,37 @@ $(document).ready(function() {
     }
   });
   
+});
+
+
+/* ===================================================================
+
+  Accordion Button
+
+=================================================================== */
+$('.faq-button').on('click', function(e) {
+  var plus = $(this).parent().parent().find('.fa-plus');
+  var minus = $(this).parent().parent().find('.fa-minus');
+
+  if(plus.hasClass('fa-plus')) { 
+      plus.removeClass('fa-plus')
+      plus.addClass('fa-minus')
+   } 
+
+   if(minus.hasClass('fa-minus')) { 
+      minus.removeClass('fa-minus')
+      minus.addClass('fa-plus')
+  }
+});
+
+
+/* ===================================================================
+
+  Show Template Button
+
+=================================================================== */
+
+$('.show-templates-button a').on('click', function (e) {
+  e.preventDefault();
+  $('.favorite-templates-panel').toggleClass('show-templates');
 });

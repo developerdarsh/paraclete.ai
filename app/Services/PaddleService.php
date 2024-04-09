@@ -62,13 +62,13 @@ class PaddleService
         session()->put('type', $id->payment_frequency);
         session()->put('plan_id', $id);
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return;
         
         $params = [
             'vendor_id' => config('services.paddle.vendor_id'),
             'vendor_auth_code' => config('services.paddle.vendor_auth_code'),
-            'product_id' => $id->paddle_plan_id,
+            'product_id' => $id->paddle_gateway_plan_id,
             'customer_email' => auth()->user()->email,
             'return_url' => config('app.url') . "/user/payments/approved/paddle",
             'passthrough' => json_encode($metadata),
@@ -159,7 +159,7 @@ class PaddleService
         session()->put('type', $type);
         session()->put('plan_id', $id);
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return;
         
         $params = [

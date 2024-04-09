@@ -153,7 +153,7 @@ let textarea_voice_id;
 let textarea_img;
 let selectedTextarea;
 function voice_select(value) {
-    
+    console.log(value)
     "use strict";
 
     previous_voice = 'current-' + value;
@@ -273,6 +273,48 @@ function voice_select(value) {
         $('#wav').removeClass('block-radio');
         $('#wav-label').removeClass('block-label');
 
+    } else if (value.includes('nova') || value.includes('shimmer') || value.includes('alloy') || value.includes('echo') || value.includes('fable') || value.includes('onyx')) {
+        $("#mp3").prop("checked", true);
+        $('#style-box').hide();
+        $('#volume-box').hide();
+        $('#emphasis-box').hide();
+        $('#effect-box').hide();
+        $('#sub-box').hide();
+        $('#sayas-box').hide();
+        $('#azurepause-box').hide();
+        $('#pause-box').hide();
+        $('#pitch-box').hide();
+        $('#speed-box').hide();
+        document.getElementById('ogg').disabled = true;
+        document.getElementById('webm').disabled = true;
+        document.getElementById('wav').disabled = true;
+        $('#ogg').addClass('block-radio');
+        $('#ogg-label').addClass('block-label');
+        $('#webm').addClass('block-radio');
+        $('#webm-label').addClass('block-label');
+        $('#wav').addClass('block-radio');
+        $('#wav-label').addClass('block-label');
+
+    } else if (value.includes('21m00Tcm4TlvDq8ikWAM') || value.includes('29vD33N1CtxCmqQRPOHJ') || value.includes('2EiwWnXFnvU5JabPnv8n') || value.includes('5Q0t7uMcjvnagumLfvZi') || value.includes('AZnzlk1XvdvUeBnXmlld') || value.includes('CYw3kZ02Hs0563khs1Fj') || value.includes('D38z5RcWu1voky8WS1ja') || value.includes('EXAVITQu4vr4xnSDxMaL') || value.includes('ErXwobaYiN019PkySvjV') || value.includes('GBv7mTt0atIp3Br8iCZE') || value.includes('IKne3meq5aSn9XLyUdCD') || value.includes('JBFqnCBsd6RMkjVDRZzb') || value.includes('LcfcDJNUP1GQjkzn1xUU') || value.includes('MF3mGyEYCl7XYWbV9V6O') || value.includes('N2lVS1w4EtoT3dr4eOWO') || value.includes('ODq5zmih8GrVes37Dizd') || value.includes('SOYHLrjzK2X1ezoPC6cr') || value.includes('TX3LPaxmHKxFdv7VOQHJ') || value.includes('ThT5KcBeYPX3keUQqHPh') || value.includes('TxGEqnHWrfWFTfGW9XjX') || value.includes('VR6AewLTigWG4xSOukaG') || value.includes('XB0fDUnXU5powFXDhCwa') || value.includes('XrExE9yKIg1WjnnlVkGX') || value.includes('Yko7PKHZNXotIFUBG7I9') || value.includes('ZQe5CZNOzWyzPSCn5a3c') || value.includes('Zlb1dXrM653N07WRdFW3') || value.includes('bVMeCyTHy58xNoL34h3p') || value.includes('flq6f7yk4E4fJM5XTYuZ') || value.includes('g5CIjZEefAph4nQFvHAz') || value.includes('jBpfuIE2acCO8z3wKNLl') || value.includes('jsCqWAovK2LkecY7zXl4') || value.includes('knrPHWnBmmDHMoiMeP3l') || value.includes('oWAxZDx7w5VEj9dCyTzz') || value.includes('onwK4e9ZLuTAKqWW03F9') || value.includes('pFZP5JQG7iQjIQuC4Bku') || value.includes('pMsXgVXv3BLzUgSXRplE') || value.includes('pNInz6obpgDQGcFmaJgB') || value.includes('piTKgcLEGmPE4e6mEKli') || value.includes('pqHfZKP75CvOlQylNhV4') || value.includes('t0jbNlBVZ17f02VDIeMI') || value.includes('yoZ06aMxZJJ28mfd3POQ') || value.includes('z9fAnlkpzviPz146aGWa') || value.includes('zcAOhNBS3c14rBihAFp1') || value.includes('zrHiDhphv9ZnVXBqCLjz')) {
+        document.getElementById('ogg').disabled = true;
+        document.getElementById('webm').disabled = true;
+        document.getElementById('wav').disabled = true;
+        $('#ogg').addClass('block-radio');
+        $('#ogg-label').addClass('block-label');
+        $('#webm').addClass('block-radio');
+        $('#webm-label').addClass('block-label');
+        $('#wav').addClass('block-radio');
+        $('#wav-label').addClass('block-label');
+        $('#style-box').hide();
+        $('#volume-box').hide();
+        $('#emphasis-box').hide();
+        $('#effect-box').hide();
+        $('#sub-box').hide();
+        $('#sayas-box').hide();
+        $('#azurepause-box').hide();
+        $('#pause-box').hide();
+        $('#pitch-box').hide();
+        $('#speed-box').hide();
     } else {
         switch (value) {
             case 'en-US-AriaNeural':
@@ -864,60 +906,6 @@ $('#sub').on('click',function() {
     ssmlText("<sub alias='INCLUDE REPLACEMENT TEXT'>", "</sub>");
 });
 
-
-/*************************************************
- *  Process File Synthesize Mode
- *************************************************/
- $('#synthesize-text').on('click',function(e) {
-
-    "use strict";
-
-    e.preventDefault()
-
-    let map = new Map();
-    let textarea = document.getElementsByTagName("textarea");
-    let full_textarea = textarea.length;
-    let full_text = '';
-
-    if (textarea.length == 1) {
-        let value = document.getElementById('ZZZOOOVVVZ').value;
-        let voice = document.getElementById('ZZZOOOVVVZ').getAttribute('data-voice');
-
-        if (value.length == 0) {
-            Swal.fire('Missing Input Text', 'Enter your text that you want to synthezise before processing', 'warning');
-        } else if (value.length > text_length_limit) { 
-            Swal.fire('Text to Speech Notification', 'Text exceeded allowed length, maximum allowed text length is ' + text_length_limit + ' characters. Please decrease the overall text length.', 'warning'); 
-        } else {
-            map.set(voice, value);
-            startSynthesizeMode(1, map, value);
-        }
-
-    } else {
-
-        for (let i = 0; i < textarea.length; i++) {
-
-            let value = textarea[i].value;
-            let voice = textarea[i].getAttribute('data-voice');
-            let distinct = generateID(3);
-            
-            if (value != '') {
-                map.set(voice +'___'+ distinct, value);
-                full_text +=value;
-            } else {
-                full_textarea--;
-            }
-        }
-
-        if (full_text.length == 0) {
-            Swal.fire('Missing Input Text', 'Enter your text that you want to synthezise before processing', 'warning');
-        } else if (full_text.length > text_length_limit) { 
-            Swal.fire('Text to Speech Notification', 'Text exceeded allowed length, maximum allowed total text length is ' + text_length_limit + ' characters. Please decrease the text length.', 'warning'); 
-        } else {
-            startSynthesizeMode(full_textarea, map, full_text);
-        }    
-    }
-});
-
 function startSynthesizeMode(length, map, all_text) {
 
     let text_object = Object.fromEntries(map);
@@ -964,59 +952,6 @@ function startSynthesizeMode(length, map, all_text) {
     }).done(function(data) {})
 }
 
-
-/*************************************************
- *  Process Live Synthesize Listen Mode
- *************************************************/
- $('#listen-text').on('click', function(e) {
-
-    "use strict";
-    
-    e.preventDefault()
-
-    let map = new Map();
-    let textarea = document.getElementsByTagName("textarea");
-    let full_textarea = textarea.length;
-    let full_text = '';
-
-    if (textarea.length == 1) {
-        let value = document.getElementById('ZZZOOOVVVZ').value;
-        let voice = document.getElementById('ZZZOOOVVVZ').getAttribute('data-voice');
-
-        if (value.length == 0) {
-            Swal.fire('Missing Input Text', 'Enter your text that you want to synthezise before processing', 'warning');
-        } else if (value.length > text_length_limit) { 
-            Swal.fire('Text to Speech Notification', 'Text exceeded allowed length, maximum allowed text length is ' + text_length_limit + ' characters. Please decrease the text length.', 'warning'); 
-        } else {
-            map.set(voice, value);
-            startListenMode(1, map, value);
-        }
-
-    } else {
-
-        for (let i = 0; i < textarea.length; i++) {
-
-            let value = textarea[i].value;
-            let voice = textarea[i].getAttribute('data-voice');
-            let distinct = generateID(3);
-            
-            if (value != '') {
-                map.set(voice +'___'+ distinct, value);
-                full_text +=value;
-            } else {
-                full_textarea--;
-            }
-        }
-
-        if (full_text.length == 0) {
-            Swal.fire('Missing Input Text', 'Enter your text that you want to synthezise before processing', 'warning');
-        } else if (full_text.length > text_length_limit) { 
-            Swal.fire('Text to Speech Notification', 'Text exceeded allowed length, maximum allowed total text length is ' + text_length_limit + ' characters. Please decrease the overall text length.', 'warning'); 
-        } else {
-            startListenMode(full_textarea, map, full_text);
-        }    
-    }
-});
 
 function startListenMode(length, map, all_text) {
 
@@ -1192,7 +1127,6 @@ $('#addTextRow').on('click', function (e) {
         Swal.fire('Voice Lines Limit Reached', 'You have reached maximum number of lines for text', 'info');
     }
     
-
 }); 
 
 
@@ -1245,40 +1179,6 @@ function generateID(length) {
     }
 
     return result;
-}
-
-
-function deleteRow(row) {
-    let id = row.id;
-
-    if(id != 'ZZZOOOVVVDEL') {
-        id = id.slice(0, -3);
-        $('#' + id).remove();
-        total_rows--;
-        countCharacters();
-
-    } else {
-        let main_img = document.getElementById('ZZZOOOVVVIMG');
-        main_img.setAttribute('src', textarea_img);
-
-        let main_voice = document.getElementById('ZZZOOOVVVZ');
-        main_voice.setAttribute('data-voice', textarea_voice_id);
-
-        let instance = tippy(document.getElementById('ZZZOOOVVVIMG'));
-        instance.setProps({
-            animation: 'scale-extreme',
-            theme: 'material',
-            content: textarea_voice_details,
-        });
-
-        main_voice.value = "";
-        if (total_rows == 1) {
-            $('#total-characters').text('0 characters, 1 line');
-        }
-
-        Swal.fire('Main Text Line', 'Main text line cannot be deleted, line voice will change to the main selected one', 'warning');
-    }
-
 }
 
 
@@ -1366,119 +1266,6 @@ function countCharacters() {
     }
 }
 
-
-/*===========================================================================
-*
-*  Listen Row 
-*
-*============================================================================*/
-function listenRow(row) {
-
-    let id = row.id;
-    id = id.slice(0, -1);
-
-    let text = document.getElementById(id + 'Z');
-    let voice = text.getAttribute('data-voice');
-    let format = document.querySelector('input[name="format"]:checked').value;
-
-    if (text.value == '') {    
-        Swal.fire('Text to Speech Notification', 'Please enter text to synthesize first', 'warning');    
-    } else if (text.value.length > text_length_limit) { 
-        Swal.fire('Text to Speech Notification', 'Text exceeded allowed length, maximum allowed text length is ' + text_length_limit + ' characters. Please decrease the text length.', 'warning'); 
-    } else {
-
-        let selected_text = "";
-        if (window.getSelection) {
-            selected_text = window.getSelection().toString();
-        } else if (document.selection && document.selection.type != "Control") {
-            selected_text = document.selection.createRange().selected_text;
-        }
-
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type: "POST",
-            url: 'text-to-speech/listen-row',
-            data: { row_text:text.value, voice:voice, selected_text:selected_text, format:format, selected_text_length:selected_text.length},
-            beforeSend: function() {
-                $('#' + row.id).html('<i class="fa-solid fa-waveform-lines"></i>');
-                $('#' + row.id).prop('disabled', true);         
-                $('#waveform-box').slideUp('slow')   
-            },
-            complete: function() {
-                $('#' + row.id).prop('disabled', false);
-                $('#' + row.id).html('<i class="fa-solid fa-message-music"></i>');              
-            },
-            success: function(data) {
-                animateValue("balance-number", data['old'], data['current'], 2000);
-                $('#waveform-box').slideDown('slow')
-            },
-            error: function(data) {
-                if (data.responseJSON['error']) {
-                    Swal.fire('Text to Speech Notification', data.responseJSON['error'], 'warning');
-                }
-
-                $('#' + row.id).prop('disabled', false);
-                $('#' + row.id).html('<i class="fa-solid fa-message-music"></i>');    
-                $('#waveform-box').slideUp('slow')            
-            }
-        }).done(function(data) {
-
-            let download = document.getElementById('downloadBtn');
-
-            if (download) {
-                document.getElementById('downloadBtn').href = data['url'];
-            }
-            
-            wavesurfer.load(data['url']);
-
-            wavesurfer.on('ready',     
-                wavesurfer.play.bind(wavesurfer),
-                playBtn.innerHTML = '<i class="fa fa-pause"></i>',
-                playBtn.classList.add('isPlaying'),
-            );
-        })
-    }
-    
-}
-
-
-/*===========================================================================
-*
-*  Read File
-*
-*============================================================================*/
-function readFile() {
-
-    Swal.fire({
-        title: 'Upload File',
-        showCancelButton: true,
-        confirmButtonText: 'Upload',
-        reverseButtons: true,
-        inputLabel: 'Only TXT files up to ' + text_length_limit + ' characters length are supported',
-        input: 'file',
-    }).then((file) => {
-        if (file.value) {
-            let file = $('.swal2-file')[0].files[0];
-            let file_name = file['name'];
-            let extension = file_name.split('.').pop();
-
-            if (extension != 'txt') {
-                Swal.fire('Incorrect File Format', 'Following file format - ' + extension + ' -  is not allowed. Select a txt file.', 'error');
-            } else {
-                let reader = new FileReader()
-                reader.onload = event => processText(event.target.result) 
-                reader.onerror = error => reject(error)
-                reader.readAsText(file)
-            }
-
-        } else if (file.dismiss !== Swal.DismissReason.cancel) {
-            Swal.fire('No File Selected', 'Make sure to select a text file before uploading', 'error');
-        }
-    })
-
-}
 
 function processText(text) {
 

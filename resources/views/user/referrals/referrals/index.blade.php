@@ -83,6 +83,7 @@
 				"order": [[ 0, "desc" ]],
 				language: {
 					search: "<i class='fa fa-search search-icon'></i>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					lengthMenu: '_MENU_ ',
 					paginate : {
 						first    : '<i class="fa fa-angle-double-left"></i>',

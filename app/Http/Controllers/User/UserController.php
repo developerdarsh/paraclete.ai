@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use App\Models\SubscriptionPlan;
 use App\Models\Subscriber;
+use App\Models\Language;
 use App\Models\User;
 use Carbon\Carbon;
 use DB;
@@ -56,11 +57,13 @@ class UserController extends Controller
 
         $user_subscription = ($subscription) ? SubscriptionPlan::where('id', auth()->user()->plan_id)->first() : '';
 
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
         $progress = [
             'words' => (auth()->user()->total_words > 0) ? ((auth()->user()->available_words / auth()->user()->total_words) * 100) : 0,
         ];
 
-        return view('user.profile.index', compact('chart_data', 'data', 'subscription', 'user_subscription', 'progress'));           
+        return view('user.profile.index', compact('chart_data', 'data', 'subscription', 'user_subscription', 'progress', 'check_api_feature'));           
     }
 
 
@@ -72,9 +75,11 @@ class UserController extends Controller
      */
     public function edit($id = null)
     {   
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
         $storage['available'] = $this->formatSize(auth()->user()->storage_total * 1000000);
 
-        return view('user.profile.edit', compact('storage'));
+        return view('user.profile.edit', compact('storage', 'check_api_feature'));
     }
 
 
@@ -105,7 +110,11 @@ class UserController extends Controller
             ->orderBy('voices.voice', 'asc')
             ->get();
 
-        return view('user.profile.default', compact('languages', 'voices'));
+        $template_languages = Language::orderBy('languages.language', 'asc')->get();
+
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
+        return view('user.profile.default', compact('languages', 'voices', 'template_languages', 'check_api_feature'));
     }
 
 
@@ -116,8 +125,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(User $user)
+    public function update(Request $request)
     {           
+        $user = User::where('id', auth()->user()->id)->first();
         $user->update(request()->validate([
             'name' => 'required|string|max:255',
             'email' => ['required','string','email','max:255',Rule::unique('users')->ignore($user)],
@@ -146,9 +156,9 @@ class UserController extends Controller
             $image = request()->file('profile_photo');
 
             $name = Str::random(20);
-         
+            
             $folder = '/uploads/img/users/';
-          
+            
             $filePath = $folder . $name . '.' . $image->getClientOriginalExtension();
             
             $this->uploadImage($image, $folder, 'public', $name);
@@ -160,7 +170,7 @@ class UserController extends Controller
 
         toastr()->success(__('Profile Successfully Updated'));
         return redirect()->route('user.profile.edit', compact('user'));
-
+        
     }
 
 
@@ -171,11 +181,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function updateDefaults(User $user)
+    public function updateDefaults(Request $request)
     {           
+        $user = User::where('id', auth()->user()->id)->first();
         $user->update(request()->validate([
             'default_voiceover_voice' => 'nullable|string|max:255',
             'default_voiceover_language' => 'nullable|string|max:255',
+            'default_template_language' => 'nullable|string|max:255',
         ]));
 
         $user->save();
@@ -193,7 +205,9 @@ class UserController extends Controller
      */
     public function showDelete($id = null)
     {   
-        return view('user.profile.delete');
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
+        return view('user.profile.delete', compact('check_api_feature'));
     }
 
 
@@ -203,28 +217,64 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function accountDelete(Request $request, User $user)
+    public function showAPI()
+    {   
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
+        return view('user.profile.api', compact('check_api_feature'));
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function storeAPI(Request $request)
+    {           
+        $user = User::where('id', auth()->user()->id)->first();
+        $user->update([
+            'personal_openai_key' => request('openai-key'),
+            'personal_sd_key' => request('sd-key'),
+        ]);
+
+        $user->save();
+
+        toastr()->success(__('Your personal api keys have been saved successfully'));
+        return redirect()->route('user.profile.api');
+        
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function accountDelete(Request $request)
     {   
         if ($request->concent) {
-            if (auth()->user()->id == $user->id) {
+
+            $user = User::where('id', auth()->user()->id)->first();
+            $user->delete();
+
+            Auth::guard('web')->logout();
+
+            $request->session()->invalidate();
+
+            $request->session()->regenerateToken();
+
+            toastr()->success(__('Your account has been successfully deleted'));
+            return redirect('/');
             
-                $user->delete();
-    
-                Auth::guard('web')->logout();
-    
-                $request->session()->invalidate();
-    
-                $request->session()->regenerateToken();
-    
-                toastr()->success(__('Your account has been successfully deleted'));
-                return redirect('/');
-            }
         } else {
             toastr()->warning(__('Please activate the checkbox to confirm account deletion'));
             return redirect()->back();
         }
-        
-        
+          
     }
 
 
@@ -254,5 +304,27 @@ class UserController extends Controller
         $size /= pow(1000, $pow);
 
         return round($size, $precision) . $units[$pow]; 
+    }
+
+
+    public function updateReferral(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $check = User::where('referral_id', $request->value)->first();
+
+            if ($check) {
+                $data['status'] = 'error';
+                $data['message'] = __('This Referral ID is already in use by another user, please enter another one');
+                return $data;
+            } else {
+                $user = User::where('id', auth()->user()->id)->first();
+                $user->referral_id = $request->value;
+                $user->save();
+            }
+
+            $data['status'] = 'success';
+            return $data;
+        } 
     }
 }

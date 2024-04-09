@@ -46,15 +46,11 @@
 							<span class="fs-14">{{ ucfirst($id->plan_name) }}</span>
 						</div>
 						<div class="col-lg-4 col-md-4 col-12">
-							<h6 class="font-weight-bold mb-1">{{ __('Storage Size') }}: </h6>
-							<span class="fs-14">{{ number_format($id->storage_total) }}MB</span>
-						</div>
-						<div class="col-lg-4 col-md-4 col-12">
 							<h6 class="font-weight-bold mb-1">{{ __('Payment Gateway') }}: </h6>
 							<span class="fs-14">{{ $id->gateway }}</span>
 						</div>
 						<div class="col-lg-4 col-md-4 col-12 pt-5">
-							<h6 class="font-weight-bold mb-1">{{ __('Payment Frequence') }}: </h6>
+							<h6 class="font-weight-bold mb-1">{{ __('Payment Frequency') }}: </h6>
 							<span class="fs-14">{{ ucfirst($id->frequency) }}</span>
 						</div>
 						<div class="col-lg-4 col-md-4 col-12 pt-5">
@@ -76,10 +72,10 @@
 						@csrf
 
 						<div class="row pt-8">
-							<div class="col-lg-6 col-md-6 col-sm-12">				
+							<div class="col-sm-12">				
 								<div class="input-box">	
 									<h6>{{ __('Update Payment Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="notification-type" name="payment-status" data-placeholder="{{ __('Update Payment Status') }}:">			
+									<select id="notification-type" name="payment-status" class="form-select" data-placeholder="{{ __('Update Payment Status') }}:">			
 										<option value="pending" @if ($id->status == 'pending') selected @endif>{{ __('Pending Payment') }}</option>
 										<option value="completed" @if ($id->status == 'completed') selected @endif>{{ __('Payment Received') }}</option>
 										<option value="cancelled" @if ($id->status == 'cancelled') selected @endif>{{ __('Payment Cancelled') }}</option>

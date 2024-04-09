@@ -32,19 +32,19 @@ class SupportController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>
-                                        <a href="'. route("admin.support.show", $row["ticket_id"] ). '"><i class="fa-solid fa-message-question table-action-buttons view-action-button" title="View Support Ticket"></i></a>
-                                        <a class="deleteNotificationButton" id="'. $row["ticket_id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Support Ticket"></i></a> 
+                                        <a href="'. route("admin.support.show", $row["ticket_id"] ). '"><i class="fa-solid fa-message-question table-action-buttons view-action-button" title="'. __('View Support Ticket') .'"></i></a>
+                                        <a class="deleteNotificationButton" id="'. $row["ticket_id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Support Ticket') .'"></i></a> 
                                     </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["created_at"], 'd M Y H:i:s').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y H:i:s').'</span>';
                         return $created_on;
                     })
                     ->addColumn('resolved-on', function($row){
                         if (!is_null($row['resolved_on'])) {
                             $date = DateTime::createFromFormat('Y-m-d H:i:s', $row['resolved_on']);
-                            $updated_on = '<span>'.date_format($date, 'd M Y H:i:s').'</span>';
+                            $updated_on = '<span>'.date_format($date, 'd/m/Y H:i:s').'</span>';
                             return $updated_on;
                         } else {
                             return '';

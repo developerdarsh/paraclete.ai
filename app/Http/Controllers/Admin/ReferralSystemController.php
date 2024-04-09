@@ -25,19 +25,8 @@ class ReferralSystemController extends Controller
             $data = Referral::whereNotNull('order_id')->latest()->get();
             return Datatables::of($data)
                     ->addIndexColumn()
-                    ->addColumn('actions', function($row){
-                        $actionBtn = '<div class="dropdown">
-                                            <button class="btn table-actions" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="fa fa-ellipsis-v"></i>                       
-                                            </button>
-                                            <div class="dropdown-menu table-actions-dropdown" role="menu" aria-labelledby="actions">
-                                                <a class="dropdown-item" href="'. route("admin.referral.show", $row["order_id"] ). '"><i class="fa fa-file-text"></i> View</a>                                              
-                                            </div>
-                                        </div>';
-                        return $actionBtn;
-                    })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["created_at"], 'd M Y, H:i:s').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y, H:i:s').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-payment', function($row){
@@ -48,26 +37,16 @@ class ReferralSystemController extends Controller
                         $custom_group = config('payment.default_system_currency_symbol') . $row["commission"];
                         return $custom_group;
                     })
-                    ->rawColumns(['actions', 'created-on', 'custom-payment', 'custom-commission'])
+                    ->rawColumns(['created-on', 'custom-payment', 'custom-commission'])
                     ->make(true);
                     
         }
 
-        $total_users = Referral::select(DB::raw("count(DISTINCT referred_id) as data"))->get();
+        $total_users = User::select(DB::raw("count(referred_by) as data"))->where('referred_by','<>', null)->where('referred_by', '<>', '')->get();
         $total_income = Referral::select(DB::raw("sum(payment) as data"))->get();
         $total_commission = Referral::select(DB::raw("sum(commission) as data"))->get();
 
-        $referral_information = ['referral_headline', 'referral_guideline'];
-        $referral = [];
-        $settings = Setting::all();
-
-        foreach ($settings as $row) {
-            if (in_array($row['name'], $referral_information)) {
-                $referral[$row['name']] = $row['value'];
-            }
-        }
-
-        return view('admin.finance.referrals.index', compact('referral', 'total_users', 'total_income', 'total_commission'));
+        return view('admin.finance.referrals.index', compact('total_users', 'total_income', 'total_commission'));
     }
 
 
@@ -112,21 +91,12 @@ class ReferralSystemController extends Controller
             'policy' => 'required_if:enable-referral,on',
             'commission' => 'required_if:enable-referral,on',
             'threshold' => 'required_if:enable-referral,on',
-
-            'referral_guideline' => 'required',
-            'referral_headline' => 'required',
         ]);
 
         $this->storeConfiguration('REFERRAL_SYSTEM_ENABLE', request('enable-referral'));
         $this->storeConfiguration('REFERRAL_USER_PAYMENT_POLICY', request('policy'));
         $this->storeConfiguration('REFERRAL_USER_PAYMENT_COMMISSION', request('commission'));
         $this->storeConfiguration('REFERRAL_USER_PAYMENT_THRESHOLD', request('threshold'));
-
-        $rows = ['referral_headline', 'referral_guideline'];
-        
-        foreach ($rows as $row) {
-            Setting::where('name', $row)->update(['value' => $request->input($row)]);
-        }
 
         toastr()->success(__('Referral settings were successfully updated'));
         return redirect()->back();

@@ -16,7 +16,7 @@
 
 @section('content')	
 	<div class="row">
-		<div class="col-lg-3 col-md-6 col-sm-12">
+		<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-body">
 					<div class="d-flex align-items-end justify-content-between">
@@ -40,7 +40,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-lg-3 col-md-6 col-sm-12">
+		<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-body">
 					<div class="d-flex align-items-end justify-content-between">
@@ -63,7 +63,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-lg-3 col-md-6 col-sm-12">
+		<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-body">
 					<div class="d-flex align-items-end justify-content-between">
@@ -86,7 +86,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-lg-3 col-md-6 col-sm-12">
+		<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-body">
 					<div class="d-flex align-items-end justify-content-between">
@@ -375,6 +375,10 @@
 												<img alt="Paddle Gateway" class="w-60" src="{{ URL::asset('img/payments/paddle.svg') }}">
 											@elseif ($data->gateway == 'Yookassa')
 												<img alt="Yookassa Gateway" class="w-60" src="{{ URL::asset('img/payments/yookassa.svg') }}">
+											@elseif ($data->gateway == 'Iyzico')
+												<img alt="Iyzico Gateway" class="w-60" src="{{ URL::asset('img/payments/iyzico.svg') }}">
+											@elseif ($data->gateway == 'TwoCheckout')
+												<img alt="TwoCheckout Gateway" class="w-60" src="{{ URL::asset('img/payments/twocheckout.svg') }}">
 											@else
 												<span class="font-weight-bold fs-12">{{__('Free')}}</span>
 										@endif
@@ -526,7 +530,7 @@
 			new Chart(ctx, {
 				type: 'bar',
 				data: {
-					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+					labels: ['{{ __('Jan') }}', '{{ __('Feb') }}', '{{ __('Mar') }}', '{{ __('Apr') }}', '{{ __('May') }}', '{{ __('Jun') }}', '{{ __('Jul') }}', '{{ __('Aug') }}', '{{ __('Sep') }}', '{{ __('Oct') }}', '{{ __('Nov') }}', '{{ __('Dec') }}'],
 					datasets: [{
 						label: '{{ __('Total New Registered Users') }} ',
 						data: userYearlyDataset,
@@ -619,7 +623,7 @@
 			new Chart(ctx, {
 				type: 'bar',
 				data: {
-					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+					labels: ['{{ __('Jan') }}', '{{ __('Feb') }}', '{{ __('Mar') }}', '{{ __('Apr') }}', '{{ __('May') }}', '{{ __('Jun') }}', '{{ __('Jul') }}', '{{ __('Aug') }}', '{{ __('Sep') }}', '{{ __('Oct') }}', '{{ __('Nov') }}', '{{ __('Dec') }}'],
 					datasets: [{
 						label: '{{ __('Total Income') }} ({{ config('payment.default_system_currency') }}) ',
 						data: incomeDataset,

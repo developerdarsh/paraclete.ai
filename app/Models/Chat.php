@@ -23,6 +23,8 @@ class Chat extends Model
         'description',
         'category',
         'type',
-        'prompt', 
+        'prompt',
+        'group', 
+        'voice_code',
     ];
 }

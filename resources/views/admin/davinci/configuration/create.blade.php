@@ -29,9 +29,9 @@
 
 						<div class="row mt-2">							
 							<div class="col-lg-12 col-md-12 col-sm-12">
-								<div class="input-box mb-0">								
+								<div class="input-box">								
 									<h6>{{ __('AI Engine') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="chats" name="engine" data-placeholder="{{ __('Select AI Engine') }}">
+									<select id="chats" name="engine" class="form-select" data-placeholder="{{ __('Select AI Engine') }}">
 										<option value="openai" selected>{{ __('OpenAI') }}</option>
 										<option value="stable_diffusion">{{ __('Stable Diffusion') }}</option>																																																																																																									
 									</select>
@@ -53,7 +53,7 @@
 							<div class="col-lg-12 col-md-12 col-sm-12">
 								<div class="input-box">
 									<h6>{{ __('Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="templates-user" name="status" data-placeholder="{{ __('Set API Key Status') }}">
+									<select id="templates-user" name="status" class="form-select" data-placeholder="{{ __('Set API Key Status') }}">
 										<option value=1 selected>{{ __('Active') }}</option>	
 										<option value=0>{{ __('Deactive') }}</option>																																									
 									</select>

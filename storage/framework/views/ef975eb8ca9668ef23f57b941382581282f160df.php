@@ -33,7 +33,6 @@
 		<?php echo adsense_header(); ?>
 
 
-
 	</head>
 
 	<body class="app sidebar-mini frontend-body <?php echo e(Request::path() != '/' ? 'blue-background' : ''); ?>">
@@ -189,7 +188,7 @@
 										<h5><?php echo e(__('Information')); ?></h5>
 
 										<ul class="list-unstyled">
-											<li><a href="https://aws.amazon.com" target="_blank"><?php echo e(__('AWS Cloud')); ?></a></li>                             
+											<li><a href="#" target="_blank"><?php echo e(__('AI World')); ?></a></li>                             
 										</ul>
 
 									</div> <!-- END INFORMATION LINKS -->

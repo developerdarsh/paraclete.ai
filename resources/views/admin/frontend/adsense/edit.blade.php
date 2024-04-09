@@ -33,7 +33,7 @@
 							<div class="col-lg-12 col-md-6 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('Adsense Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-			  						<select id="smtp-encryption" name="status" data-placeholder="{{ __('Adsense Status') }}:">			
+			  						<select id="smtp-encryption" name="status" class="form-select" data-placeholder="{{ __('Adsense Status') }}:">			
 										<option value=1 @if ($id->status == true) selected @endif>{{ __('Activate') }}</option>
 										<option value=0 @if ($id->status == false) selected @endif>{{ __('Deactivate') }}</option>
 									</select>

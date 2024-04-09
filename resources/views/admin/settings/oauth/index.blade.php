@@ -31,7 +31,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12 mt-2">
 								<div class="input-box">	
 									<h6>{{ __('Login via Social Media') }} <span class="text-muted">({{ __('OAuth') }})</span></h6>
-			  						<select id="login-oauth" name="login-oauth" data-placeholder="{{ __('Login via Social Media') }}:">			
+			  						<select id="login-oauth" name="login-oauth" class="form-select" data-placeholder="{{ __('Login via Social Media') }}:">			
 										<option value="enabled" @if ( config('settings.oauth_login')  == 'enabled') selected @endif>{{ __('Enabled') }}</option>
 										<option value="disabled" @if ( config('settings.oauth_login')  == 'disabled') selected @endif>{{ __('Disabled') }}</option>
 									</select>

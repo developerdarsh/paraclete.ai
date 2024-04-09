@@ -23,6 +23,22 @@ class Image extends Model
         'plan_type',
         'storage',
         'expires_at',
-        'image_name'
+        'image_name',
+        'vendor',
+        'negative_prompt',
+        'image_style',
+        'image_lighting',
+        'image_medium',
+        'image_mood',
+        'image_artist',
+        'sd_prompt_strength',
+        'sd_steps',
+        'sd_diffusion_samples',
+        'sd_clip_guidance',
+        'vendor_engine',
+        'public',
+        'views',
+        'downloads',
+        'favorite',
     ];
 }

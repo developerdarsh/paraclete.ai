@@ -92,35 +92,112 @@ unset($__errorArgs, $__bag); ?>
 
 						<div class="col-lg-12 col-md-12 col-sm-12">
 							<div id="form-group">
-								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Art Style')); ?></h6>
-								<select id="style" name="style" data-placeholder="<?php echo e(__('Select Image Style')); ?>">
+								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Artist Name')); ?></h6>
+								<select id="artist" name="artist" data-placeholder="<?php echo e(__('Select Artist Name')); ?>">
 									<option value='none' selected><?php echo e(__('None')); ?></option>																																																												
-									<option value='abstract'><?php echo e(__('Abstract')); ?></option>																																																												
-									<option value='realistic'><?php echo e(__('Realistic')); ?></option>																																																												
-									<option value='3d render'><?php echo e(__('3D Render')); ?></option>																																																												
-									<option value='cartoon'><?php echo e(__('Cartoon')); ?></option>																																																												
-									<option value='anime'><?php echo e(__('Anime')); ?></option>																																																												
-									<option value='digital art'><?php echo e(__('Digital Art')); ?></option>
-									<option value='modern'><?php echo e(__('Modern')); ?></option>																																																												
-									<option value='art deco'><?php echo e(__('Art Deco')); ?></option>																																																												
-									<option value='illustration'><?php echo e(__('Illustration')); ?></option>																																																												
-									<option value='origami'><?php echo e(__('Origami')); ?></option>																																																												
-									<option value='pixel art'><?php echo e(__('Pixel Art')); ?></option>																																																												
-									<option value='retro'><?php echo e(__('Retro')); ?></option>																																																												
-									<option value='photography'><?php echo e(__('Photography')); ?></option>																																																												
-									<option value='line art'><?php echo e(__('Line Art')); ?></option>																																																												
-									<option value='pop art'><?php echo e(__('Pop Art')); ?></option>																																																																																																																						
-									<option value='vaporwave'><?php echo e(__('Vaporwave')); ?></option>																																																												
-									<option value='pencil drawing'><?php echo e(__('Pencil Drawing')); ?></option>																																																												
-									<option value='renaissance'><?php echo e(__('Renaissance')); ?></option>																																																												
-									<option value='minimalism'><?php echo e(__('Minimalism')); ?></option>																																																																																																																							
+									<option value="Leonardo da Vinci (Renaissance)"><?php echo e(__('Leonardo da Vinci (Renaissance)')); ?></option>																																																																																																																																																																																	
+									<option value="Vincent van Gogh (Impressionists and Neo-Impressionists)"><?php echo e(__('Vincent van Gogh (Impressionists and Neo-Impressionists)')); ?></option>																																																																																																																																																																																	
+									<option value="Pablo Picasso (Cubism)"><?php echo e(__('Pablo Picasso (Cubism)')); ?></option>																																																																																																																																																																																	
+									<option value="Salvador Dali (Surrealism)"><?php echo e(__('Salvador Dali (Surrealism)')); ?></option>																																																																																																																																																																																	
+									<option value="Banksy (Street Art)"><?php echo e(__('Banksy (Street Art)')); ?></option>																																																																																																																																																																																	
+									<option value="Takashi Murakami (Superflat)"><?php echo e(__('Takashi Murakami (Superflat)')); ?></option>																																																																																																																																																																																	
+									<option value="George Condo (Artificial Realism)"><?php echo e(__('George Condo (Artificial Realism)')); ?></option>																																																																																																																																																																																	
+									<option value="Tim Burton (Expressionism)"><?php echo e(__('Tim Burton (Expressionism)')); ?></option>																																																																																																																																																																																	
+									<option value="Normal Rockwell (exaggerated realism)"><?php echo e(__('Normal Rockwell (Exaggerated Realism)')); ?></option>																																																																																																																																																																																	
+									<option value="Andy Warhol (Pop Art)"><?php echo e(__('Andy Warhol (Pop Art)')); ?></option>																																																																																																																																																																																	
+									<option value="Claude Monet (Impressionism-Nature)"><?php echo e(__('Claude Monet (Impressionism-Nature)')); ?></option>																																																																																																																																																																																	
+									<option value="Robert Wyland (outdoor murals)"><?php echo e(__('Robert Wyland (Outdoor Murals)')); ?></option>																																																																																																																																																																																	
+									<option value="Thomas Kinkade (luminism)"><?php echo e(__('Thomas Kinkade (Luminism)')); ?></option>																																																																																																																																																																																	
+									<option value="Michelangelo (Fresco Art)"><?php echo e(__('Michelangelo (Fresco Art)')); ?></option>																																																																																																																																																																																	
+									<option value="Johannes Vermeer (impressionist)"><?php echo e(__('Johannes Vermeer (Impressionist)')); ?></option>																																																																																																																																																																																	
+									<option value="Gustav Klimt (fresco-secco)"><?php echo e(__('Gustav Klimt (Fresco-Secco)')); ?></option>																																																																																																																																																																																	
+									<option value="Sandro Botticelli (egg tempera)"><?php echo e(__('Sandro Botticelli (Egg Tempera)')); ?></option>																																																																																																																																																																																	
+									<option value="James Abbott (Impressionist)"><?php echo e(__('James Abbott (Impressionist)')); ?></option>																																																																																																																																																																																	
+									<option value="McNeill Whistler (Realism)"><?php echo e(__('McNeill Whistler (Realism)')); ?></option>																																																																																																																																																																																	
+									<option value="Jan van Eyck (Oil Panting)"><?php echo e(__('Jan van Eyck (Oil Panting)')); ?></option>																																																																																																																																																																																	
+									<option value="Hieronymus Bosch (Flemish painting)"><?php echo e(__('Hieronymus Bosch (Flemish Painting)')); ?></option>																																																																																																																																																																																	
+									<option value="Georges Seurat (pointillism)"><?php echo e(__('Georges Seurat (Pointillism)')); ?></option>																																																																																																																																																																																	
+									<option value="Pieter Bruegel (Flemish Renaissance)"><?php echo e(__('Pieter Bruegel (Flemish Renaissance)')); ?></option>																																																																																																																																																																																	
+									<option value="Diego Rodríguez (portraiture and scene painting)"><?php echo e(__('Diego Rodríguez (Portraiture and Scene Painting)')); ?></option>																																																																																																																																																																																	
+									<option value="Silva Velázquez (Baroque)"><?php echo e(__('Silva Velázquez (Baroque)')); ?></option>																																																																																																																																																																																	
+									<option value="John Bramblitt (impressionism Pop Art)"><?php echo e(__('John Bramblitt (impressionism Pop Art)')); ?></option>																																																																																																																																																																																	
+									<option value="Beeple (3d art)"><?php echo e(__('Beeple (3D Art)')); ?></option>																																																																																																																																																																																	
+									<option value="Sam Gilliam (Abstract)"><?php echo e(__('Sam Gilliam (Abstract)')); ?></option>																																																																																																																																																																																	
+									<option value="Hayao Miyazaki (Anime)"><?php echo e(__('Hayao Miyazaki (Anime)')); ?></option>																																																																																																																																																																																
+									<option value="datfootdive (Vaperwave)"><?php echo e(__('Datfootdive (Vaperwave)')); ?></option>																																																																																																																																																																																
+									<option value="Keith Thompson (Steampunk)"><?php echo e(__('Keith Thompson (Steampunk)')); ?></option>																																																																																																																																																																																
+									<option value="Johnny Silverhand (Cyberpunk)"><?php echo e(__('Johnny Silverhand (Cyberpunk)')); ?></option>																																																																																																																																																																																
 								</select>
 							</div>
 						</div>
 
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
-								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Medium')); ?></h6>
+								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Image Style')); ?></h6>
+								<select id="style" name="style" data-placeholder="<?php echo e(__('Select Image Style')); ?>">
+									<?php if(config('settings.image_vendor') == 'openai'): ?>
+										<option value='none' selected><?php echo e(__('None')); ?></option>																																																												
+										<option value='abstract'><?php echo e(__('Abstract')); ?></option>																																																												
+										<option value='realistic'><?php echo e(__('Realistic')); ?></option>																																																												
+										<option value='3d render'><?php echo e(__('3D Render')); ?></option>																																																												
+										<option value='cartoon'><?php echo e(__('Cartoon')); ?></option>																																																												
+										<option value='anime'><?php echo e(__('Anime')); ?></option>																																																												
+										<option value='digital art'><?php echo e(__('Digital Art')); ?></option>
+										<option value='modern'><?php echo e(__('Modern')); ?></option>																																																												
+										<option value='art deco'><?php echo e(__('Art Deco')); ?></option>																																																												
+										<option value='illustration'><?php echo e(__('Illustration')); ?></option>																																																												
+										<option value='origami'><?php echo e(__('Origami')); ?></option>																																																												
+										<option value='pixel art'><?php echo e(__('Pixel Art')); ?></option>																																																												
+										<option value='retro'><?php echo e(__('Retro')); ?></option>																																																												
+										<option value='photography'><?php echo e(__('Photography')); ?></option>																																																												
+										<option value='line art'><?php echo e(__('Line Art')); ?></option>																																																												
+										<option value='pop art'><?php echo e(__('Pop Art')); ?></option>																																																																																																																						
+										<option value='vaporwave'><?php echo e(__('Vaporwave')); ?></option>																																																												
+										<option value='pencil drawing'><?php echo e(__('Pencil Drawing')); ?></option>																																																												
+										<option value='renaissance'><?php echo e(__('Renaissance')); ?></option>																																																												
+										<option value='minimalism'><?php echo e(__('Minimalism')); ?></option>																																																																																																																							
+										<option value='sticker'><?php echo e(__('Sticker')); ?></option>																																																																																																																							
+										<option value='isometric'><?php echo e(__('Isometric')); ?></option>																																																																																																																							
+										<option value='cyberpunk'><?php echo e(__('Cyberpunk')); ?></option>																																																																																																																							
+										<option value='ballpoint pen drawing'><?php echo e(__('Ballpoint Pen Drawing')); ?></option>																																																																																																																																																																																																																																													
+										<option value='steampunk'><?php echo e(__('Steampunk')); ?></option>																																																																																																																																																																																																																																													
+										<option value='glitchcore'><?php echo e(__('Glitchcore')); ?></option>																																																																																																																																																																																																																																													
+										<option value='bauhaus'><?php echo e(__('Bauhaus')); ?></option>																																																																																																																																																																																																																																													
+										<option value='vector'><?php echo e(__('Vector')); ?></option>																																																																																																																																																																																																																																													
+										<option value='low poly'><?php echo e(__('Low Poly')); ?></option>																																																																																																																																																																																																																																													
+										<option value='ukiyo-e'><?php echo e(__('Ukiyo-e')); ?></option>																																																																																																																																																																																																																																													
+										<option value='cubism'><?php echo e(__('Cubism')); ?></option>																																																																																																																																																																																																																																													
+										<option value='contemporary'><?php echo e(__('Contemporary')); ?></option>																																																																																																																																																																																																																																													
+										<option value='impressionism'><?php echo e(__('Impressionism')); ?></option>																																																																																																																																																																																																																																													
+										<option value='pointilism'><?php echo e(__('Pointilism')); ?></option>	
+									<?php else: ?>
+										<option value='none' selected><?php echo e(__('None')); ?></option>																																																																																																																							
+										<option value='3d-model'><?php echo e(__('3D Model')); ?></option>																																																																																																																							
+										<option value='analog-film'><?php echo e(__('Analog Film')); ?></option>																																																																																																																							
+										<option value='anime'><?php echo e(__('Anime')); ?></option>																																																																																																																							
+										<option value='cinematic'><?php echo e(__('Cinematic')); ?></option>																																																																																																																																																																																																																																													
+										<option value='comic-book'><?php echo e(__('Comic Book')); ?></option>																																																																																																																																																																																																																																													
+										<option value='digital-art'><?php echo e(__('Digital Art')); ?></option>																																																																																																																																																																																																																																													
+										<option value='enhance'><?php echo e(__('Enhance')); ?></option>																																																																																																																																																																																																																																													
+										<option value='fantasy-art'><?php echo e(__('Fantasy Art')); ?></option>																																																																																																																																																																																																																																													
+										<option value='isometric'><?php echo e(__('Isometric')); ?></option>																																																																																																																																																																																																																																													
+										<option value='line-art'><?php echo e(__('Line Art')); ?></option>																																																																																																																																																																																																																																													
+										<option value='low-poly'><?php echo e(__('Low Poly')); ?></option>																																																																																																																																																																																																																																													
+										<option value='modeling-compound'><?php echo e(__('Modeling Compound')); ?></option>																																																																																																																																																																																																																																													
+										<option value='neon-punk'><?php echo e(__('Neon Punk')); ?></option>																																																																																																																																																																																																																																													
+										<option value='origami'><?php echo e(__('Origami')); ?></option>	
+										<option value='photographic'><?php echo e(__('Photographic')); ?></option>	
+										<option value='pixel-art'><?php echo e(__('Pixel Art')); ?></option>	
+										<option value='tile-texture'><?php echo e(__('Tile Texture')); ?></option>	
+									<?php endif; ?>
+																																																																																																																																																																																																																																																					
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<div id="form-group">
+								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Image Medium')); ?></h6>
 								<select id="medium" name="medium" data-placeholder="<?php echo e(__('Select Image Medium')); ?>">
 									<option value='none' selected><?php echo e(__('None')); ?></option>																																																												
 									<option value='acrylic'><?php echo e(__('Acrylic')); ?></option>																																																																																																																																																																																		
@@ -142,6 +219,36 @@ unset($__errorArgs, $__bag); ?>
 
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
+								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Lighting Style')); ?></h6>
+								<select id="lightning" name="lightning" data-placeholder="<?php echo e(__('Select Image Lighting Style')); ?>">
+									<option value='none' selected><?php echo e(__('None')); ?></option>																																																												
+									<option value="warm"><?php echo e(__('Warm')); ?></option>
+                                    <option value="cold"><?php echo e(__('Cold')); ?></option>
+                                    <option value="golden hour"><?php echo e(__('Golden Hour')); ?></option>
+                                    <option value="blue hour"><?php echo e(__('Blue Hour')); ?></option>
+                                    <option value="ambient"><?php echo e(__('Ambient')); ?></option>
+                                    <option value="studio"><?php echo e(__('Studio')); ?></option>
+                                    <option value="neon"><?php echo e(__('Neon')); ?></option>
+                                    <option value="dramatic"><?php echo e(__('Dramatic')); ?></option>
+                                    <option value="cinematic"><?php echo e(__('Cinematic')); ?></option>
+                                    <option value="natural"><?php echo e(__('Natural')); ?></option>
+                                    <option value="foggy"><?php echo e(__('Foggy')); ?></option>
+                                    <option value="backlight"><?php echo e(__('Backlight')); ?></option>
+                                    <option value="hard"><?php echo e(__('Hard')); ?></option>																																																																																																																																																																																		
+                                    <option value="soft"><?php echo e(__('Soft')); ?></option>																																																																																																																																																																																		
+                                    <option value="irivescent"><?php echo e(__('Irivescent')); ?></option>																																																																																																																																																																																		
+                                    <option value="fluorescent"><?php echo e(__('Fluorescent')); ?></option>																																																																																																																																																																																		
+                                    <option value="decorative"><?php echo e(__('Decorative')); ?></option>																																																																																																																																																																																		
+                                    <option value="accent"><?php echo e(__('Accent')); ?></option>																																																																																																																																																																																		
+                                    <option value="task"><?php echo e(__('Task')); ?></option>																																																																																																																																																																																		
+                                    <option value="halogen"><?php echo e(__('Halogen')); ?></option>																																																																																																																																																																																		
+                                    <option value="light emitting diode"><?php echo e(__('Light Emitting Diode (LED)')); ?></option>																																																																																																																																																																																		
+								</select>
+							</div>
+						</div>
+
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Mood')); ?></h6>
 								<select id="mood" name="mood" data-placeholder="<?php echo e(__('Select Image Mood')); ?>">
 									<option value='none' selected><?php echo e(__('None')); ?></option>																																																												
@@ -156,30 +263,109 @@ unset($__errorArgs, $__bag); ?>
 									<option value='happy'><?php echo e(__('Happy')); ?></option>																																																																																																																																																																																		
 									<option value='dark'><?php echo e(__('Dark')); ?></option>																																																																																																																																																																																		
 									<option value='neutral'><?php echo e(__('Neutral')); ?></option>																																																																																																																																																																																		
+									<option value='sad'><?php echo e(__('Sad')); ?></option>																																																																																																																																																																																		
+									<option value='crying'><?php echo e(__('Crying')); ?></option>																																																																																																																																																																																		
+									<option value='disappointed'><?php echo e(__('Disappointed')); ?></option>																																																																																																																																																																																		
+									<option value='flirt'><?php echo e(__('Flirt')); ?></option>																																																																																																																																																																																		
 								</select>
 							</div>
 						</div>
+
+						<?php if(config('settings.image_vendor') == 'stable_diffusion'): ?>
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div id="form-group">
+									<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Image Diffusion Samples')); ?></h6>
+									<select id="diffusion-samples" name="diffusion_samples" data-placeholder="<?php echo e(__('Set Image Diffusion Samples')); ?>">
+										<option value='none' selected><?php echo e(__('Auto')); ?></option>																																																												
+										<option value='DDIM'><?php echo e(__('DDIM')); ?></option>																																																																																																																																																																																		
+										<option value='DDPM'><?php echo e(__('DDPM')); ?></option>																																																																																																																																																																																		
+										<option value='K_DPMPP_2M'><?php echo e(__('K_DPMPP_2M')); ?></option>																																																																																																																																																																																		
+										<option value='K_DPMPP_2S_ANCESTRAL'><?php echo e(__('K_DPMPP_2S_ANCESTRAL')); ?></option>																																																																																																																																																																																		
+										<option value='K_DPM_2'><?php echo e(__('K_DPM_2')); ?></option>																																																																																																																																																																																		
+										<option value='K_DPM_2_ANCESTRAL'><?php echo e(__('K_DPM_2_ANCESTRAL')); ?></option>																																																																																																																																																																																		
+										<option value='K_EULER'><?php echo e(__('K_EULER')); ?></option>																																																																																																																																																																																		
+										<option value='K_EULER_ANCESTRAL'><?php echo e(__('K_EULER_ANCESTRAL')); ?></option>																																																																																																																																																																																		
+										<option value='K_HEUN'><?php echo e(__('K_HEUN')); ?></option>																																																																																																																																																																																		
+										<option value='K_LMS'><?php echo e(__('K_LMS')); ?></option>																																																																																																																																																																																																																																																																																																																																																																				
+									</select>
+								</div>
+							</div>		
+							
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div id="form-group">
+									<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Clip Guidance Preset')); ?></h6>
+									<select id="preset" name="preset" data-placeholder="<?php echo e(__('Set Clip Guidance Preset')); ?>">
+										<option value='NONE' selected><?php echo e(__('None')); ?></option>																																																												
+										<option value='FAST_BLUE'><?php echo e(__('FAST_BLUE')); ?></option>																																																																																																																																																																																		
+										<option value='FAST_GREEN'><?php echo e(__('FAST_GREEN')); ?></option>																																																																																																																																																																																		
+										<option value='SIMPLE'><?php echo e(__('SIMPLE')); ?></option>																																																																																																																																																																																		
+										<option value='SLOW'><?php echo e(__('SLOW')); ?></option>																																																																																																																																																																																		
+										<option value='SLOWER'><?php echo e(__('SLOWER')); ?></option>																																																																																																																																																																																		
+										<option value='SLOWEST'><?php echo e(__('SLOWEST')); ?></option>																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																						
+									</select>
+								</div>
+							</div>
+						<?php endif; ?>
 						
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Image Resolution')); ?> <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="<?php echo e(__('The image resolutoin of the generated images')); ?>"></i></h6>
 								<select id="resolution" name="resolution" data-placeholder="<?php echo e(__('Set image resolution')); ?>">
-									<option value='256x256' selected>[256x256] <?php echo e(__('Small Image')); ?></option>
-									<option value='512x512'>[512x512] <?php echo e(__('Medium Image')); ?></option>																															
-									<option value='1024x1024'>[1024x1024] <?php echo e(__('Large Image')); ?></option>																																																													
+									<?php if(config('settings.image_vendor') == 'openai'): ?>
+										<option value='256x256' selected>[256x256] <?php echo e(__('Small Image')); ?></option>
+										<option value='512x512'>[512x512] <?php echo e(__('Medium Image')); ?></option>																															
+										<option value='1024x1024'>[1024x1024] <?php echo e(__('Large Image')); ?></option>	
+									<?php endif; ?>
+									<?php if(config('settings.image_vendor') == 'stable_diffusion'): ?>		
+										<?php if(config('settings.image_stable_diffusion_engine') == 'stable-diffusion-v1-5'): ?>
+											<option value='512x512' selected><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='768x768'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 768</option>
+										<?php elseif(config('settings.image_stable_diffusion_engine') == 'stable-diffusion-512-v2-1'): ?>
+											<option value='768x512'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='1024x512'><?php echo e(__('Width')); ?> 1024 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='512x512' selected><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='512x768'><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 768</option>
+											<option value='512x1024'><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 1024</option>
+										<?php elseif(config('settings.image_stable_diffusion_engine') == 'stable-diffusion-768-v2-1'): ?>
+											<option value='1344x768'><?php echo e(__('Width')); ?> 1344 x <?php echo e(__('Height')); ?> 768</option>
+											<option value='1152x768'><?php echo e(__('Width')); ?> 1152 x <?php echo e(__('Height')); ?> 768</option>
+											<option value='1024x768'><?php echo e(__('Width')); ?> 1024 x <?php echo e(__('Height')); ?> 768</option>
+											<option value='768x768' selected><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 768</option>
+											<option value='768x1024'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 1024</option>
+											<option value='768x1152'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 1152</option>
+											<option value='768x1344'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 1344</option>
+										<?php elseif(config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-beta-v2-2-2'): ?>
+											<option value='896x512'><?php echo e(__('Width')); ?> 896 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='768x512'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='512x512' selected><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 512</option>
+											<option value='512x768'><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 768</option>	
+											<option value='512x896'><?php echo e(__('Width')); ?> 512 x <?php echo e(__('Height')); ?> 896</option>	
+										<?php elseif(config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-1024-v0-9'): ?>
+											<option value='1536x640'><?php echo e(__('Width')); ?> 1536 x <?php echo e(__('Height')); ?> 640</option>
+											<option value='1344x768'><?php echo e(__('Width')); ?> 1344 x <?php echo e(__('Height')); ?> 768</option>
+											<option value='1024x1024' selected><?php echo e(__('Width')); ?> 1024 x <?php echo e(__('Height')); ?> 1024</option>
+											<option value='768x1344'><?php echo e(__('Width')); ?> 768 x <?php echo e(__('Height')); ?> 1344</option>
+											<option value='640x1536'><?php echo e(__('Width')); ?> 640 x <?php echo e(__('Height')); ?> 1536</option>
+										<?php endif; ?>								
+									<?php endif; ?>																																																												
 								</select>
 							</div>
 						</div>
 
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<div id="form-group">
-								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Number of Images')); ?> <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="<?php echo e(__('The number of images to generate')); ?>"></i></h6>
-								<select id="max-results" name="max_results" data-placeholder="<?php echo e(__('Set max number of results')); ?>">
+								<h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Number of Variations')); ?> <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="<?php echo e(__('The number of images to generate')); ?>"></i></h6>
+								<select id="max-results" name="max_results" data-placeholder="<?php echo e(__('Set Number of Variants')); ?>">
 									<option value=1 selected>1</option>
 									<option value=2>2</option>																															
 									<option value=3>3</option>																															
 									<option value=4>4</option>																															
 									<option value=5>5</option>																															
+									<option value=6>6</option>																															
+									<option value=7>7</option>																															
+									<option value=8>8</option>																															
+									<option value=9>9</option>																															
+									<option value=10>10</option>																															
 								</select>
 							</div>
 						</div>
@@ -287,7 +473,7 @@ unset($__errorArgs, $__bag); ?>
 		$(document).ready(function() {
 
 			$('#title').simpleTxtCounter({
-				maxLength: 2000,
+				maxLength: 3000,
 				countElem: '<div class="form-text"></div>',
 				lineBreak: false,
 			});

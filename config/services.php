@@ -41,6 +41,42 @@ return [
         'key' => env('OPENAI_SECRET_KEY'),
     ],
 
+	/*
+    |--------------------------------------------------------------------------
+    | GETRESPONSE
+    |--------------------------------------------------------------------------
+    */
+    'getResponse' => [
+        'key' => env('GETRESPONSE_API_KEY'),
+        'list_id' => env('GETRESPONSE_LIST_ID'),
+    ],
+    /*
+    |--------------------------------------------------------------------------
+    | ADOBE EDITOR
+    |--------------------------------------------------------------------------
+    */
+    'adobe' => [
+        'client_id' => env('ADOBE_CLIENT_ID'),
+        'appName' => env('ADOBE_APP_NAME'),
+    ],
+    /*
+    |--------------------------------------------------------------------------
+    | VIRAL RSS FEED
+    |--------------------------------------------------------------------------
+    */
+    'feed' => [
+        'key' => env('RSS_API_KEY'),
+        'secret' => env('RSS_API_SECRET'),
+    ],
+    /*
+    |--------------------------------------------------------------------------
+    | Social media 
+    |--------------------------------------------------------------------------
+    */
+    'youtube' => [
+        'key' => env('YOUTUBE_API_KEY'),
+    ],
+
     'stable_diffusion' => [
         'key' => env('STABLE_DIFFUSION_API_KEY'),
     ],
@@ -74,6 +110,27 @@ return [
 
     'gcp' => [
         'key_path' => env('GOOGLE_APPLICATION_CREDENTIALS'),
+        'bucket' => env('GOOGLE_STORAGE_BUCKET'),
+    ],
+
+    'elevenlabs' => [
+        'key' => env('ELEVENLABS_API_KEY'),
+    ],
+
+    'serper' => [
+        'key' => env('SERPER_API_KEY'),
+    ],
+
+    'storj' => [
+        'key' => env('STORJ_ACCESS_KEY_ID'),
+        'secret' => env('STORJ_SECRET_ACCESS_KEY'),
+        'bucket' => env('STORJ_BUCKET'),
+    ],
+
+    'dropbox' => [
+        'key' => env('DROPBOX_APP_KEY'),
+        'secret' => env('DROPBOX_APP_SECRET'),
+        'token' => env('DROPBOX_ACCESS_TOKEN'),
     ],
 
     /*
@@ -243,6 +300,24 @@ return [
         'vendor_auth_code' => env('PADDLE_VENDOR_AUTH_CODE'),
         'sandbox' => env('PADDLE_SANDBOX'),
         'class' => App\Services\PaddleService::class,
+    ],
+
+    'iyzico' => [
+        'enable' => env('IYZICO_ENABLED'),
+        'subscription' => env('IYZICO_SUBSCRIPTION_ENABLED'),
+        'api_key' => env('IYZICO_API_KEY'),
+        'secret_key' => env('IYZICO_SECRET_KEY'),
+        'sandbox' => env('IYZICO_SANDBOX'),
+        'class' => App\Services\IyzicoService::class,
+    ],
+
+    '2checkout' => [
+        'enable' => env('2CHECKOUT_ENABLED'),
+        'subscription' => env('2CHECKOUT_SUBSCRIPTION_ENABLED'),
+        'merchant_code' => env('2CHECKOUT_MERCHANT_CODE'),
+        'secret_key' => env('2CHECKOUT_SECRET_KEY'),
+        'sandbox' => env('2CHECKOUT_SANDBOX'),
+        'class' => App\Services\TwoCheckoutService::class,
     ],
 
 ];

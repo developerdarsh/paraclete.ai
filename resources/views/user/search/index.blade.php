@@ -62,6 +62,7 @@
 			"order": [[ 6, "desc" ]],
 			language: {
 				"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>{{ __('No search results were found') }}</div>",
+				"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 			},
 			"bFilter": false,
 			"paging": false,

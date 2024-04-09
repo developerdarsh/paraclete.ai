@@ -102,7 +102,7 @@ class GCPTTSService
         $audio_stream = $response->getAudioContent();        
 
         $backup = new Backup();
-        $upload = $backup->upload();
+        $upload = $backup->download();
         if (!$upload['status']) { return false; }
 
         Storage::disk('audio')->put($file_name, $audio_stream); 

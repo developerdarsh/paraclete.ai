@@ -1,0 +1,383 @@
+/* Fonts */
+
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* Default CSS */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--body-font);
+}
+
+body {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--body-font);
+    background: #ffffff;
+}
+
+img  {
+    max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--heading-font);
+}
+
+p {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    outline: none;
+    border: none;
+    font-weight: 500;
+    -webkit-transition: color 350ms ease-in-out;
+    -moz-transition: color 350ms ease-in-out;
+    -ms-transition: color 350ms ease-in-out;
+    -o-transition: color 350ms ease-in-out;
+    transition: color 350ms ease-in-out;
+}
+
+a:focus,
+a:hover {
+    text-decoration: none;
+    outline: none;
+    border: none;
+}
+
+title {
+    text-transform: capitalize;
+}
+
+:root {
+    --heading-font: 'Quicksand', sans-serif;
+    --body-font: 'Roboto', sans-serif;
+    --primary-color: #367BF5;
+    --secondary-color: #F3AA18;
+    --black-color: #000;
+    --lightblack: #222222;
+    --white-color: #fff;
+    --darkgrey: #868686;
+    --lightgrey: #636363;
+    --green: #069697;
+    --red: #EA3D2F;
+}
+
+.green {
+    color: var(--green) !important;
+}
+
+.lightblack {
+    color: var(--lightblack) !important;
+}
+
+.blue {
+    color: var(--primary-color) !important;
+}
+
+.red {
+    color: var(--red) !important;
+}
+
+
+
+/* main css start */
+
+.header-1 {
+    position: relative;
+    padding: 80px 0px 40px;
+}
+.header-1 .sec-title h2 {
+    font-size: 30px;
+    line-height: 42px;
+    padding-bottom: 5px;
+    font-weight: 600;
+}
+.header-1 .sec-title a {
+    font-size: 16px;
+    line-height: 20px;
+    color: rgb(130, 139, 162);
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+}
+.header-1 .sec-title img {
+    height: 20px;
+    margin-right: 5px;
+}
+.progress-section .fa-count {
+    display: inline-block;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-right: 8px;
+    color: rgb(255, 255, 255);
+    font-variant-numeric: tabular-nums;
+    width: fit-content;
+    height: 20px;
+    padding: 2px 4.5px;
+    background-color: rgb(236, 147, 12);
+}
+.progress-section .dsewr {
+    font-size: 16px;
+    line-height: 20px;
+    color: rgb(130, 139, 162);
+    margin-right: 5px;
+    display: block;
+    max-width: 180px;
+    height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+.progress-section .progress {
+    height: 3px;
+}
+.progress-section .progress-bar {
+    background-color: #ec930c;
+}
+.PersonalDetails .sec-title h2 {
+    font-size: 24px;
+    line-height: 28px;
+    position: relative;
+    display: inline-flex;
+    -webkit-box-align: center;
+    align-items: center;
+    margin-right: 4px;
+    min-width: 0px;
+    height: 28px;
+    font-weight: 600;
+    padding-bottom: 30px;
+}
+.resume-form .form-label {
+    font-size: 16px;
+    line-height: 20px;
+    color: rgb(130, 139, 162);
+}
+.resume-form .form-control {
+    border-radius: 3px;
+    padding: 12px 16px;
+    width: 100%;
+    display: block;
+    caret-color: rgb(26, 145, 240);
+    background-color: rgb(239, 242, 249);
+    outline: none;
+    border: 0px;
+    color: rgb(30, 37, 50);
+    transition: color 0.1s ease 0s;
+}
+.resume-form .form-control:focus {
+    box-shadow: none;
+    border-bottom: 2px solid rgb(26, 145, 240);
+}
+.form-group .uploader {
+    display: flex;
+    align-items: center;
+    padding-top: 20px;
+}
+.form-group .uploader .svg-icon {
+    flex: 0 0 60px;
+    width: 60px;
+    height: 60px;
+    border-radius: 3px;
+    margin-right: 16px;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background-color: rgb(239, 242, 249);
+    background-image: none;
+    background-size: cover;
+}
+.form-group .uploader .photo {
+    font-size: 16px;
+    line-height: 20px;
+    color: rgb(26, 145, 240);
+    transition: color 0.1s ease 0s;
+}
+
+.work-experiences .accordion-button {
+    padding: 24px;
+}
+.work-experiences .accordion-button:not(.collapsed) {
+    background-color: #ffffff;
+}
+.work-experiences .accordion-button:focus {
+    box-shadow: none;
+}
+
+.skill-list .list-inline .sc-jzZzup {
+    padding: 6px 6px 6px 10px;
+    border-radius: 4px;
+    background-color: rgb(239, 242, 249);
+    color: rgb(30, 37, 50);
+    font-size: 16px;
+    line-height: 20px;
+    white-space: nowrap;
+    transition: background-color 0.1s ease 0s, color 0.1s ease 0s;
+    will-change: opacity, transform;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+.skill-list .list-inline .sc-jzZzup i {
+    margin-left: 2px;
+    color: rgb(130, 139, 162);
+}
+.form-group .AddMore {
+    padding: 5px;
+}
+.form-group .AddMore a {
+    color: #0c63e4;
+}
+.form-group .AddMore:hover {
+    background-color: rgba(234, 246, 255, 0.5);
+}
+
+/* 18-03-2024 CSS Start */
+
+.Add-custom-sec .custom-box {
+    padding-bottom: 15px;
+    width: 100%;
+    display: block;
+    color: #000;
+    font-weight: 400;
+}
+.resume-form .form-group .plus-minus i {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 16px;
+    background: rgb(26, 145, 240);
+    text-align: center;
+    border-radius: 100%;
+    color: #ffffff;
+}
+.resume-form .form-group #pre-written { 
+    cursor: pointer;
+}
+.SuggestionPanel {
+    display: none;
+    position: absolute;
+    border-radius: 3px;
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(23, 68, 130, 0.2) 0px 0px 1px, rgba(23, 68, 130, 0.15) 0px 2px 14px;
+    transform-origin: 0px 0px;
+    transition-property: opacity, transform;
+    transition-timing-function: ease-out;
+    top: 40px;
+    right: 0px;
+    width: 420px;
+    z-index: 1;
+}
+.SuggestionPanel .panel-head {
+    padding: 10px;
+    border-bottom: 1px solid #eeeeee;
+}
+.SuggestionPanel .panel-head input {
+    border: none;
+    font-size: 14px;
+}
+.SuggestionPanel .panel-head input:focus { 
+    outline: none;
+    box-shadow: none;
+}
+.SuggestionPanel .panel-head .close {
+    border: none;
+    border-radius: 100px;
+    text-align: right;
+    position: absolute;
+    right: 10px;
+    background: #ffffff;
+}
+.SuggestionPanel .panel-body {
+    position: relative;
+    padding: 5px 10px;
+    height: 300px;
+    overflow-y: auto;
+}
+.SuggestionPanel .panel-body::-webkit-scrollbar {
+    width: 4px
+  }
+  .SuggestionPanel .panel-body::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 4px #fff;
+  }
+  .SuggestionPanel .panel-body::-webkit-scrollbar-thumb {
+    background-color: rgb(239, 242, 249);
+    outline: 1px solid rgb(239, 242, 249);
+    border-radius: 10px;
+  }
+.SuggestionPanel .panel-body .most-popular p {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgb(236, 147, 12);
+}
+.SuggestionPanel .panel-body .most-popular p svg path {
+    fill: rgb(236, 147, 12);
+}
+.tm-select-content-sec {
+    display: flex;
+    -webkit-box-align: center;
+    overflow: hidden;
+    padding: 6px 8px;
+    align-items: flex-start;
+    font-size: 16px;
+    line-height: 22px;
+    cursor: pointer;
+    transition: color 0.15s ease 0s;
+}
+.tm-select-content-sec .tm-svg {
+    padding: 6px;
+    background-color: rgb(239, 242, 249);
+    color: rgb(130, 139, 162);
+    transition: color 0.2s ease 0s, background-color 0.2s ease 0s;
+    will-change: color, background-color;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-right: 16px;
+    border-radius: 50%;
+}
+.tm-select-content-sec .tm-content {
+    -webkit-box-flex: 1;
+    flex-grow: 1;
+}
+.tm-select-content-sec .tm-content a {
+    color: rgb(130, 139, 162);
+    font-weight: 400;
+}
+.tm-select-content-sec .tm-content a:hover {
+    background-color: rgba(234, 246, 255, 0.5);
+    color: rgb(26, 145, 240);
+}
+

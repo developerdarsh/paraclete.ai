@@ -86,6 +86,33 @@ return [
             'options' => ['ContentDisposition' => 'attachment'],
         ],
 
+        'gcs' => [
+            'driver' => 'gcs',
+            'key_file_path' => env('GOOGLE_APPLICATION_CREDENTIALS', null), 
+            'bucket' => env('GOOGLE_STORAGE_BUCKET', 'your-bucket'),
+            'visibility' => 'public', 
+            'visibility_handler' => null, 
+            'metadata' => ['cacheControl'=> 'public,max-age=86400', 'contentDisposition' => 'attachment'], 
+        ],
+
+        'storj' => [
+            'driver' => 's3',
+            'key' => env('STORJ_ACCESS_KEY_ID'),
+            'secret' => env('STORJ_SECRET_ACCESS_KEY'),
+            'region' => 'us-east-1',
+            'bucket' => env('STORJ_BUCKET'),
+            'endpoint' => 'https://gateway.storjshare.io',
+            'visibility' => 'public',
+            'options' => ['ContentDisposition' => 'attachment', 'CacheControl'=> 'public,max-age=86400',],
+        ],
+
+        'dropbox' => [
+            'driver' => 'dropbox',
+            'key' => env('DROPBOX_APP_KEY'),
+            'secret' => env('DROPBOX_APP_SECRET'),
+            'authorization_token' => env('DROPBOX_ACCESS_TOKEN'),
+        ],
+
 
     ],
 
@@ -101,7 +128,7 @@ return [
     */
 
     'links' => [
-        public_path('images') => storage_path('app/images'),
+      
     ],
 
 ];

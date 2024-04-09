@@ -30,6 +30,14 @@
 <!-- Toastr JS -->
 <script src="{{URL::asset('plugins/toastr/toastr.min.js')}}"></script>
 
+<!-- multiselect select  -->
+
+<script src="{{URL::asset('plugins/bootstrap-5.0.2/js/bootstrap-multiselect.min.js')}}"></script>
+
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+<script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+
 <!-- Custom js-->
 <script src="{{URL::asset('js/custom.js')}}"></script>
 
@@ -153,6 +161,43 @@
         document.cookie = "theme=" + theme + ";path=/";
 
         location.reload();
+    });
+
+
+    $(function(){
+
+        var ua =navigator.userAgent;
+        if(ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1 || ua.indexOf('iPod')  > -1){
+            var start = "touchstart";
+            var move  = "touchmove";
+            var end   = "touchend";
+        } else{
+            var start = "mousedown";
+            var move  = "mousemove";
+            var end   = "mouseup";
+        }
+        var ink, d, x, y;
+        $(".ripple").on(start, function(e){
+        
+            if($(this).find(".ink").length === 0){
+            $(this).prepend("<span class='ink'></span>");
+        }
+            
+        ink = $(this).find(".ink");
+        ink.removeClass("animate");
+        
+        if(!ink.height() && !ink.width()){
+            d = Math.max($(this).outerWidth(), $(this).outerHeight());
+            ink.css({height: d, width: d});
+        }
+        
+        x = e.originalEvent.pageX - $(this).offset().left - ink.width()/2;
+        y = e.originalEvent.pageY - $(this).offset().top - ink.height()/2;
+        
+        ink.css({top: y+'px', left: x+'px'}).addClass("animate");
+
+        });
+
     });
    
 </script>

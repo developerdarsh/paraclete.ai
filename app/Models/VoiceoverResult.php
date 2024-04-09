@@ -37,6 +37,7 @@ class VoiceoverResult extends Model
         'audio_type',
         'mode',
         'expires_at',
+        'type',
     ];
 
     /**

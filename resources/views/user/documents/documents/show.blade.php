@@ -23,8 +23,8 @@
 @endsection
 
 @section('content')						
-	<div class="row">
-		<div class="col-lg-7 col-md-12 col-sm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-8 col-md-12 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-body">		
 
@@ -59,7 +59,7 @@
 						</div>
 						<div class="col-lg-6 col-md-12 col-sm-12">
 								<div class="form-group">
-									<select id="project" name="project" data-placeholder="{{ __('Select Workbook Name') }}">	
+									<select id="project" name="project" class="form-select" data-placeholder="{{ __('Select Workbook Name') }}">	
 										<option value="all"> {{ __('All Workbooks') }}</option>
 										@foreach ($workbooks as $workbook)
 											<option value="{{ $workbook->name }}" @if (strtolower(auth()->user()->workbook) == strtolower($workbook->name)) selected @endif> {{ ucfirst($workbook->name) }}</option>
@@ -70,7 +70,12 @@
 						</div>
 					</div>
 					<div>						
-						<div id="template-textarea" class="pl-4 pr-4">						
+						<div id="template-textarea" class="pl-4 pr-4">		
+							@if (!is_null($id->image))
+							<div class="text-center mb-5 mt-2">
+								<img src="{{ $id->image }}" style="height: 300px; border-radius: 10px;" alt="AI Article Wizard Image">
+							</div>								
+							@endif				
 							<div class="form-control" name="content" rows="12" id="richtext">{!! $id->result_text !!}</div>
 							@error('content')
 								<p class="text-danger">{{ $errors->first('content') }}</p>

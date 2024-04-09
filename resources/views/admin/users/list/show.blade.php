@@ -30,21 +30,21 @@
 							<div class="text-center p-2">
 								<div class="d-flex w-100">
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">{{ number_format($user->available_words + $user->available_words_prepaid) }} / {{ number_format($user->total_words) }}</h4>
+										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_words == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words + $user->available_words_prepaid) }} @endif</h4>
 										<h6 class="fs-12 mb-3">{{ __('Words Left') }}</h6>
 									</div>			
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">{{ number_format($user->available_images + $user->available_images_prepaid) }} / {{ number_format($user->total_images) }}</h4>
+										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_images == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_images + $user->available_images_prepaid) }} @endif</h4>
 										<h6 class="fs-12 mb-3">{{ __('Images Left') }}</h6>
 									</div>	
 								</div>	
 								<div class="d-flex w-100">
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">{{ number_format($user->available_chars + $user->available_chars_prepaid) }} / {{ number_format($user->total_chars) }}</h4>
+										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_chars == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_chars + $user->available_chars_prepaid) }} @endif</h4>
 										<h6 class="fs-12 mb-3">{{ __('Characters Left') }}</h6>
 									</div>			
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">{{ number_format($user->available_minutes + $user->available_minutes_prepaid) }} / {{ number_format($user->total_minutes) }}</h4>
+										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_minutes == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_minutes + $user->available_minutes_prepaid) }} @endif</h4>
 										<h6 class="fs-12 mb-3">{{ __('Minutes Left') }}</h6>
 									</div>	
 								</div>
@@ -57,8 +57,9 @@
 					<div>
 						<h4 class="mb-1 mt-1 font-weight-bold fs-16">{{ $user->name }}</h4>
 						<h6 class="text-muted fs-12">{{ $user->job_role }}</h6>
-						<a href="{{ route('admin.user.edit', [$user->id]) }}" class="btn btn-primary mt-3 mb-2 mr-2 pl-5 pr-5"><i class="fa-solid fa-pencil mr-1"></i> {{ __('Update Profile') }}</a>
-						<a href="{{ route('admin.user.credit', [$user->id]) }}" class="btn btn-primary mt-3 mb-2"><i class="fa-solid fa-scroll-old mr-1"></i>{{ __('Add Credits') }}</a>
+						<a href="{{ route('admin.user.edit', [$user->id]) }}" class="btn btn-primary mt-3 mb-2 mr-2"><i class="fa-solid fa-pencil mr-1"></i> {{ __('Update Profile') }}</a>
+						<a href="{{ route('admin.user.credit', [$user->id]) }}" class="btn btn-primary mt-3 mb-2"><i class="fa-solid fa-scroll-old mr-1"></i>{{ __('Update Credits') }}</a>
+						<a href="{{ route('admin.user.subscription', [$user->id]) }}" class="btn btn-primary mt-3 mb-2"><i class="fa-solid fa-box-circle-check mr-1"></i>{{ __('Add Subscription') }}</a>
 					</div>
 				</div>
 				
@@ -198,6 +199,32 @@
 									</div>
 								</div>
 							</div>
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div class="card overflow-hidden border-0">
+									<div class="card-body d-flex">
+										<div class="usage-info w-100">
+											<p class=" mb-3 fs-12 font-weight-bold">{{ __('Characters Synthesized') }}</p>
+											<h2 class="mb-2 number-font fs-20">{{ number_format($data['characters']) }} <span class="text-muted fs-18">{{ __('characters') }}</span></h2>
+										</div>
+										<div class="usage-icon w-100 text-right">
+											<i class="fa-solid fa-waveform-lines"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div class="card overflow-hidden border-0">
+									<div class="card-body d-flex">
+										<div class="usage-info w-100">
+											<p class=" mb-3 fs-12 font-weight-bold">{{ __('Minutes Transcribed') }}</p>
+											<h2 class="mb-2 number-font fs-20">{{ number_format((float)$data['minutes']/60, 2) }} <span class="text-muted fs-18">{{ __('minutes') }}</span></h2>
+										</div>
+										<div class="usage-icon w-100 text-right">
+											<i class="fa-solid fa-folder-music"></i>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -205,8 +232,19 @@
 				<div class="col-lg-12 col-md-12 col-sm-12">
 					<div class="card mb-5 border-0">
 						<div class="card-header d-inline border-0">
-							<div>
-								<h3 class="card-title fs-16 mt-3 mb-4"><i class="fa-solid fa-box-open mr-4 text-info"></i>{{ __('Subscription ') }}</h3>
+							<div class="d-flex">
+								<div class="w-100">
+									<h3 class="card-title fs-16 mt-3 mb-4"><i class="fa-solid fa-box-open mr-4 text-info"></i>{{ __('Subscription') }}</h3>
+								</div>
+								<div class="w-30">
+									<div class="form-group mt-3">
+										<label class="custom-switch">
+											<input type="checkbox" name="hidden-plans" class="custom-switch-input" id="hidden-plans" onchange="toggleHidden()" @if ( $user->hidden_plan) checked @endif>
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Show Hidden Plans to this User') }}</span>
+										</label>
+									</div>
+								</div>
 							</div>
 							@if ($user_subscription == '')
 								<div>
@@ -227,9 +265,9 @@
 						<div class="card-body">
 							<div class="mb-3">
 								@if ($user_subscription == '')
-								<span class="fs-12 text-muted">{{ __('Total one time words available ') }} {{ number_format($user->available_words) }}.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }} {{ number_format($user->available_words_prepaid) }}. </span>
+									<span class="fs-12 text-muted">{{ __('Total words available') }}: @if ($user->available_words == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }} {{ number_format($user->available_words_prepaid) }}. </span>
 								@else
-									<span class="fs-12 text-muted">{{ __('Total words available via subscription plan ') }} {{ number_format($user->available_words) }} {{ __(' out of ') }} {{ number_format($user->total_words) }}. </span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }} {{ number_format($user->available_words_prepaid) }}. </span>
+									<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }}: @if ($user->available_words == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }}: {{ number_format($user->available_words_prepaid) }}. </span>
 								@endif
 							</div>
 							<div class="progress mb-4">
@@ -284,9 +322,9 @@
 			new Chart(ctx, {
 				type: 'bar',
 				data: {
-					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+					labels: ['{{ __('Jan') }}', '{{ __('Feb') }}', '{{ __('Mar') }}', '{{ __('Apr') }}', '{{ __('May') }}', '{{ __('Jun') }}', '{{ __('Jul') }}', '{{ __('Aug') }}', '{{ __('Sep') }}', '{{ __('Oct') }}', '{{ __('Nov') }}', '{{ __('Dec') }}'],
 					datasets: [{
-						label: 'Words Generated',
+						label: '{{ __('Words Generated') }}',
 						data: usageDataset,
 						backgroundColor: '#007bff',
 						borderWidth: 1,
@@ -369,5 +407,31 @@
 			});
 
 		});
+
+		function toggleHidden() {
+
+			var formData = new FormData();
+			formData.append("status", $('#hidden-plans').is(':checked') );
+			formData.append("user_id", {{ $user->id }});
+
+			$.ajax({
+				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+				method: 'post',
+				url: '/admin/users/plan',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (data) {
+					if (data['status'] == 200) {
+						toastr.success('Hidden subscription plans visibility updated');								
+					} else {
+						toastr.error('There was an issue setting hidden plan visibility status');
+					}      
+				},
+				error: function(data) {
+					toastr.error('There was an issue setting hidden plan visibility status');
+				}
+			})
+		}
 	</script>
 @endsection

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('frequency')->nullable()->comment('prepaid|monthly|yearly');
-            $table->string('order_id');
+            $table->string('order_id')->nullable();
             $table->unsignedBigInteger('plan_id');
             $table->float('price');
             $table->string('currency');

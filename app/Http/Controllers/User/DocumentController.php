@@ -28,18 +28,18 @@ class DocumentController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Content::where('user_id', Auth::user()->id)->where('result_text', '<>', 'null')->latest()->get();
+            $data = Content::where('user_id', Auth::user()->id)->where('result_text', '<>', 'null')->orderBy('created_at', 'asc')->get();
             return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>
-                                            <a href="'. route("user.documents.show", $row["id"] ). '"><i class="fa-solid fa-file-lines table-action-buttons edit-action-button" title="View Document"></i></a>
-                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Document"></i></a> 
+                                            <a href="'. route("user.documents.show", $row["id"] ). '"><i class="fa-solid fa-file-lines table-action-buttons edit-action-button"></i></a>
+                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button"></i></a> 
                                         </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd/m/Y').'</span><br><span class="text-muted">'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-title', function($row){
@@ -79,39 +79,10 @@ class DocumentController extends Controller
      */
     public function images(Request $request)
     {   
-        if ($request->ajax()) {
-            $data = Image::where('user_id', Auth::user()->id)->latest()->get();
-            return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->addColumn('actions', function($row){
-                        $actionBtn = '<div>
-                                            <a download href=" '. url($row["image"]) .'"><i class="fa-solid fa-cloud-arrow-down table-action-buttons edit-action-button" title="Download Image"></i></a>
-                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Image"></i></a> 
-                                        </div>';
-                        return $actionBtn;
-                    })
-                    ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
-                        return $created_on;
-                    })
-                    ->addColumn('custom-image', function($row){
-                        if ($row['storage'] == 'local' || is_null($row['storage'])) {
-                            $path = URL::asset($row['image']);
-                        } else {
-                            $path = $row['image'];
-                        }
-                        $user = '<div class="d-flex">
-                                <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" src="' . $path . '"></div>
-                                <div><a class="file-name font-weight-bold" href="#" id="'.$row["id"].'">' . $row['name'] . '</a><br><span class="text-muted">'.$row["description"].'</span></div>
-                            </div>';                        
-                        return $user;
-                    })
-                    ->rawColumns(['actions', 'created-on', 'custom-image'])
-                    ->make(true);
-                    
-        }
+        $data = Image::where('user_id', Auth::user()->id)->latest()->limit(18)->get();
+        $records = Image::where('user_id', Auth::user()->id)->count();
 
-        return view('user.documents.images.index');
+        return view('user.documents.images.index', compact('data', 'records'));
     }
 
 
@@ -128,13 +99,13 @@ class DocumentController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                            <a href="'. route("user.documents.voiceover.show", $row["id"] ). '"><i class="fa-solid fa-list-music table-action-buttons edit-action-button" title="View Result"></i></a>
-                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Result"></i></a>
+                                            <a href="'. route("user.documents.voiceover.show", $row["id"] ). '"><i class="fa-solid fa-list-music table-action-buttons edit-action-button" title="'. __('View Result') .'"></i></a>
+                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Result') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["created_at"], 'd M Y').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-voice-type', function($row){
@@ -147,12 +118,12 @@ class DocumentController extends Controller
                     })
                     ->addColumn('download', function($row){
                         $url = ($row['storage'] == 'local') ? URL::asset($row['result_url']) : $row['result_url'];
-                        $result = '<a class="" href="' . $url . '" download><i class="fa fa-cloud-download table-action-buttons download-action-button" title="Download Result"></i></a>';
+                        $result = '<a class="" href="' . $url . '" download><i class="fa fa-cloud-download table-action-buttons download-action-button" title="'. __('Download Result') .'"></i></a>';
                         return $result;
                     })
                     ->addColumn('single', function($row){
                         $url = ($row['storage'] == 'local') ? URL::asset($row['result_url']) : $row['result_url'];
-                        $result = '<button type="button" class="result-play p-0" onclick="resultPlay(this)" src="' . $url . '" type="'. $row['audio_type'].'" id="'. $row['id'] .'"><i class="fa fa-play table-action-buttons view-action-button" title="Play Result"></i></button>';
+                        $result = '<button type="button" class="result-play p-0" onclick="resultPlay(this)" src="' . $url . '" type="'. $row['audio_type'].'" id="'. $row['id'] .'"><i class="fa fa-play table-action-buttons view-action-button" title="'. __('Play Result') .'"></i></button>';
                         return $result;
                     })
                     ->addColumn('custom-language', function($row) {
@@ -182,13 +153,13 @@ class DocumentController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>
-                                            <a id="'.$row["id"].'" href="'. route('user.documents.transcript.show', $row['id']) .'" class="transcribeResult"><i class="fa fa-clipboard table-action-buttons edit-action-button" title="View Result"></i></a> 
-                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Result"></i></a>
+                                            <a id="'.$row["id"].'" href="'. route('user.documents.transcript.show', $row['id']) .'" class="transcribeResult"><i class="fa fa-clipboard table-action-buttons edit-action-button" title="'. __('View Result') .'"></i></a> 
+                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Result') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["created_at"], 'd M Y').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span>';
                         return $created_on;
                     })        
                     ->addColumn('custom-length', function($row) {
@@ -201,12 +172,12 @@ class DocumentController extends Controller
                     })
                     ->addColumn('download', function($row){
                         $result = ($row['storage'] == 'local') ? URL::asset($row['url']) : $row['url'];
-                        $result = '<a class="result-download" href="' . $row['url'] . '" download title="Download Audio"><i class="fa fa-cloud-download table-action-buttons download-action-button"></i></a>';
+                        $result = '<a class="result-download" href="' . $result . '" download title="'. __('Download Audio') .'"><i class="fa fa-cloud-download table-action-buttons download-action-button"></i></a>';
                         return $result;
                     })
                     ->addColumn('single', function($row){
                         $audio = ($row['storage'] == 'local') ? URL::asset($row['url']) : $row['url'];
-                        $result = '<button type="button" class="result-play pl-0" title="Play Audio" onclick="resultPlay(this)" src="' . $audio . '" id="'. $row['id'] .'"><i class="fa fa-play table-action-buttons view-action-button"></i></button>';
+                        $result = '<button type="button" class="result-play pl-0" title="'. __('Play Audio') .'" onclick="resultPlay(this)" src="' . $audio . '" id="'. $row['id'] .'"><i class="fa fa-play table-action-buttons view-action-button"></i></button>';
                         return $result;
                     })
                     ->addColumn('type', function($row){ 
@@ -235,13 +206,13 @@ class DocumentController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>
-                                            <a href="'. route("user.documents.code.show", $row["id"] ). '"><i class="fa-solid fa-file-lines table-action-buttons edit-action-button" title="View Document"></i></a>
-                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Document"></i></a> 
+                                            <a href="'. route("user.documents.code.show", $row["id"] ). '"><i class="fa-solid fa-file-lines table-action-buttons edit-action-button" title="'. __('View Document') .'"></i></a>
+                                            <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Document') .'"></i></a> 
                                         </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-title', function($row){
@@ -389,6 +360,136 @@ class DocumentController extends Controller
     }
 
 
+     /**
+	*
+	* Process media file
+	* @param - file id in DB
+	* @return - confirmation
+	*
+	*/
+	public function showImage(Request $request) 
+    {
+        if ($request->ajax()) {
+
+            $image = Image::where('id', request('id'))->first(); 
+
+            if ($image) {
+                if ($image->user_id == Auth::user()->id){
+
+                    $image_url = ($image->storage == 'local') ? URL::asset($image->image) : $image->image;
+                    $image_vendor = ($image->vendor == 'sd') ? __('Stable Diffusion') : __('Dalle');
+                    $image_url_second = url($image->image);
+                    $image_style = ($image->image_style == 'none') ? __('Not Set') : ucfirst($image->image_style);
+                    $image_lighting = ($image->image_lighting == 'none') ? __('Not Set') : ucfirst($image->image_lighting);
+                    $image_medium = ($image->image_medium == 'none') ? __('Not Set') : ucfirst($image->image_medium);
+                    $image_mood = ($image->image_mood == 'none') ? __('Not Set') : ucfirst($image->image_mood);
+                    $image_artist = ($image->image_artist == 'none') ? __('Not Set') : ucfirst($image->image_artist);
+
+                    $data['status'] = 'success';
+                    $data['modal'] = '<div class="row">
+                                        <div class="col-lg-6 col-md-6 col-sm-12">
+                                            <div class="image-view-box">
+                                                <a href="'. $image_url_second .'" class="download-image text-center" download><i class="fa-sharp fa-solid fa-arrow-down-to-line" title="' .__('Download Image') .'"></i></a>
+                                                <img src="'. $image_url .'" alt="">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 col-sm-12">
+                                            <div class="image-description-box">
+                                                <div class="row">
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Created')
+                                                        .'</div>
+                                                        <div class="description-data">
+                                                            September 02, 2023
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('AI Model')
+                                                        .'</div>
+                                                        <div class="description-data">'.
+                                                            $image_vendor
+                                                        .'</div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Resolution')
+                                                        .'</div>
+                                                        <div class="description-data">'.
+                                                            $image->resolution
+                                                        .'</div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Image Style')
+                                                        .'</div>
+                                                        <div class="description-data">'.
+                                                            $image_style
+                                                        .'</div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Lighting Style')
+                                                        .'</div>
+                                                        <div class="description-data">'.
+                                                            $image_lighting
+                                                        .'</div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Image Medium')
+                                                        .'</div>
+                                                        <div class="description-data">'.
+                                                            $image_medium
+                                                        .'</div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Artist Name')
+                                                       .'</div>
+                                                        <div class="description-data">'.
+                                                            $image_artist
+                                                        .'</div>
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6 mb-5">
+                                                        <div class="description-title">'.
+                                                             __('Image Mood')
+                                                        .'</div>
+                                                        <div class="description-data">'.
+                                                            $image_mood
+                                                        .'</div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-5">
+                                                    <div class="col-sm-12">
+                                                        <h6 class="text-white mb-3">'. __('Image Prompt') .'</h6>
+                                                        <div class="image-prompt">
+                                                            <p>'. $image->description.'</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>';
+                    return $data;  
+        
+                } else{
+    
+                    $data['status'] = 'error';
+                    $data['message'] = __('There was an error while retrieving this image');
+                    return $data;
+                }  
+            } else {
+                $data['status'] = 'error';
+                $data['message'] = __('Image was not found');
+                return $data;
+            }
+            
+        }
+	}
+
+
     /**
      * Remove the specified resource from storage.
      *
@@ -444,6 +545,21 @@ class DocumentController extends Controller
                             Storage::disk('wasabi')->delete($result->file_name);
                         }
                         break;
+                    case 'storj':
+                        if (Storage::disk('storj')->exists($result->file_name)) {
+                            Storage::disk('storj')->delete($result->file_name);
+                        }
+                        break;
+                    case 'gcp':
+                        if (Storage::disk('gcs')->exists($result->file_name)) {
+                            Storage::disk('gcs')->delete($result->file_name);
+                        }
+                        break;
+                    case 'dropbox':
+                        if (Storage::disk('dropbox')->exists($result->file_name)) {
+                            Storage::disk('dropbox')->delete($result->file_name);
+                        }
+                        break;
                     default:
                         # code...
                         break;
@@ -492,6 +608,21 @@ class DocumentController extends Controller
                     case 'wasabi':
                         if (Storage::disk('wasabi')->exists($transcript->temp_name)) {
                             Storage::disk('wasabi')->delete($transcript->temp_name);
+                        }
+                        break;
+                    case 'storj':
+                        if (Storage::disk('storj')->exists($transcript->temp_name)) {
+                            Storage::disk('storj')->delete($transcript->temp_name);
+                        }
+                        break;
+                    case 'gcp':
+                        if (Storage::disk('gcs')->exists($transcript->temp_name)) {
+                            Storage::disk('gcs')->delete($transcript->temp_name);
+                        }
+                        break;
+                    case 'dropbox':
+                        if (Storage::disk('dropbox')->exists($transcript->temp_name)) {
+                            Storage::disk('dropbox')->delete($transcript->temp_name);
                         }
                         break;
                     default:

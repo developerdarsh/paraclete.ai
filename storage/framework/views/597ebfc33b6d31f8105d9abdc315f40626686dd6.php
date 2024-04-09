@@ -586,6 +586,44 @@ unset($__errorArgs, $__bag); ?>
 
 						<div class="card border-0 special-shadow">							
 							<div class="card-body">
+								<h6 class="fs-12 font-weight-bold mb-4"><?php echo e(__('Live Chat')); ?> <span class="text-muted">(<?php echo e(__('tawk.to')); ?>)</span></h6>
+								
+								<div class="form-group">
+									<label class="custom-switch">
+										<input type="checkbox" name="enable-live-chat" class="custom-switch-input" <?php if( config('settings.live_chat')  == 'on'): ?> checked <?php endif; ?>>
+										<span class="custom-switch-indicator"></span>
+										<span class="custom-switch-description"><?php echo e(__('Enable Live Chat')); ?></span>
+									</label>
+								</div>
+							
+								<div class="input-box mb-2 mt-2">								
+									<h6><?php echo e(__('Direct Chat Link')); ?></h6>
+									<div class="form-group">							    
+										<input type="text" class="form-control <?php $__errorArgs = ['live-chat-link'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-danger <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" id="live-chat-link" name="live-chat-link" value="<?php echo e(config('settings.live_chat_link')); ?>" autocomplete="off">
+										<?php $__errorArgs = ['live-chat-link'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+											<p class="text-danger"><?php echo e($errors->first('live-chat-link')); ?></p>
+										<?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+									</div> 
+								</div> 	
+							</div>
+						</div>
+
+						<div class="card border-0 special-shadow">							
+							<div class="card-body pb-0">
 								<h6 class="fs-12 font-weight-bold mb-4"><?php echo e(__('Google reCaptcha v3')); ?></h6>
 								
 								<div class="form-group">
@@ -599,7 +637,7 @@ unset($__errorArgs, $__bag); ?>
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12">								
 										<!-- ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6><?php echo e(__('reCaptcha Site Key')); ?></h6>
 											<div class="form-group">							    
 												<input type="text" class="form-control <?php $__errorArgs = ['recaptcha-site-key'];
@@ -626,7 +664,7 @@ unset($__errorArgs, $__bag); ?>
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<!-- SECRET ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6><?php echo e(__('reCaptcha Secret Key')); ?></h6> 
 											<div class="form-group">							    
 												<input type="text" class="form-control <?php $__errorArgs = ['recaptcha-secret-key'];
@@ -655,7 +693,7 @@ unset($__errorArgs, $__bag); ?>
 						</div>	
 
 						<div class="card overflow-hidden border-0 special-shadow">							
-							<div class="card-body">
+							<div class="card-body pb-0">
 
 								<h6 class="fs-12 font-weight-bold mb-4"><?php echo e(__('Google Analytics')); ?></h6>
 
@@ -670,7 +708,7 @@ unset($__errorArgs, $__bag); ?>
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12">								
 										<!-- ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6><?php echo e(__('Google Analytics Tracking ID')); ?></h6>
 											<div class="form-group">							    
 												<input type="text" class="form-control <?php $__errorArgs = ['google-analytics'];
@@ -701,7 +739,7 @@ unset($__errorArgs, $__bag); ?>
 						</div>
 
 						<div class="card overflow-hidden border-0 special-shadow">							
-							<div class="card-body">
+							<div class="card-body pb-0">
 
 								<h6 class="fs-12 font-weight-bold mb-4"><?php echo e(__('Google Maps')); ?></h6>
 
@@ -716,7 +754,7 @@ unset($__errorArgs, $__bag); ?>
 								<div class="row">
 									<div class="col-lg-6 col-md-6 col-sm-12">								
 										<!-- ACCESS KEY -->
-										<div class="input-box">								
+										<div class="input-box mt-2">								
 											<h6><?php echo e(__('Google Maps API Key')); ?></h6>
 											<div class="form-group">							    
 												<input type="text" class="form-control <?php $__errorArgs = ['google-key'];

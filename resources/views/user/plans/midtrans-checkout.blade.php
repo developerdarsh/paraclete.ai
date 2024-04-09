@@ -45,7 +45,7 @@
             // Trigger snap popup. @TODO: Replace TRANSACTION_TOKEN_HERE with your transaction token
             window.snap.pay('{{$snapToken}}', {
                 onSuccess: function (result) {
-                    //window.location.href = '/user/payments/approved'
+                  //  window.location.href = '/user/payments/approved'
                     console.log(result);
                 },
                 onPending: function (result) {

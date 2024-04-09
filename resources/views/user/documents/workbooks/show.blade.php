@@ -59,7 +59,7 @@
 						</div>
 						<div class="col-lg-6 col-md-12 col-sm-12">
 								<div class="form-group">
-									<select id="project" name="project" data-placeholder="{{ __('Select Workbook Name') }}">	
+									<select id="project" name="project" class="form-select" data-placeholder="{{ __('Select Workbook Name') }}">	
 										<option value="all"> {{ __('All Workbooks') }}</option>
 										@foreach ($workbooks as $workbook)
 											<option value="{{ $workbook->name }}" @if (strtolower(auth()->user()->workbook) == strtolower($workbook->name)) selected @endif> {{ ucfirst($workbook->name) }}</option>

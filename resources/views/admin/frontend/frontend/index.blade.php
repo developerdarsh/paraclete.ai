@@ -21,7 +21,7 @@
 @endsection
 @section('content')					
 	<div class="row">
-		<div class="col-lg-6 col-md-12 col-xm-12">
+		<div class="col-lg-10 col-md-12 col-xm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Setup Frontend Settings') }}</h3>
@@ -232,6 +232,17 @@
 												<input type="text" class="form-control @error('instagram') is-danger @enderror" id="instagram" name="instagram" value="{{ config('frontend.social_instagram') }}" autocomplete="off">
 												@error('instagram')
 													<p class="text-danger">{{ $errors->first('instagram') }}</p>
+												@enderror
+											</div> 
+										</div> 
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-12">					
+										<div class="input-box">								
+											<h6><i class="fa-brands fa-youtube mr-2"></i>{{ __('Youtube') }} <span class="text-muted"></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('youtube') is-danger @enderror" id="youtube" name="youtube" value="{{ config('frontend.social_youtube') }}" autocomplete="off">
+												@error('youtube')
+													<p class="text-danger">{{ $errors->first('youtube') }}</p>
 												@enderror
 											</div> 
 										</div> 

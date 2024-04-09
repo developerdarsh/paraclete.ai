@@ -24,6 +24,7 @@ return new class extends Migration
             $table->longText('description')->nullable();
             $table->string('category')->nullable();
             $table->string('type')->default('original');
+            $table->string('group')->nullable();
             $table->timestamps();
         });
     }

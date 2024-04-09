@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\User;
 use Carbon\Carbon;
 
+
 class StripeWebhookController extends Controller
 {
     /**
@@ -20,7 +21,6 @@ class StripeWebhookController extends Controller
      */
     public function handleStripe(Request $request)
     {
-        //\Stripe\Stripe::setApiKey(config('services.stripe.client_id'));
 
         $endpoint_secret = config('services.stripe.webhook_secret');
 
@@ -46,8 +46,8 @@ class StripeWebhookController extends Controller
 
 
         switch ($event->type) {
-            case 'customer.subscription.deleted': 
-                $subscription = Subscriber::where('subscription_id', $event->data->object->id)->firstOrFail();
+            case 'customer.subscription.deleted':                 
+                $subscription = Subscriber::where('subscription_id', $event->data->object->subscription)->firstOrFail();
                 $subscription->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
                 
                 $user = User::where('id', $subscription->user_id)->firstOrFail();
@@ -70,8 +70,9 @@ class StripeWebhookController extends Controller
                 }
            
                 break;
-            case 'invoice.payment_failed':
-                $subscription = Subscriber::where('subscription_id', $event->data->object->id)->firstOrFail();
+
+            case 'invoice.payment_failed':             
+                $subscription = Subscriber::where('subscription_id', $event->data->object->subscription)->firstOrFail();
                 $subscription->update(['status'=>'Expired', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
                 
                 $user = User::where('id', $subscription->user_id)->firstOrFail();
@@ -94,9 +95,10 @@ class StripeWebhookController extends Controller
                 }
           
                 break;
+
             case 'invoice.paid':
 
-                $subscription = Subscriber::where('subscription_id', $event->data->object->id)->where('status', 'Expired')->firstOrFail();
+                $subscription = Subscriber::where('subscription_id', $event->data->object->subscription)->firstOrFail();
 
                 if ($subscription) {
                     $plan = SubscriptionPlan::where('id', $subscription->plan_id)->firstOrFail();
@@ -121,41 +123,48 @@ class StripeWebhookController extends Controller
                         }
                     }
 
-                    $record_payment = new Payment();
-                    $record_payment->user_id = $user->id;
-                    $record_payment->plan_id = $plan->id;
-                    $record_payment->order_id = $subscription->plan_id;
-                    $record_payment->plan_name = $plan->plan_name;
-                    $record_payment->price = $total_price;
-                    $record_payment->currency = $plan->currency;
-                    $record_payment->gateway = 'Stripe';
-                    $record_payment->frequency = $plan->payment_frequency;
-                    $record_payment->status = 'completed';
-                    $record_payment->words = $plan->words;
-                    $record_payment->images = $plan->images;
-                    $record_payment->save();
-                    
-                    $group = ($user->hasRole('admin')) ? 'admin' : 'subscriber';
+                    $payment = Payment::where('order_id', $event->data->object->id)->first();
 
-                    $user->syncRoles($group);    
-                    $user->group = $group;
-                    $user->plan_id = $plan->id;
-                    $user->total_words = $plan->words;
-                    $user->total_images = $plan->images;
-                    $user->total_chars = $plan->characters;
-                    $user->total_minutes = $plan->minutes;
-                    $user->available_words = $plan->words;
-                    $user->available_images = $plan->images;
-                    $user->available_chars = $plan->characters;
-                    $user->available_minutes = $plan->minutes;
-                    $user->member_limit = $plan->team_members;
-                    $user->save();       
-
-                    event(new PaymentProcessed($user));
+                    if (!$payment) {
+                        $record_payment = new Payment();
+                        $record_payment->user_id = $user->id;
+                        $record_payment->plan_id = $plan->id;
+                        $record_payment->order_id = $event->data->object->payment_intent;
+                        $record_payment->plan_name = $plan->plan_name;
+                        $record_payment->price = $total_price;
+                        $record_payment->currency = $plan->currency;
+                        $record_payment->gateway = 'Stripe';
+                        $record_payment->frequency = $plan->payment_frequency;
+                        $record_payment->status = 'completed';
+                        $record_payment->words = $plan->words;
+                        $record_payment->images = $plan->images;
+                        $record_payment->save();
+    
+                        $group = ($user->hasRole('admin')) ? 'admin' : 'subscriber';
+    
+                        $user->syncRoles($group);    
+                        $user->group = $group;
+                        $user->plan_id = $plan->id;
+                        $user->total_words = $plan->words;
+                        $user->total_images = $plan->images;
+                        $user->total_chars = $plan->characters;
+                        $user->total_minutes = $plan->minutes;
+                        $user->available_words = $plan->words;
+                        $user->available_images = $plan->images;
+                        $user->available_chars = $plan->characters;
+                        $user->available_minutes = $plan->minutes;
+                        $user->member_limit = $plan->team_members;
+                        $user->save();       
+    
+                        event(new PaymentProcessed($user));
+                    }
+ 
                 }
+
+                header("Status: 200 All rosy");
                 
-            
                 break;
+
         }
     }
 }

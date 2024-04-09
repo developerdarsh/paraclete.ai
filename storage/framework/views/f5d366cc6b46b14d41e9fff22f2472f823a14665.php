@@ -1,3 +1,101 @@
+ 
+<?php $__env->startSection('css'); ?>
+   
+<style>
+ .list-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .list-item-text {
+    flex-grow: 1;
+  }
+  .close-button {
+    cursor: pointer;
+    color: red;
+  }
+	.add_templates-sec input {
+		background-color: #f5f9fc;
+		border-color: transparent;
+		border-radius: 0.5rem;
+		border-width: 1px;
+		padding: 0.375rem 1rem;
+	border-color: #007BFF;
+	}
+	.add_templates-sec .btn.btn-primary {
+		padding: 0.575rem 1rem;
+	}
+	.add_templates-sec .btn.btn-primary:focus {
+		box-shadow: none;
+		outline: none;
+	}
+	.add_templates-sec .form-group {
+    display: flex;
+    justify-content: space-between;
+  align-items: center;
+    margin-bottom: 10px;
+  }
+  .add_templates-sec .list-item {
+      background-color: rgba(0, 123, 255, 0.4);
+      border-color: rgba(0, 123, 255, 0.4);
+      /* box-shadow: 0 1px 3px 0 rgba(50, 50, 50, 0.2), 0 2px 1px -1px rgba(50, 50, 50, 0.12), 0 1px 1px 0 rgba(50, 50, 50, 0.14); */
+      padding: 10px;
+      border-radius: 5px;
+  }
+  .add_templates-sec .list-item-text {
+    font-size: 14px;
+    color: #000000;
+  }
+  .Templete_multiselect span.multiselect-native-select,
+  .Templete_multiselect .btn-group,
+  .Templete_multiselect .multiselect
+  {
+    width: 100%;
+  }
+  .Templete_multiselect .multiselect {
+    background-color: #f5f9fc;
+    border-color: transparent;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    padding: 0.375rem 1rem;
+    border-color: #007BFF;
+    text-align: left !important;
+  }
+  .add_templates-sec .form-group .form-input {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .add_templates-sec .form-group .form-input input {
+    flex: 1;
+    margin-right: 10px;
+  }
+  .add_templates-sec .btn.btn-primary {
+    padding: 0.575rem 1rem;
+    min-width: 60px;
+  }
+
+  .Templete_multiselect .multiselect-container {
+	  width: 100%;
+	  max-height: 300px;
+	  overflow-y: auto;
+	}
+.Templete_multiselect .dropdown-menu {
+    top: unset;
+    bottom: 100%;
+}
+.Templete_multiselect .dropdown-menu .form-check label {
+  margin-bottom: 0px;
+}
+
+.Templete_multiselect .dropdown-menu .dropdown-item:hover, .Templete_multiselect .dropdown-menu .dropdown-item:focus {
+    color: #ffffff;
+}
+
+</style>
+<?php $__env->stopSection(); ?>
 <?php $__env->startSection('page-header'); ?>
 	<!-- PAGE HEADER -->
 	<div class="page-header mt-5-7"> 
@@ -59,20 +157,20 @@ unset($__errorArgs, $__bag); ?>
               </div>					
           
             </div>
-			<div class="gender-select-b d-flex">
-				<div class="form-check me-4">
-					<input value="1" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" <?php if($chat->voice_code == '1'): ?> checked <?php endif; ?>>
-					<label class="form-check-label" for="flexRadioDefault1">
-						Male
-					</label>
-				</div>
-				<div class="form-check">
-					<input value="0" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" <?php if($chat->voice_code == '0'): ?> checked <?php endif; ?>>
-					<label class="form-check-label" for="flexRadioDefault2">
-						Female
-					</label>
-				</div>   
-			</div>
+            <div class="gender-select-b d-flex">
+              <div class="form-check me-4">
+                <input value="1" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" <?php if($chat->voice_code == '1'): ?> checked <?php endif; ?>>
+                <label class="form-check-label" for="flexRadioDefault1">
+                  Male
+                </label>
+              </div>
+              <div class="form-check">
+                <input value="0" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" <?php if($chat->voice_code == '0'): ?> checked <?php endif; ?>>
+                <label class="form-check-label" for="flexRadioDefault2">
+                  Female
+                </label>
+              </div>   
+            </div>
             <div class="col-md-12 col-sm-12 mt-2 mb-4 pl-0">
               <div class="form-group">
                 <label class="custom-switch">
@@ -144,7 +242,7 @@ unset($__errorArgs, $__bag); ?>
                     <option value="free" <?php if($chat->category == 'free'): ?> selected <?php endif; ?>><?php echo e(__('Free Chat Bot')); ?></option>																																											
                     <option value="standard" <?php if($chat->category == 'standard'): ?> selected <?php endif; ?>> <?php echo e(__('Standard Chat Bot')); ?></option>
                     <option value="professional" <?php if($chat->category == 'professional'): ?> selected <?php endif; ?>> <?php echo e(__('Professional Chat Bot')); ?></option>
-                    <option value="premium" <?php if($chat->category == 'premium'): ?> selected <?php endif; ?>> <?php echo e(__('Premuim Chat Bot')); ?></option>																																																														
+                    <option value="premium" <?php if($chat->category == 'premium'): ?> selected <?php endif; ?>> <?php echo e(__('Premium Chat Bot')); ?></option>																																																														
                   </select>
                 </div>
               </div>
@@ -203,7 +301,32 @@ unset($__errorArgs, $__bag); ?>
                 </div> 
               </div>
             </div>
-          
+            <div class="col-sm-12">								
+							<div class="input-box add_templates-sec">								
+							  <h6 class="fs-11 mb-2 font-weight-semibold"><?php echo e(__('Templates')); ?> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+							  <div class="form-group Templete_multiselect">
+							  	<?php if(isset($templates)): ?>
+								<select id="template-list" name="templates[]"  class="multiselect-picker" multiple="multiple">
+									<?php $__currentLoopData = $templates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $template): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($template->id); ?>"><?php echo e($template->template); ?></option>
+									<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+								</select>
+								<?php endif; ?>
+							  </div> 
+								<div class="add_templates-sec">
+									<div class="form-group">
+									<div class="form-input">
+                                    <input type="hidden" name="dataArrayField" id="dataArrayField">
+										<input type="text" name="template_name" id="template_name">
+											<button type="button" id="addTemplateBtn" class="btn btn-primary">Add </button>
+										</div>
+									</div>
+								</div>
+                <!-- <div class="form-group">
+                  <button type="button" id="removeTemplateBtn">Remove Selected</button>
+                </div>-->
+							</div> 
+						</div>
             <div class="modal-footer d-inline">
               <div class="row text-center">
                 <div class="col-md-12">
@@ -211,7 +334,6 @@ unset($__errorArgs, $__bag); ?>
                   <button type="submit" class="btn btn-primary"><?php echo e(__('Update')); ?></button>
                 </div>
               </div>
-              
             </div>
           </form>			
 				</div>
@@ -220,5 +342,56 @@ unset($__errorArgs, $__bag); ?>
 	</div>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startSection('js'); ?>
+<script type="text/javascript">
 
+  $(document).ready(function() {
+     var selectedLabels = [];
+    $('#template-list').multiselect({
+      enableResetButton: false,
+      enableFiltering: true,
+      includeSelectAllOption: true,
+      onChange: function(option, checked) {
+        if (checked) {
+            selectedLabels.push($(option).text());
+            $('.multiselect-container.dropdown-menu').addClass('show');
+            $('#dataArrayField').val(selectedLabels);
+        } else {
+            var index = selectedLabels.indexOf($(option).text());
+            if (index !== -1) {
+                selectedLabels.splice(index, 1);
+            }
+            $('#dataArrayField').val(selectedLabels);
+            $('.multiselect-container.dropdown-menu').removeClass('show');
+        }
+      }
+    });
+
+    $('.multiselect').on('click', function () {
+		  var selectedOptions = $(this).val();
+		  event.stopPropagation();
+		  $('.multiselect-container.dropdown-menu').toggleClass('show');
+		  console.log('Selected options:', selectedOptions);
+	  });
+
+    $("#addTemplateBtn").on("click", function() {
+      var templateName = $("#template_name").val();
+      if (templateName.trim() !== "") {
+          var newOption = $("<option>", {
+              value: templateName,
+              text: templateName
+          });
+          $("#template-list").append(newOption);
+          $('#template-list').multiselect('rebuild');
+          $("#template_name").val('');
+      }
+    });
+
+    // Remove Selected button click event
+    $("#removeTemplateBtn").on("click", function() {
+      $("select[name='templates[]'] option:selected").remove();
+    });
+  });
+</script>
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/customer/www/paraclete.ai/public_html/resources/views/admin/davinci/chats/edit.blade.php ENDPATH**/ ?>

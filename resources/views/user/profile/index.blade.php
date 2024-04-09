@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('css')
+	<!-- Sweet Alert CSS -->
+	<link href="{{URL::asset('plugins/sweetalert/sweetalert2.min.css')}}" rel="stylesheet" />
+@endsection
+
 @section('page-header')
 	<!-- PAGE HEADER -->
 	<div class="page-header mt-5-7">
@@ -27,35 +32,41 @@
 						<h6 class="font-weight-bold fs-12">{{ auth()->user()->job_role }}</h6>
 					</div>
 				</div>
-				<div class="card-footer p-0">
-					<div class="row">
-						<div class="col-sm-12">
-							<div class="text-center p-4">
-								<div class="d-flex w-100">
-									<div class="flex w-100">
-										<div class="flex w-100">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableWords() }} / {{ App\Services\HelperService::userPlanTotalWords() }}</h4>
-											<h6 class="fs-12">{{ __('Words Left') }}</h6>
-										</div>
-										<div class="flex w-100 mt-4">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableImages() }} / {{ App\Services\HelperService::userPlanTotalImages() }}</h4>
-											<h6 class="fs-12">{{ __('Images Left') }}</h6>
-										</div>
-									</div>
-									<div class="flex w-100">
-										<div class="flex w-100">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableChars() }} / {{ App\Services\HelperService::userPlanTotalChars() }}</h4>
-											<h6 class="fs-12">{{ __('Characters Left') }}</h6>
-										</div>
-										<div class="flex w-100 mt-4">
-											<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableMinutes() }} / {{ App\Services\HelperService::userPlanTotalMinutes() }}</h4>
-											<h6 class="fs-12">{{ __('Minutes Left') }}</h6>
-										</div>
-									</div>
-								</div>
-							</div>
+				<div class="card-footer p-0">								
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Words Left') }}</h6>
 						</div>
+						@role('user|subscriber|admin')
+							@if (config('settings.image_feature_user') == 'allow')
+								<div class="col-sm">
+									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableImages() }} @endif</h4>
+									<h6 class="fs-12">{{ __('Images Left') }}</h6>
+								</div>
+							@endif
+						@endrole
 					</div>
+					@if (config('settings.voiceover_feature_user') == 'allow' || config('settings.whisper_feature_user') == 'allow')
+						<div class="row text-center pb-4">
+							@role('user|subscriber|admin')
+								@if (config('settings.voiceover_feature_user') == 'allow')
+									<div class="col-sm">
+										<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_chars == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableChars() }} @endif</h4>
+										<h6 class="fs-12">{{ __('Characters Left') }}</h6>
+									</div>
+								@endif
+							@endrole
+							@role('user|subscriber|admin')
+								@if (config('settings.whisper_feature_user') == 'allow')
+									<div class="col-sm">
+										<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_minutes == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableMinutes() }} @endif</h4>
+										<h6 class="fs-12">{{ __('Minutes Left') }}</h6>
+									</div>
+								@endif
+							@endrole
+						</div>
+					@endif															
 				</div>
 				<div class="card-footer p-0">
 					<div class="row" id="profile-pages">
@@ -79,6 +90,23 @@
 								<a href="{{ route('user.security.2fa') }}" class="fs-13"><i class="fa fa-shield-check mr-1"></i> {{ __('2FA Authentication') }}</a>
 							</div>
 						</div>
+						@if (auth()->user()->group == 'user' || auth()->user()->group == 'admin')
+							@if (config('settings.personal_openai_api') == 'allow' || config('settings.personal_sd_api') == 'allow')
+								<div class="col-sm-12">
+									<div class="text-center pb-3">
+										<a href="{{ route('user.profile.api') }}" class="fs-13"><i class="fa-solid fa-key mr-1"></i> {{ __('Personal API Keys') }}</a>
+									</div>
+								</div>
+							@endif
+						@elseif (!is_null(auth()->user()->plan_id))
+							@if ($check_api_feature->personal_openai_api || $check_api_feature->personal_sd_api)
+								<div class="col-sm-12">
+									<div class="text-center pb-3">
+										<a href="{{ route('user.profile.api') }}" class="fs-13"><i class="fa-solid fa-key mr-1"></i> {{ __('Personal API Keys') }}</a>
+									</div>
+								</div>
+							@endif
+						@endif							
 						<div class="col-sm-12">
 							<div class="text-center pb-4">
 								<a href="{{ route('user.profile.delete') }}" class="fs-13"><i class="fa fa-user-xmark mr-1"></i> {{ __('Delete Account') }}</a>
@@ -109,7 +137,13 @@
 									<td class="py-2 px-0">
 										<span class="font-weight-semibold w-50">{{ __('Referral ID') }} </span>
 									</td>
-									<td class="py-2 px-0">{{ auth()->user()->referral_id }}</td>
+									<td class="py-2 px-0"><span class="referral-value">{{ auth()->user()->referral_id }}</span> <a href="#" class="referral-edit-small" id="edit-referral">{{ __('Edit') }}</a></td>
+								</tr>
+								<tr>
+									<td class="py-2 px-0">
+										<span class="font-weight-semibold w-50">{{ __('Referral Link') }} </span>
+									</td>
+									<td class="py-2 px-0">{{ config('app.url') }}/?ref=<span class="referral-value">{{ auth()->user()->referral_id }}</span></td>
 								</tr>
 								<tr>
 									<td class="py-2 px-0">
@@ -185,58 +219,74 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-lg-4 col-md-6 col-sm-12">
-							<div class="card overflow-hidden border-0">
-								<div class="card-body d-flex">
-									<div class="usage-info w-100">
-										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Images Created') }}</p>
-										<h2 class="mb-2 number-font fs-20">{{ number_format($data['images']) }} <span class="text-muted fs-18">{{ __('images') }}</span></h2>
-									</div>
-									<div class="usage-icon text-right">
-										<i class="fa-solid fa-image-landscape"></i>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-6 col-sm-12">
-							<div class="card overflow-hidden border-0">
-								<div class="card-body d-flex">
-									<div class="usage-info w-100">
-										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Voiceover Tasks') }}</p>
-										<h2 class="mb-2 number-font fs-20">{{ number_format($data['synthesized']) }} <span class="text-muted fs-18">{{ __('tasks') }}</span></h2>
-									</div>
-									<div class="usage-icon text-right">
-										<i class="fa-sharp fa-solid fa-waveform-lines"></i>
+						@role('user|subscriber|admin')
+            				@if (config('settings.image_feature_user') == 'allow')
+								<div class="col-lg-4 col-md-6 col-sm-12">
+									<div class="card overflow-hidden border-0">
+										<div class="card-body d-flex">
+											<div class="usage-info w-100">
+												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Images Created') }}</p>
+												<h2 class="mb-2 number-font fs-20">{{ number_format($data['images']) }} <span class="text-muted fs-18">{{ __('images') }}</span></h2>
+											</div>
+											<div class="usage-icon text-right">
+												<i class="fa-solid fa-image-landscape"></i>
+											</div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-6 col-sm-12">
-							<div class="card overflow-hidden border-0">
-								<div class="card-body d-flex">
-									<div class="usage-info w-100">
-										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Audio Transcribed') }}</p>
-										<h2 class="mb-2 number-font fs-20">{{ number_format($data['transcribed']) }} <span class="text-muted fs-18">{{ __('audio files') }}</span></h2>
-									</div>
-									<div class="usage-icon text-right">
-										<i class="fa-sharp fa-solid fa-folder-music"></i>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-6 col-sm-12">
-							<div class="card overflow-hidden border-0">
-								<div class="card-body d-flex">
-									<div class="usage-info w-100">
-										<p class=" mb-3 fs-12 font-weight-bold">{{ __('Codes Generated') }}</p>
-										<h2 class="mb-2 number-font fs-20">{{ number_format($data['codes']) }} <span class="text-muted fs-18">{{ __('codes') }}</span></h2>
-									</div>
-									<div class="usage-icon text-right">
-										<i class="fa-solid fa-square-code"></i>
+							@endif
+						@endrole
+						@role('user|subscriber|admin')
+            				@if (config('settings.voiceover_feature_user') == 'allow')
+								<div class="col-lg-4 col-md-6 col-sm-12">
+									<div class="card overflow-hidden border-0">
+										<div class="card-body d-flex">
+											<div class="usage-info w-100">
+												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Voiceover Tasks') }}</p>
+												<h2 class="mb-2 number-font fs-20">{{ number_format($data['synthesized']) }} <span class="text-muted fs-18">{{ __('tasks') }}</span></h2>
+											</div>
+											<div class="usage-icon text-right">
+												<i class="fa-sharp fa-solid fa-waveform-lines"></i>
+											</div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>
+							@endif
+						@endrole
+						@role('user|subscriber|admin')
+            				@if (config('settings.whisper_feature_user') == 'allow')
+								<div class="col-lg-4 col-md-6 col-sm-12">
+									<div class="card overflow-hidden border-0">
+										<div class="card-body d-flex">
+											<div class="usage-info w-100">
+												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Audio Transcribed') }}</p>
+												<h2 class="mb-2 number-font fs-20">{{ number_format($data['transcribed']) }} <span class="text-muted fs-18">{{ __('audio files') }}</span></h2>
+											</div>
+											<div class="usage-icon text-right">
+												<i class="fa-sharp fa-solid fa-folder-music"></i>
+											</div>
+										</div>
+									</div>
+								</div>
+							@endif
+						@endrole
+						@role('user|subscriber|admin')
+            				@if (config('settings.code_feature_user') == 'allow')
+								<div class="col-lg-4 col-md-6 col-sm-12">
+									<div class="card overflow-hidden border-0">
+										<div class="card-body d-flex">
+											<div class="usage-info w-100">
+												<p class=" mb-3 fs-12 font-weight-bold">{{ __('Codes Generated') }}</p>
+												<h2 class="mb-2 number-font fs-20">{{ number_format($data['codes']) }} <span class="text-muted fs-18">{{ __('codes') }}</span></h2>
+											</div>
+											<div class="usage-icon text-right">
+												<i class="fa-solid fa-square-code"></i>
+											</div>
+										</div>
+									</div>
+								</div>
+							@endif
+						@endrole
 					</div>
 				</div>
 
@@ -265,7 +315,7 @@
 						<div class="card-body">
 							<div class="mb-3">
 								@if ($user_subscription == '')
-								<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }} {{ number_format(auth()->user()->available_words) }}.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }} {{ number_format(auth()->user()->available_words_prepaid) }}. </span>
+								<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }}: @if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }}: {{ number_format(auth()->user()->available_words_prepaid) }}. </span>
 								@else
 									<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }} {{ number_format(auth()->user()->available_words) }} {{ __('out of') }} {{ number_format(auth()->user()->total_words) }}. </span> <span class="fs-12 text-muted">{{ __('Total prepaid words available') }} {{ number_format(auth()->user()->available_words_prepaid) }}. </span>
 								@endif
@@ -309,6 +359,7 @@
 @section('js')
 	<!-- Chart JS -->
 	<script src="{{URL::asset('plugins/chart/chart.min.js')}}"></script>
+	<script src="{{URL::asset('plugins/sweetalert/sweetalert2.all.min.js')}}"></script>
 	<script>
 		$(function() {
 	
@@ -324,7 +375,7 @@
 			new Chart(ctx, {
 				type: 'bar',
 				data: {
-					labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+					labels: ['{{ __('Jan') }}', '{{ __('Feb') }}', '{{ __('Mar') }}', '{{ __('Apr') }}', '{{ __('May') }}', '{{ __('Jun') }}', '{{ __('Jul') }}', '{{ __('Aug') }}', '{{ __('Sep') }}', '{{ __('Oct') }}', '{{ __('Nov') }}', '{{ __('Dec') }}'],
 					datasets: [{
 						label: '{{ __('Images Created') }}',
 						data: usageDataset2,
@@ -414,6 +465,47 @@
 					}
 					
 				}
+			});
+
+
+			// UPDATE DESCRIPTION
+			$(document).on('click', '#edit-referral', function(e) {
+
+				e.preventDefault();
+
+				Swal.fire({
+					title: '{{ __('Change Referral ID') }}',
+					showCancelButton: true,
+					confirmButtonText: '{{ __('Change') }}',
+					reverseButtons: true,
+					input: 'text',
+				}).then((result) => {
+					if (result.value) {
+						var formData = new FormData();
+						formData.append("value", result.value);
+						$.ajax({
+							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+							method: 'post',
+							url: 'profile/change/referral',
+							data: formData,
+							processData: false,
+							contentType: false,
+							success: function (data) {
+								if (data['status'] == 'success') {
+									Swal.fire('{{ __('Referral ID Updated') }}', '{{ __('Referral ID has been successfully changed') }}', 'success');
+									$('.referral-value').html(result.value);
+								} else {
+									Swal.fire('{{ __('Referral ID Update Error') }}', data['message'], 'warning');
+								}      
+							},
+							error: function(data) {
+								Swal.fire('Update Error', data.responseJSON['error'], 'error');
+							}
+						})
+					} else if (result.dismiss !== Swal.DismissReason.cancel) {
+						Swal.fire('{{ __('No Referral ID Entered') }}', '{{ __('Make sure to provide a new referral ID before changing') }}', 'warning')
+					}
+				})
 			});
 		});
 	</script>

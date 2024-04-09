@@ -81,6 +81,7 @@
 				colReorder: true,
 				"order": [[ 0, "desc" ]],
 				language: {
+					"emptyTable": "<div><br>{{ __('No referrals yet') }}</div>",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {

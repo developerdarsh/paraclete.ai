@@ -33,14 +33,14 @@
 
 					<div class="row">
 						<div class="col-sm-12">
-							<div class="text-left mb-4" id="balance-status">
-								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">{{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }}</span> {{ __('Words') }}</span>
+							<div class="text-left mb-5" id="balance-status">
+								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }} {{ __('Words') }} @endif</span> </span>
 							</div>							
 						</div>	
 						<div class="col-sm-12">
-							<div id="form-group">
+							<div id="form-group" class="mb-5">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Programming Language') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-								<select id="creativity" name="language" data-placeholder="{{ __('Specify Your Programming Language') }}">									
+								<select id="creativity" name="language" class="form-select" data-placeholder="{{ __('Specify Your Programming Language') }}">									
 									<option value='go'>{{ __('Go') }}</option>
 									<option value='html'>{{ __('HTML') }}</option>
 									<option value='javascript'> {{ __('JavaScript') }}</option>																																																													
@@ -49,7 +49,8 @@
 									<option value='python' selected> {{ __('Python') }}</option>																																																													
 									<option value='ruby'> {{ __('Ruby') }}</option>																																																													
 									<option value='shell'> {{ __('Shell') }}</option>																																																													
-									<option value='swift'> {{ __('Swift') }}</option>																																																													
+									<option value='swift'> {{ __('Swift') }}</option>	
+									<option value='flutter'> {{ __('flutter') }}</option>																																																													
 									<option value='typescript'> {{ __('TypeScript') }}</option>		
 									<option value='none'>{{ __('None') }}</option>																																																											
 								</select>

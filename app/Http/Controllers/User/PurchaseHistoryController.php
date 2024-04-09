@@ -25,12 +25,12 @@ class PurchaseHistoryController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                        <a href="'. route("user.purchases.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons view-action-button" title="View Transaction"></i></a>
+                                        <a href="'. route("user.purchases.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons view-action-button" title="'. __('View Transaction') .'"></i></a>
                                     </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-status', function($row){
@@ -42,11 +42,12 @@ class PurchaseHistoryController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-words', function($row){
-                        $custom_words = '<span class="font-weight-bold">'.number_format($row["words"]).'</span>';
+                        $words = ($row["words"] == -1) ? __('Unlimited') : number_format($row["words"]);
+                        $custom_words = '<span>'.$words.'</span>';
                         return $custom_words;
                     })
                     ->addColumn('custom-order', function($row){
-                        $custom_storage = '<span class="font-weight-bold">'.$row["order_id"].'</span>';
+                        $custom_storage = '<span>'.$row["order_id"].'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-plan-name', function($row){
@@ -91,8 +92,17 @@ class PurchaseHistoryController extends Controller
                             case 'Paddle':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
                                 break;
+                            case 'Iyzico':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Iyzico Gateway" class="w-40" src="' . URL::asset('img/payments/iyzico.svg') . '"></div>';
+                                break;
+                            case 'TwoCheckout':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="TwoCheckout Gateway" class="w-40" src="' . URL::asset('img/payments/twocheckout.svg') . '"></div>';
+                                break;
+                            case 'Manual':
+                                $custom_gateway = '<div>Manual Assign</div>';
+                                break;
                             case 'FREE':
-                                $custom_gateway = '<div class="font-weight-bold">Free Plan</div>';
+                                $custom_gateway = '<div>Free Plan</div>';
                                 break;
                             default:
                                 $custom_gateway = '<div class="overflow-hidden">Unknown</div>';
@@ -121,20 +131,20 @@ class PurchaseHistoryController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn =  '<div>                                            
-                                            <a class="cancelSubscriptionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-file-slash table-action-buttons delete-action-button" title="Cancel Sunbscription"></i></a>
+                                            <a class="cancelSubscriptionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-file-slash table-action-buttons delete-action-button" title="'. __('Cancel Subscription') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-until', function($row){
-                        $custom_until = '<span class="font-weight-bold">'.date_format(Carbon::parse($row["active_until"]), 'd M Y').'</span><br><span>'.date_format(Carbon::parse($row["active_until"]), 'H:i A').'</span>';
+                        $custom_until = '<span class="font-weight-bold">'.date_format(Carbon::parse($row["active_until"]), 'd/m/Y').'</span><br><span>'.date_format(Carbon::parse($row["active_until"]), 'H:i A').'</span>';
                         return $custom_until;
                     })
                     ->addColumn('custom-subscription-id', function($row){
-                        $custom = '<span class="font-weight-bold">'.$row["subscription_id"].'</span>';
+                        $custom = '<span>'.$row["subscription_id"].'</span>';
                         return $custom;
                     })
                     ->addColumn('custom-status', function($row){
@@ -146,7 +156,8 @@ class PurchaseHistoryController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-plan-name', function($row){
-                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.number_format($row["words"]).' words</span>';
+                        $words = ($row["words"] == -1) ? __('Unlimited') : number_format($row["words"]);
+                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'. $words . ' ' . __('words') .'</span>';
                         return $custom_status;
                     })
                     ->addColumn('custom-gateway', function($row){
@@ -181,8 +192,17 @@ class PurchaseHistoryController extends Controller
                             case 'Paddle':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
                                 break;
+                            case 'Iyzico':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Iyzico Gateway" class="w-40" src="' . URL::asset('img/payments/iyzico.svg') . '"></div>';
+                                break;
+                            case 'TwoCheckout':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="TwoCheckout Gateway" class="w-40" src="' . URL::asset('img/payments/twocheckout.svg') . '"></div>';
+                                break;
+                            case 'Manual':
+                                $custom_gateway = '<div>Manual Assign</div>';
+                                break;
                             case 'FREE':
-                                $custom_gateway = '<div class="font-weight-bold">Free Plan</div>';
+                                $custom_gateway = '<div>Free Plan</div>';
                                 break;
                             default:
                                 $custom_gateway = '<div class="overflow-hidden">Unknown</div>';

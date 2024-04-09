@@ -33,16 +33,15 @@
 					<!-- SET DATATABLE -->
 					<table id='listPaymentsTable' class='table' width='100%'>
 							<thead>
-								<tr>
-									<th width="7%">{{ __('Plan Name') }}</th>
-									<th width="15%">{{ __('User') }}</th>
+								<tr>									
+									<th width="10%">{{ __('User') }}</th>
 									<th width="5%">{{ __('Status') }}</th>
+									<th width="7%">{{ __('Plan Name') }}</th>
 									<th width="5%">{{ __('Price') }}</th>
 									<th width="7%">{{ __('Order ID') }}</th>												
 									<th width="7%">{{ __('Gateway') }}</th>
 									<th width="7%">{{ __('Paid On') }}</th>
 									<th width="7%">{{ __('Pricing Plan') }}</th>
-									<th width="7%">{{ __('Country') }}</th>
 									<th width="7%">{{ __('Actions') }}</th>
 								</tr>
 							</thead>
@@ -69,6 +68,8 @@
 				colReorder: true,
 				"order": [[ 0, "desc" ]],
 				language: {
+					"emptyTable": "<div><br>{{ __('There are no transactions yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {
@@ -82,13 +83,7 @@
 				processing: true,
 				serverSide: true,
 				ajax: "{{ route('admin.finance.transactions') }}",
-				columns: [
-					{
-						data: 'custom-plan-name',
-						name: 'custom-plan-name',
-						orderable: false,
-						searchable: true
-					},
+				columns: [					
 					{
 						data: 'user',
 						name: 'user',
@@ -99,6 +94,12 @@
 						data: 'custom-status',
 						name: 'custom-status',
 						orderable: true,
+						searchable: true
+					},
+					{
+						data: 'custom-plan-name',
+						name: 'custom-plan-name',
+						orderable: false,
 						searchable: true
 					},
 					{
@@ -130,13 +131,7 @@
 						name: 'custom-frequency',
 						orderable: true,
 						searchable: true
-					},
-					{
-						data: 'custom-country',
-						name: 'custom-country',
-						orderable: true,
-						searchable: true
-					},																			
+					},																		
 					{
 						data: 'actions',
 						name: 'actions',
@@ -157,7 +152,7 @@
 					text: '{{ __('It will permanently delete this transaction information') }}',
 					icon: 'warning',
 					showCancelButton: true,
-					confirmButtonText: 'Delete',
+					confirmButtonText: '{{ __('Delete') }}',
 					reverseButtons: true,
 				}).then((result) => {
 					if (result.isConfirmed) {

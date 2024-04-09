@@ -31,7 +31,7 @@
 							<div class="col-12">							
 								<div class="input-box">	
 									<h6>{{ __('New User Registration') }}</h6>
-			  						<select id="registration" name="registration" data-placeholder="{{ __('Select Registration Option') }}:">			
+			  						<select id="registration" name="registration" class="form-select" data-placeholder="{{ __('Select Registration Option') }}:">			
 										<option value="enabled" @if ( config('settings.registration')  == 'enabled') selected @endif>{{ __('Enabled') }}</option>
 										<option value="disabled" @if ( config('settings.registration')  == 'disabled') selected @endif>{{ __('Disabled') }}</option>
 									</select>
@@ -41,7 +41,7 @@
 							<div class="col-12">							
 								<div class="input-box">	
 									<h6>{{ __('New User Email Verification') }}</h6>
-			  						<select id="email-verification" name="email-verification" data-placeholder="{{ __('Select Email Verification Option') }}:">			
+			  						<select id="email-verification" name="email-verification" class="form-select" data-placeholder="{{ __('Select Email Verification Option') }}:">			
 										<option value="enabled" @if ( config('settings.email_verification')  == 'enabled') selected @endif>{{ __('Enabled') }}</option>
 										<option value="disabled" @if ( config('settings.email_verification')  == 'disabled') selected @endif>{{ __('Disabled') }}</option>
 									</select>
@@ -51,7 +51,7 @@
 							<div class="col-12">							
 								<div class="input-box">	
 									<h6>{{ __('Default Country') }}</h6>
-			  						<select id="user-country" name="country" data-placeholder="{{ __('Select Default User Country') }}:">			
+			  						<select id="user-country" name="country" class="form-select" data-placeholder="{{ __('Select Default User Country') }}:">			
 										@foreach(config('countries') as $value)
 											<option value="{{ $value }}" @if(config('settings.default_country') == $value) selected @endif>{{ $value }}</option>
 										@endforeach

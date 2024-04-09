@@ -49,7 +49,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">						
 								<div class="input-box">	
 									<h6>{{ __('Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="promo-status" name="status" data-placeholder="{{ __('Select Promocode Status') }}:">			
+									<select id="promo-status" name="status" class="form-select" data-placeholder="{{ __('Select Promocode Status') }}:">			
 										<option value="valid" selected>{{ __('Valid') }}</option>
 										<option value="invalid">{{ __('Invalid') }}</option>
 									</select>
@@ -65,7 +65,7 @@
 							<div class="col-lg-6 col-md-6col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Promo Type') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="promo-type" name="promo-type" data-placeholder="{{ __('Select Promocode Type') }}:">			
+									<select id="promo-type" name="promo-type" class="form-select" data-placeholder="{{ __('Select Promocode Type') }}:">			
 										<option value="percentage" selected>{{ __('Percentage Discount') }}</option>
 										<option value="fixed">{{ __('Fixed Discount') }}</option>
 									</select> 
@@ -90,7 +90,7 @@
 							<div class="col-lg-6 col-md-6col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Single Usage') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span> <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Create only 1 promocode or many others by specifying in the Quantities field') }}"></i></h6>
-									<select id="promo-usage" name="usage" data-placeholder="{{ __('Select Promocode Usage') }}:" data-callback="singleUsageCheck">			
+									<select id="promo-usage" name="usage" class="form-select" data-placeholder="{{ __('Select Promocode Usage') }}:" data-callback="singleUsageCheck">			
 										<option value=0 selected>{{ __('False') }}</option>
 										<option value=1>{{ __('True') }}</option>
 									</select> 
@@ -115,7 +115,7 @@
 							<div class="col-lg-6 col-md-6col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Multi Usage by the same User') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span> <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Allow or Deny the same promocode usage by the same user multiple times') }}"></i></h6>
-									<select id="languages" name="multi_use" data-placeholder="{{ __('Set Multi Usage by the same User') }}:">			
+									<select id="multi_use" name="multi_use" class="form-select" data-placeholder="{{ __('Set Multi Usage by the same User') }}:">			
 										<option value=1>{{ __('Allow') }}</option>
 										<option value=0 selected>{{ __('Deny') }}</option>
 									</select> 

@@ -80,9 +80,9 @@ class TeamController extends Controller
                         ->addIndexColumn()
                         ->addColumn('actions', function($row){
                             $actionBtn ='<div>
-                                            <a href="'. route("user.team.show", $row["id"] ). '"><i class="fa-solid fa-clipboard-user table-action-buttons view-action-button" title="View Team Member"></i></a>
-                                            <a href="'. route("user.team.edit", $row["id"] ). '"><i class="fa-solid fa-user-pen table-action-buttons edit-action-button" title="Edit Team Member"></i></a>
-                                            <a class="deleteUserButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-user-slash table-action-buttons delete-action-button" title="Remove Team Member"></i></a>
+                                            <a href="'. route("user.team.show", $row["id"] ). '"><i class="fa-solid fa-clipboard-user table-action-buttons view-action-button" title="'. __('View Team Member') .'"></i></a>
+                                            <a href="'. route("user.team.edit", $row["id"] ). '"><i class="fa-solid fa-user-pen table-action-buttons edit-action-button" title="'. __('Edit Team Member') .'"></i></a>
+                                            <a class="deleteUserButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-user-slash table-action-buttons delete-action-button" title="'. __('Remove Team Member') .'"></i></a>
                                         </div>';
                             return $actionBtn;
                         })
@@ -104,7 +104,7 @@ class TeamController extends Controller
                             return $user;
                         })
                         ->addColumn('created-on', function($row){
-                            $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                            $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                             return $created_on;
                         })
                         ->addColumn('custom-status', function($row){
@@ -136,9 +136,9 @@ class TeamController extends Controller
                         ->addIndexColumn()
                         ->addColumn('actions', function($row){
                             $actionBtn ='<div>
-                                            <a href="'. route("user.team.show", $row["id"] ). '"><i class="fa-solid fa-clipboard-user table-action-buttons view-action-button" title="View Team Member"></i></a>
-                                            <a href="'. route("user.team.edit", $row["id"] ). '"><i class="fa-solid fa-user-pen table-action-buttons edit-action-button" title="Edit Team Member"></i></a>
-                                            <a class="deleteUserButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-user-slash table-action-buttons delete-action-button" title="Delete Team Member"></i></a>
+                                            <a href="'. route("user.team.show", $row["id"] ). '"><i class="fa-solid fa-clipboard-user table-action-buttons view-action-button" title="'. __('View Team Member') .'"></i></a>
+                                            <a href="'. route("user.team.edit", $row["id"] ). '"><i class="fa-solid fa-user-pen table-action-buttons edit-action-button" title="'. __('Edit Team Member') .'"></i></a>
+                                            <a class="deleteUserButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-user-slash table-action-buttons delete-action-button" title="'. __('Remove Team Member') .'"></i></a>
                                         </div>';
                             return $actionBtn;
                         })
@@ -160,7 +160,7 @@ class TeamController extends Controller
                             return $user;
                         })
                         ->addColumn('created-on', function($row){
-                            $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                            $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                             return $created_on;
                         })
                         ->addColumn('custom-status', function($row){

@@ -32,7 +32,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">				
 								<div class="input-box">	
 									<h6>{{ __('Support Category') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="support-category" name="category" data-placeholder="{{ __('Select Support Case') }}:">			
+									<select id="support-category" name="category" class="form-select" data-placeholder="{{ __('Select Support Case') }}:">			
 										<option value="General Inquiry" selected>{{ __('General Inquiry') }}</option>
 										<option value="Technical Inquiry">{{ __('Technical Issue') }}</option>
 										<option value="Billing Inquiry">{{ __('Billing Issue') }}</option>
@@ -48,7 +48,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">						
 								<div class="input-box">	
 									<h6>{{ __('Support Priority') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="support-priority" name="priority" data-placeholder="{{ __('Select Support Case Priority') }}:">			
+									<select id="support-priority" name="priority" class="form-select" data-placeholder="{{ __('Select Support Case Priority') }}:">			
 										<option value="Low" selected>{{ __('Low') }}</option>
 										<option value="Normal">{{ __('Normal') }}</option>
 										<option value="High">{{ __('High') }}</option>

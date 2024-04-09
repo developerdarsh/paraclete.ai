@@ -155,8 +155,8 @@ class PaddleWebhookController extends Controller
             
             if ($subscriber) {
                 
-                $date1 = Carbon::createFromFormat('m/d/Y', $subscriber->created_at);
-                $date2 = Carbon::createFromFormat('m/d/Y', $request->event_time);
+                $date1 = Carbon::createFromFormat('Y/m/d h:m:s', $subscriber->created_at);
+                $date2 = Carbon::createFromFormat('Y/m/d h:m:s', $request->event_time);
             
                 if ($date1->ne($date2)) {
                     
@@ -169,10 +169,10 @@ class PaddleWebhookController extends Controller
                             if (Payment::where('user_id', $user->id)->where('status', 'completed')->exists()) {
                                 /** User already has at least 1 payment */
                             } else {
-                                event(new PaymentReferrerBonus($user, $subcriber->plan_id, $total_price, 'PayPal'));
+                                event(new PaymentReferrerBonus($user, $subscriber->plan_id, $plan->price, 'Paddle'));
                             }
                         } else {
-                            event(new PaymentReferrerBonus($user, $subscriber->plan_id, $total_price, 'PayPal'));
+                            event(new PaymentReferrerBonus($user, $subscriber->plan_id, $plan->price, 'Paddle'));
                         }
                     }
                     

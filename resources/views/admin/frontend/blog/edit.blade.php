@@ -49,7 +49,7 @@
 
 							<div class="col-lg-12 col-md-12 col-sm-12">							
 								<div class="input-box">								
-									<h6>{{ __('SEO Keywords') }} <span class="text-muted">({{ __('Optional, Comman Seperated') }})</span></h6>
+									<h6>{{ __('SEO Keywords') }} <span class="text-muted">({{ __('Optional, Comma Separated') }})</span></h6>
 									<div class="form-group">							    
 										<input type="text" class="form-control" id="keywords" name="keywords" value="{{ $id->keywords }}">
 									</div> 
@@ -74,7 +74,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('Blog Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-			  						<select id="smtp-encryption" name="status" data-placeholder="Blog Status:">			
+			  						<select id="smtp-encryption" name="status" class="form-select" data-placeholder="Blog Status:">			
 										<option value="published" @if ($id->status == 'published') selected @endif>{{ __('Publish') }}</option>
 										<option value="hidden" @if ($id->status == 'hidden') selected @endif>{{ __('Hide') }}</option>
 									</select>

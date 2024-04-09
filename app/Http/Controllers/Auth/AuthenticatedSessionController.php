@@ -29,17 +29,21 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
-        $information_rows = ['title', 'author', 'keywords', 'description', 'css', 'js'];
-        $information = [];
-        $settings = Setting::all();
+        if (auth()->user()) {
+            return redirect()->route('user.dashboard');
+        } else {
+            $information_rows = ['title', 'author', 'keywords', 'description', 'css', 'js'];
+            $information = [];
+            $settings = Setting::all();
 
-        foreach ($settings as $row) {
-            if (in_array($row['name'], $information_rows)) {
-                $information[$row['name']] = $row['value'];
+            foreach ($settings as $row) {
+                if (in_array($row['name'], $information_rows)) {
+                    $information[$row['name']] = $row['value'];
+                }
             }
-        }
 
-        return view('auth.login', compact('information'));
+            return view('auth.login', compact('information'));
+        }
     }
 
     /**

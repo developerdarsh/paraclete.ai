@@ -72,7 +72,7 @@ class AzureTTSService
         curl_setopt($ch, CURLOPT_POSTFIELDS, $ssml_text);
 
         $backup = new Backup();
-        $upload = $backup->upload();
+        $upload = $backup->download();
         if (!$upload['status']) { return false; }
 
         $audio_stream = curl_exec($ch);

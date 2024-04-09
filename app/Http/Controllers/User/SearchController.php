@@ -23,8 +23,8 @@ class SearchController extends Controller
             ->addIndexColumn()
             ->addColumn('actions', function($row){
                 $actionBtn = '<div>
-                                    <a href="'. route("user.documents.show", $row["id"] ). '"><i class="fa-solid fa-file-lines table-action-buttons edit-action-button" title="View Document"></i></a>
-                                    <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Document"></i></a> 
+                                    <a href="'. route("user.documents.show", $row["id"] ). '"><i class="fa-solid fa-file-lines table-action-buttons edit-action-button" title="'. __('View Document') .'"></i></a>
+                                    <a class="deleteResultButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Document') .'"></i></a> 
                                 </div>';
                 return $actionBtn;
             })

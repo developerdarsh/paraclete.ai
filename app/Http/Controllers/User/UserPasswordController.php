@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use App\Rules\ValidateUserPasswordRule;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 
 class UserPasswordController extends Controller
@@ -33,7 +34,9 @@ class UserPasswordController extends Controller
             $google_data
         );
 
-        return view('user.profile.password');
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
+        return view('user.profile.password', compact('check_api_feature'));
     }
 
     
@@ -84,7 +87,9 @@ class UserPasswordController extends Controller
             $google_data
         );
 
-        return view('user.profile.google', compact('qr_code', 'google_data'));
+        $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+
+        return view('user.profile.google', compact('qr_code', 'google_data', 'check_api_feature'));
     }
 
 

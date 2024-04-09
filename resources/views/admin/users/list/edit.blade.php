@@ -165,10 +165,10 @@
 						@method('PUT')
 						@csrf
 						<div class="row">
-							<div class="col-sm-12 col-md-12">
+							<div class="col-sm-12 col-md-12 mb-4">
 								<div class="form-group">
 									<label class="form-label fs-12">{{ __('User Status') }}</label>
-									<select id="user-status" name="status" data-placeholder="{{ __('Select User Status') }}">	
+									<select id="user-status" name="status" class="form-select" data-placeholder="{{ __('Select User Status') }}">	
 										<option value="pending" {{ ($user->status == 'pending') ? 'selected' : '' }}>{{ __('Pending') }}</option>
 										<option value="active" {{ ($user->status == 'active') ? 'selected' : '' }}>{{ __('Active') }}</option>
 										<option value="suspended" {{ ($user->status == 'suspended') ? 'selected' : '' }}>{{ __('Suspended') }}</option>
@@ -179,12 +179,11 @@
 									@enderror
 								</div>
 							</div>
-							<div class="col-sm-12 col-md-12">
+							<div class="col-sm-12 col-md-12 mb-4">
 								<div class="form-group">
 									<label class="form-label fs-12">{{ __('User Group') }}</label>
-									<select id="user-group" name="group" data-placeholder="{{ __('Select User Group') }}">	
+									<select id="user-group" name="group" class="form-select" data-placeholder="{{ __('Select User Group') }}">	
 										<option value="user" {{ ($user->group == 'user') ? 'selected' : '' }}>{{ __('User') }}</option>
-										<option value="subscriber" {{ ($user->group == 'subscriber') ? 'selected' : '' }}>{{ __('Subscriber') }}</option>
 										<option value="admin" {{ ($user->group == 'admin') ? 'selected' : '' }}>{{ __('Administrator') }}</option>																		
 									</select>
 									@error('group')
@@ -192,10 +191,10 @@
 									@enderror
 								</div>
 							</div>
-							<div class="col-sm-12 col-md-12">
+							<div class="col-sm-12 col-md-12 mb-4">
 								<div class="form-group">
 									<label class="form-label fs-12">{{ __('2FA Authentication') }}</label>
-									<select id="2fa-status" name="twoFactor_status" data-placeholder="{{ __('Disable 2FA Authentication') }}">	
+									<select id="2fa-status" name="twoFactor_status" class="form-select" data-placeholder="{{ __('Disable 2FA Authentication') }}">	
 										<option value=1 {{ ($user->google2fa_enabled == true) ? 'selected' : '' }}>{{ __('Enabled') }}</option>
 										<option value=0 {{ ($user->google2fa_enabled == false) ? 'selected' : '' }}>{{ __('Disabled') }}</option>																		
 									</select>

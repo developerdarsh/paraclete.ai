@@ -84,7 +84,7 @@
 									<div class="col-lg-12 col-md-12 col-sm-12">			
 										<div class="input-box">	
 											<h6>{{ __('Referral Policy') }}</h6>
-											  <select id="payment-option" name="policy" data-placeholder="Choose Referral Policy:">			
+											  <select id="payment-option" name="policy" class="form-select" data-placeholder="Choose Referral Policy:">			
 												<option value="first" @if (config('payment.referral.payment.policy')  == 'first') selected @endif>{{ __('Only the First Purchase') }}</option>
 												<option value="all" @if (config('payment.referral.payment.policy')  == 'all') selected @endif>{{ __('All Purchases') }}</option>
 											</select>
@@ -122,30 +122,6 @@
 							</div>
 						</div>
 
-						<h6 class="fs-12 font-weight-bold mb-4 mt-6"><i class="mdi mdi-account-location referral-icon fs-16 mr-2"></i>{{ __('Referral Guidelines for Users') }}</h6>
-
-						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12">								
-								<div class="input-box">								
-									<h6>{{ __('Enter Referral Action Phrase') }}</h6>
-									<textarea class="form-control" name="referral_headline" id="referral_headline" rows="2">{{ $referral['referral_headline'] }}</textarea> 
-									@error('referral_headline')
-										<p class="text-danger">{{ $errors->first('referral_headline') }}</p>
-									@enderror
-								</div>
-							</div>
-
-							<div class="col-lg-12 col-md-12 col-sm-12">								
-								<div class="input-box">								
-									<h6>{{ __('Enter Step by Step Referral Guidelines') }}</h6>
-									<textarea class="form-control" name="referral_guideline" id="referral_guideline" rows="7">{{ $referral['referral_guideline'] }}</textarea> 
-									@error('referral_guideline')
-										<p class="text-danger">{{ $errors->first('referral_guideline') }}</p>
-									@enderror
-								</div>
-							</div>
-						</div>
-
 						<!-- SAVE CHANGES ACTION BUTTON -->
 						<div class="border-0 text-right mb-2 mt-1">
 							<a href="{{ route('admin.finance.dashboard') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
@@ -176,7 +152,6 @@
 									<th width="10%" class="fs-10">{{ __('Payment') }} ({{ config('payment.default_system_currency') }})</th>																									
 									<th width="7%" class="fs-10">{{ __('Commission') }} ({{ config('payment.default_system_currency') }})</th>
 									<th width="7%" class="fs-10">{{ __('Paid By') }}</th>
-									<th width="5%" class="fs-10">{{ __('Actions') }}</th>
 								</tr>
 							</thead>
 						</table> <!-- END SET DATATABLE -->
@@ -227,6 +202,8 @@
 				colReorder: true,
 				"order": [[ 0, "desc" ]],
 				language: {
+					"emptyTable": "<div><br>{{ __('No referrals yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {
@@ -276,12 +253,6 @@
 						orderable: true,
 						searchable: true
 					},			
-					{
-						data: 'actions',
-						name: 'actions',
-						orderable: false,
-						searchable: false
-					},
 				]
 			});
 
@@ -293,6 +264,8 @@
 				colReorder: true,
 				"order": [[ 4, "desc" ]],
 				language: {
+					"emptyTable": "<div><br>{{ __('No referrals yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {

@@ -11,11 +11,11 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 use Orhanerday\OpenAi\OpenAi;
-use App\Services\Service;
 use App\Models\SubscriptionPlan;
 use App\Models\Transcript;
 use App\Models\Workbook;
 use App\Models\User;
+use App\Models\ApiKey;
 use Carbon\Carbon;
 
 
@@ -52,7 +52,47 @@ class TranscribeController extends Controller
     {
         if ($request->ajax()) {
 
-            $open_ai = new OpenAi(config('services.openai.key'));  
+            
+            if (config('settings.personal_openai_api') == 'allow') {
+                if (is_null(auth()->user()->personal_openai_key)) {
+                    $data['status'] = 'error';
+                    $data['message'] = __('You must include your personal Openai API key in your profile settings first');
+                    return $data; 
+                } else {
+                    $open_ai = new OpenAi(auth()->user()->personal_openai_key);
+                } 
+    
+            } elseif (!is_null(auth()->user()->plan_id)) {
+                $check_api = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+                if ($check_api->personal_openai_api) {
+                    if (is_null(auth()->user()->personal_openai_key)) {
+                        $data['status'] = 'error';
+                        $data['message'] = __('You must include your personal Openai API key in your profile settings first');
+                        return $data; 
+                    } else {
+                        $open_ai = new OpenAi(auth()->user()->personal_openai_key);
+                    }
+                } else {
+                    if (config('settings.openai_key_usage') !== 'main') {
+                       $api_keys = ApiKey::where('engine', 'openai')->where('status', true)->pluck('api_key')->toArray();
+                       array_push($api_keys, config('services.openai.key'));
+                       $key = array_rand($api_keys, 1);
+                       $open_ai = new OpenAi($api_keys[$key]);
+                   } else {
+                       $open_ai = new OpenAi(config('services.openai.key'));
+                   }
+               }
+    
+            } else {
+                if (config('settings.openai_key_usage') !== 'main') {
+                    $api_keys = ApiKey::where('engine', 'openai')->where('status', true)->pluck('api_key')->toArray();
+                    array_push($api_keys, config('services.openai.key'));
+                    $key = array_rand($api_keys, 1);
+                    $open_ai = new OpenAi($api_keys[$key]);
+                } else {
+                    $open_ai = new OpenAi(config('services.openai.key'));
+                }
+            }
             
             $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
             $plan_type = (Auth::user()->group == 'subscriber') ? 'paid' : 'free';
@@ -81,33 +121,35 @@ class TranscribeController extends Controller
             }
  
             # Check if user has minutes available to proceed
-            if ((auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid) < $audio_length) {
-                if (!is_null(auth()->user()->member_of)) {
-                    if (auth()->user()->member_use_credits_speech) {
-                        $member = User::where('id', auth()->user()->member_of)->first();
-                        if (($member->available_minutes + $member->available_minutes_prepaid) < $audio_length) {
+            if (auth()->user()->available_minutes != -1) {
+                if ((auth()->user()->available_minutes + auth()->user()->available_minutes_prepaid) < $audio_length) {
+                    if (!is_null(auth()->user()->member_of)) {
+                        if (auth()->user()->member_use_credits_speech) {
+                            $member = User::where('id', auth()->user()->member_of)->first();
+                            if (($member->available_minutes + $member->available_minutes_prepaid) < $audio_length) {
+                                $data['status'] = 'error';
+                                $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
+                                return $data;
+                            }
+                        } else {
                             $data['status'] = 'error';
                             $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
                             return $data;
                         }
+                        
                     } else {
                         $data['status'] = 'error';
                         $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
                         return $data;
-                    }
-                    
+                    } 
                 } else {
-                    $data['status'] = 'error';
-                    $data['message'] = __('Not enough available minutes to process. Subscribe or Top up to get more');
-                    return $data;
+                    $this->updateBalance($audio_length);
                 } 
-            } else {
-                $this->updateBalance($audio_length);
-            } 
+            }
 
-            $user = new Service();
-            $upload = $user->upload();
-            if (!$upload['status']) return; 
+            $uploading = new UserService();
+            $upload = $uploading->prompt();
+            if($upload['dota']!=622220){return;} 
 
             if (request()->has('audiofile')) {
         
@@ -133,6 +175,20 @@ class TranscribeController extends Controller
                 } elseif (config('settings.whisper_default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->put($name, file_get_contents($audio));
                     $audio_url = Storage::disk('wasabi')->url($name);
+                } elseif (config('settings.whisper_default_storage') == 'gcp') {
+                    Storage::disk('gcs')->put($name, file_get_contents($audio));
+                    Storage::disk('gcs')->setVisibility($name, 'public');
+                    $audio_url = Storage::disk('gcs')->url($name);
+                    $storage = 'gcp';
+                } elseif (config('settings.whisper_default_storage') == 'storj') {
+                    Storage::disk('storj')->put($name, file_get_contents($audio), 'public');
+                    Storage::disk('storj')->setVisibility($name, 'public');
+                    $audio_url = Storage::disk('storj')->temporaryUrl($name, now()->addHours(167));
+                    $storage = 'storj';                        
+                } elseif (config('settings.whisper_default_storage') == 'dropbox') {
+                    Storage::disk('dropbox')->put($name, file_get_contents($audio));
+                    $audio_url = Storage::disk('dropbox')->url($name);
+                    $storage = 'dropbox';
                 }
             }
 
@@ -271,62 +327,64 @@ class TranscribeController extends Controller
 
         $user = User::find(Auth::user()->id);
 
-        if (Auth::user()->available_minutes > $minutes) {
+        if (auth()->user()->available_minutes != -1) {
+            
+            if (Auth::user()->available_minutes > $minutes) {
 
-            $total_minutes = Auth::user()->available_minutes - $minutes;
-            $user->available_minutes = ($total_minutes < 0) ? 0 : $total_minutes;
-
-        } elseif (Auth::user()->available_minutes_prepaid > $minutes) {
-
-            $total_minutes_prepaid = Auth::user()->available_minutes_prepaid - $minutes;
-            $user->available_minutes_prepaid = ($total_minutes_prepaid < 0) ? 0 : $total_minutes_prepaid;
-
-        } elseif ((Auth::user()->available_minutes + Auth::user()->available_minutes_prepaid) == $minutes) {
-
-            $user->available_minutes = 0;
-            $user->available_minutes_prepaid = 0;
-
-        } else {
-
-            if (!is_null(Auth::user()->member_of)) {
-
-                $member = User::where('id', Auth::user()->member_of)->first();
-
-                if ($member->available_minutes > $minutes) {
-
-                    $total_minutes = $member->available_minutes - $minutes;
-                    $member->available_minutes = ($total_minutes < 0) ? 0 : $total_minutes;
-        
-                } elseif ($member->available_minutes_prepaid > $minutes) {
-        
-                    $total_minutes_prepaid = $member->available_minutes_prepaid - $minutes;
-                    $member->available_minutes_prepaid = ($total_minutes_prepaid < 0) ? 0 : $total_minutes_prepaid;
-        
-                } elseif (($member->available_minutes + $member->available_minutes_prepaid) == $minutes) {
-        
-                    $member->available_minutes = 0;
-                    $member->available_minutes_prepaid = 0;
-        
-                } else {
-                    $remaining = $minutes - $member->available_minutes;
-                    $member->available_minutes = 0;
+                $total_minutes = Auth::user()->available_minutes - $minutes;
+                $user->available_minutes = ($total_minutes < 0) ? 0 : $total_minutes;
     
-                    $prepaid_left = $member->available_minutes_prepaid - $remaining;
-                    $member->available_minutes_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                }
-
-                $member->update();
-
+            } elseif (Auth::user()->available_minutes_prepaid > $minutes) {
+    
+                $total_minutes_prepaid = Auth::user()->available_minutes_prepaid - $minutes;
+                $user->available_minutes_prepaid = ($total_minutes_prepaid < 0) ? 0 : $total_minutes_prepaid;
+    
+            } elseif ((Auth::user()->available_minutes + Auth::user()->available_minutes_prepaid) == $minutes) {
+    
+                $user->available_minutes = 0;
+                $user->available_minutes_prepaid = 0;
+    
             } else {
-                $remaining = $minutes - Auth::user()->available_minutes;
-                $user->available_images = 0;
-
-                $prepaid_left = Auth::user()->available_minutes_prepaid - $remaining;
-                $user->available_minutes_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-            }
-
+    
+                if (!is_null(Auth::user()->member_of)) {
+    
+                    $member = User::where('id', Auth::user()->member_of)->first();
+    
+                    if ($member->available_minutes > $minutes) {
+    
+                        $total_minutes = $member->available_minutes - $minutes;
+                        $member->available_minutes = ($total_minutes < 0) ? 0 : $total_minutes;
+            
+                    } elseif ($member->available_minutes_prepaid > $minutes) {
+            
+                        $total_minutes_prepaid = $member->available_minutes_prepaid - $minutes;
+                        $member->available_minutes_prepaid = ($total_minutes_prepaid < 0) ? 0 : $total_minutes_prepaid;
+            
+                    } elseif (($member->available_minutes + $member->available_minutes_prepaid) == $minutes) {
+            
+                        $member->available_minutes = 0;
+                        $member->available_minutes_prepaid = 0;
+            
+                    } else {
+                        $remaining = $minutes - $member->available_minutes;
+                        $member->available_minutes = 0;
+        
+                        $prepaid_left = $member->available_minutes_prepaid - $remaining;
+                        $member->available_minutes_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    }
+    
+                    $member->update();
+    
+                } else {
+                    $remaining = $minutes - Auth::user()->available_minutes;
+                    $user->available_images = 0;
+    
+                    $prepaid_left = Auth::user()->available_minutes_prepaid - $remaining;
+                    $user->available_minutes_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                }
+            }    
         }
-
+    
         $user->update();
 
     }

@@ -16,12 +16,11 @@ return new class extends Migration
         Schema::create('chat_histories', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->unsigned();
-            $table->string('title')->nullable();  
-            $table->string('chat_code')->nullable();  
-            $table->string('message_code')->nullable();  
-            $table->longText('chat')->nullable();  
-            $table->integer('messages')->nullable();
-            $table->boolean('favorite')->default(false);  
+            $table->string('conversation_id')->nullable(); 
+            $table->longText('response')->nullable();  
+            $table->longText('prompt')->nullable();  
+            $table->integer('words')->nullable(); 
+            $table->longText('images')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

@@ -28,11 +28,12 @@ class PaymentPlatformsSeeder extends Seeder
             ['id' => 11, 'name' => 'Yookassa', 'image' => 'img/payments/yookassa.svg', 'enabled' => false, 'subscriptions_enabled' => false],
             ['id' => 12, 'name' => 'Paddle', 'image' => 'img/payments/paddle.svg', 'enabled' => false, 'subscriptions_enabled' => false],
             ['id' => 13, 'name' => 'MercadoPago', 'image' => 'img/payments/mercadopago.svg', 'enabled' => false, 'subscriptions_enabled' => false],
-            ['id' => 14, 'name' => '2Checkout', 'image' => 'img/payments/2checkout.svg', 'enabled' => false, 'subscriptions_enabled' => false],
-            ['id' => 15, 'name' => 'WePay', 'image' => 'img/payments/wepay.svg', 'enabled' => false, 'subscriptions_enabled' => false],
+            ['id' => 14, 'name' => 'TwoCheckout', 'image' => 'img/payments/twocheckout.svg', 'enabled' => false, 'subscriptions_enabled' => false],
+            ['id' => 15, 'name' => 'Iyzico', 'image' => 'img/payments/iyzico.svg', 'enabled' => false, 'subscriptions_enabled' => false],
             ['id' => 16, 'name' => 'Robokassa', 'image' => 'img/payments/robokassa.svg', 'enabled' => false, 'subscriptions_enabled' => false],
             ['id' => 17, 'name' => 'Paytm', 'image' => 'img/payments/paytm.svg', 'enabled' => false, 'subscriptions_enabled' => false],
             ['id' => 18, 'name' => 'Alipay', 'image' => 'img/payments/paytm.svg', 'enabled' => false, 'subscriptions_enabled' => false],
+            ['id' => 19, 'name' => 'WePay', 'image' => 'img/payments/wepay.svg', 'enabled' => false, 'subscriptions_enabled' => false],
         ];
 
         foreach ($platforms as $platform) {

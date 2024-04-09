@@ -38,7 +38,7 @@
 								<div class="input-box">								
 									<h6>{{ __('Template Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 									<div class="form-group">							    
-										<input type="text" class="form-control @error('name') is-danger @enderror" id="name" name="name">
+										<input type="text" class="form-control @error('name') is-danger @enderror" id="name" name="name" placeholder="{{ __('Provide Template Name') }}">
 										@error('name')
 											<p class="text-danger">{{ $errors->first('name') }}</p>
 										@enderror
@@ -50,7 +50,7 @@
 								<div class="input-box">								
 									<h6>{{ __('Template Description') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 									<div class="form-group">							    
-										<input type="text" class="form-control @error('description') is-danger @enderror" id="description" name="description">
+										<input type="text" class="form-control @error('description') is-danger @enderror" id="description" name="description" placeholder="{{ __('Provide Template Description') }}">
 										@error('description')
 											<p class="text-danger">{{ $errors->first('description') }}</p>
 										@enderror
@@ -61,9 +61,9 @@
 							<div class="col-lg-6 col-md-12 col-sm-12">
 								<div class="input-box">
 									<h6>{{ __('Template Category') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="image-feature-user" name="category" data-placeholder="{{ __('Select template category') }}">
+									<select id="image-feature-user" name="category" class="form-select" data-placeholder="{{ __('Select template category') }}">
 										@foreach ($categories as $category)
-											<option value="{{ $category->code }}"> {{ ucfirst($category->name) }}</option>
+											<option value="{{ $category->code }}"> {{ __(ucfirst($category->name)) }}</option>
 										@endforeach																																																													
 									</select>
 								</div>
@@ -73,7 +73,7 @@
 								<div class="input-box">								
 									<h6>{{ __('Template Icon') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('You will need to get it from fontawesome.com') }}"></i></h6>
 									<div class="form-group">							    
-										<input type="text" class="form-control @error('icon') is-danger @enderror" id="icon" name="icon">
+										<input type="text" class="form-control @error('icon') is-danger @enderror" id="icon" name="icon" placeholder="ex: <i class='fa-solid fa-books'></i>">
 										@error('icon')
 											<p class="text-danger">{{ $errors->first('icon') }}</p>
 										@enderror
@@ -84,7 +84,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">
 								<div class="input-box">
 									<h6>{{ __('Templates Package') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="templates-admin" name="package" data-placeholder="{{ __('Set Templates Package') }}">
+									<select id="templates-admin" name="package" class="form-select" data-placeholder="{{ __('Set Templates Package') }}">
 										<option value="free">{{ __('Free Package') }}</option>
 										<option value="all" selected>{{ __('Standard Package') }}</option>
 										<option value="professional"> {{ __('Professional Package') }}</option>																															
@@ -123,11 +123,18 @@
 									<div class="field input-group mb-4">
 										<input type="hidden" name="code[]" value="input-field-1">
 										<input type="text" class="form-control" name="names[]" placeholder="{{ __('Enter Input Field Title (Required)') }}" id="input-field-1">
-										<input type="text" class="form-control" name="placeholders[]" placeholder="{{ __('Enter Input Field Description') }}">
-										<select class="form-select" name="input_field[]">
+										<input type="text" class="form-control" name="placeholders[]" placeholder="{{ __('Enter Input Field Description') }} ({{ __('Required') }})">
+										<select class="form-select mr-4" name="input_field[]" onchange="notifyUser(this)">
 											<option value="input" selected>{{ __('Input Field') }}</option>
 											<option value="textarea">{{ __('Textarea Field') }}</option>
-										  </select>
+											<option value="select">{{ __('Select List Field') }}</option>
+											<option value="checkbox">{{ __('Checkbox List Field') }}</option>
+											<option value="radio">{{ __('Radio Buttons Field') }}</option>
+										</select>
+										<select class="form-select" name="status_field[]">
+											<option value="optional" selected>{{ __('Optional') }}</option>
+											<option value="required">{{ __('Required') }}</option>
+										</select>
 										<span onclick="addField(this)" class="btn btn-primary">
 											<i class="fa fa-btn fa-plus"></i>
 										</span>
@@ -206,6 +213,7 @@
 				"order": [[3, "asc"]],
 				language: {
 					"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>No custom templates created yet</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {
@@ -498,7 +506,8 @@
 		let i = 2;
 		function addField(plusElement){
 
-			let field_type = plusElement.previousElementSibling;
+			let required_type = plusElement.previousElementSibling;
+			let field_type = required_type.previousElementSibling;
 			let placeholder = field_type.previousElementSibling;	
 			let name = placeholder.previousElementSibling;	
 		
@@ -512,11 +521,18 @@
 			let new_field ='<div class="field input-group mb-4">' +
 								'<input type="hidden" name="code[]" value="input-field-' + i + '">' +
 								'<input type="text" class="form-control" name="names[]" id="input-field-' + i + '" placeholder="{{ __('Enter Input Field Title (Required)') }}">' +
-								'<input type="text" class="form-control" placeholder="{{ __('Enter Input Field Description') }}" name="placeholders[]">' +								
-								'<select class="form-select" name="input_field[]" >' +
+								'<input type="text" class="form-control" placeholder="{{ __('Enter Input Field Description') }} ({{ __('Required') }})" name="placeholders[]">' +								
+								'<select class="form-select mr-4" name="input_field[]" onchange="notifyUser(this)">' +
 									'<option value="input" selected>{{ __('Input Field') }}</option>' +
 									'<option value="textarea">{{ __('Textarea Field') }}</option>' +
-									'</select>' +
+									'<option value="select">{{ __('Select List Field') }}</option>' +
+									'<option value="checkbox">{{ __('Checkbox List Field') }}</option>' +
+									'<option value="radio">{{ __('Radio Buttons Field') }}</option>' +
+								'</select>' +
+								'<select class="form-select" name="status_field[]">' +
+									'<option value="optional" selected>{{ __('Optional') }}</option>' +
+									'<option value="required">{{ __('Required') }}</option>' +
+								'</select>' +
 								'<span onclick="addField(this)" class="btn btn-primary">' +
 									'<i class="fa fa-btn fa-plus"></i>' +
 								'</span>' +
@@ -562,6 +578,29 @@
 			var curPos = document.getElementById("prompt").selectionStart;
 			let x = $("#prompt").val();
 			$("#prompt").val(x.slice(0, curPos) + text + x.slice(curPos));
+		}
+
+		function notifyUser(input) {
+			let placeholder = input.previousElementSibling;
+
+			switch (input.value) {
+				case 'input':
+				case 'textarea':
+					placeholder.setAttribute('placeholder', 'Enter Input Field Description (Required)');
+					break;
+				case 'select':
+					placeholder.setAttribute('placeholder', 'Enter Comma separated Options for Select List (Required)');
+					break;
+				case 'checkbox':
+					placeholder.setAttribute('placeholder', 'Enter Comma separated Values for Checkboxes (Required)');
+					break;
+				case 'radio':
+					placeholder.setAttribute('placeholder', 'Enter Comma separated Values for Radio Buttons (Required)');
+					break;
+				default:
+					placeholder.setAttribute('placeholder', 'Enter Input Field Description (Required)');
+					break;
+			}
 		}
 	</script>
 @endsection

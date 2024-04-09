@@ -25,7 +25,7 @@
                     </div>
                     
                     <div class="col-md-5 col-sm-12 h-100" id="login-responsive">                
-                        <div class="card-body pr-10 pl-10 pt-10">
+                        <div class="card-body pr-8 pl-10 pt-8">
                             <form method="POST" action="<?php echo e(route('register')); ?>">
                                 <?php echo csrf_field(); ?>                                
                                 

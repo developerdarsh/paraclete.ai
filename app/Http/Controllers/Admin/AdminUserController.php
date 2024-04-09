@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use App\Services\PaymentPlatformResolverService;
 use App\Services\Statistics\UserRegistrationYearlyService;
 use App\Services\Statistics\UserRegistrationMonthlyService;
 use App\Services\Statistics\DavinciUsageService;
@@ -23,6 +24,15 @@ use Cache;
 
 class AdminUserController extends Controller
 {
+    
+    protected $paymentPlatformResolver;
+
+    
+    public function __construct(PaymentPlatformResolverService $paymentPlatformResolver)
+    {
+        $this->paymentPlatformResolver = $paymentPlatformResolver;
+    }
+
     /**
      * Display user management dashboard
      *
@@ -69,9 +79,9 @@ class AdminUserController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn ='<div>
-                                        <a href="'. route("admin.user.show", $row["id"] ). '"><i class="fa-solid fa-clipboard-user table-action-buttons view-action-button" title="View User"></i></a>
-                                        <a href="'. route("admin.user.edit", $row["id"] ). '"><i class="fa-solid fa-user-pen table-action-buttons edit-action-button" title="Edit User Group"></i></a>
-                                        <a class="deleteUserButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-user-slash table-action-buttons delete-action-button" title="Delete User"></i></a>
+                                        <a href="'. route("admin.user.show", $row["id"] ). '"><i class="fa-solid fa-clipboard-user table-action-buttons view-action-button" title="'. __('View User') .'"></i></a>
+                                        <a href="'. route("admin.user.edit", $row["id"] ). '"><i class="fa-solid fa-user-pen table-action-buttons edit-action-button" title="'. __('Edit User Group') .'"></i></a>
+                                        <a class="deleteUserButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-user-slash table-action-buttons delete-action-button" title="'. __('Delete User') .'"></i></a>
                                     </div>';
                         return $actionBtn;
                     })
@@ -93,42 +103,48 @@ class AdminUserController extends Controller
                         return $user;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-status', function($row){
-                        $custom_status = '<span class="cell-box user-'.$row["status"].'">'.ucfirst($row["status"]).'</span>';
+                        if ($row["status"]) {
+                            $custom_status = '<span class="cell-box user-'.$row["status"].'">'.ucfirst($row["status"]).'</span>';
+                        } else {
+                            $custom_status = '';
+                        }
+                        
                         return $custom_status;
                     })
                     ->addColumn('custom-group', function($row){
-                        $custom_group = '<span class="cell-box user-group-'.$row["group"].'">'.ucfirst($row["group"]).'</span>';
+                        if ($row["group"]) {
+                            $custom_group = '<span class="cell-box user-group-'.$row["group"].'">'.ucfirst($row["group"]).'</span>';
+                        } else {
+                            $custom_group = '';
+                        }
+                        
                         return $custom_group;
                     })
-                    ->addColumn('custom-country', function($row){
-                        $custom_country = '<span class="font-weight-bold">'.$row["country"].'</span>';
-                        return $custom_country;
-                    })
                     ->addColumn('words-left', function($row){
-                        $words = (is_null($row['available_words'] + $row['available_words_prepaid'])) ? 0 : number_format($row["available_words"] + $row['available_words_prepaid']);
+                        $words = ($row['available_words'] == -1) ? __('Unlimited') : number_format($row["available_words"] + $row['available_words_prepaid']);
                         $used = '<span class="font-weight-bold">'.$words.'</span>';
                         return $used;
                     })
                     ->addColumn('images-left', function($row){
-                        $words = (is_null($row['available_images'] + $row['available_images_prepaid'])) ? 0 : number_format($row["available_images"] + $row['available_images_prepaid']);
+                        $words = ($row['available_images'] == -1) ? __('Unlimited') : number_format($row["available_images"] + $row['available_images_prepaid']);
                         $used = '<span class="font-weight-bold">'.$words.'</span>';
                         return $used;
                     })
                     ->addColumn('chars-left', function($row){
-                        $words = (is_null($row['available_chars'] + $row['available_chars_prepaid'])) ? 0 : number_format($row["available_chars"] + $row['available_chars_prepaid']);
+                        $words = ($row['available_chars'] == -1) ? __('Unlimited') : number_format($row["available_chars"] + $row['available_chars_prepaid']);
                         $used = '<span class="font-weight-bold">'.$words.'</span>';
                         return $used;
                     })
                     ->addColumn('minutes-left', function($row){
-                        $words = (is_null($row['available_minutes'] + $row['available_minutes_prepaid'])) ? 0 : number_format($row["available_minutes"] + $row['available_minutes_prepaid']);
+                        $words = ($row['available_minutes'] == -1) ? __('Unlimited') : number_format($row["available_minutes"] + $row['available_minutes_prepaid']);
                         $used = '<span class="font-weight-bold">'.$words.'</span>';
                         return $used;
                     })
-                    ->rawColumns(['actions', 'custom-status', 'custom-group', 'created-on', 'user', 'custom-country','words-left', 'images-left', 'chars-left', 'minutes-left'])
+                    ->rawColumns(['actions', 'custom-status', 'custom-group', 'created-on', 'user', 'words-left', 'images-left', 'chars-left', 'minutes-left'])
                     ->make(true);                    
         }
 
@@ -229,6 +245,8 @@ class AdminUserController extends Controller
         $data = [
             'words' => $davinci->userTotalWordsGenerated($user->id),
             'images' => $davinci->userTotalImagesGenerated($user->id),
+            'characters' => $davinci->userTotalCharactersSynthesized($user->id),
+            'minutes' => $davinci->userTotalMinutesTranscribed($user->id),
         ];
         
         $chart_data['word_usage'] = json_encode($davinci->userMonthlyWordsChart($user->id));
@@ -274,24 +292,118 @@ class AdminUserController extends Controller
 
 
     /**
+     * Show users subscription
+     */
+    public function subscription(User $user)
+    {
+        if (!is_null($user->plan_id)) {
+            $plan = SubscriptionPlan::where('id', $user->plan_id)->first();
+            $plan = $plan->plan_name;
+        } else {
+            $plan = __('None');
+        }
+
+        $plans = SubscriptionPlan::orderBy('payment_frequency', 'DESC')->get();
+
+        return view('admin.users.list.subscription', compact('user', 'plan', 'plans'));
+    }
+
+
+    /**
      * Change user credit capacity
      */
     public function increase(Request $request, User $user)
     {
         $request->validate([
-            'words' => 'nullable|integer|min:0',
-            'images' => 'nullable|integer|min:0',
-            'chars' => 'nullable|integer|min:0',
-            'minutes' => 'nullable|integer|min:0',
+            'words' => 'nullable|integer',
+            'images' => 'nullable|integer',
+            'chars' => 'nullable|integer',
         ]);
 
-        $user->available_words_prepaid = ($user->available_words_prepaid + request('words'));
-        $user->available_images_prepaid = ($user->available_images_prepaid + request('images'));
-        $user->available_chars_prepaid = ($user->available_chars_prepaid + request('chars'));
-        $user->available_minutes_prepaid = ($user->available_minutes_prepaid + request('minutes'));
+        $user->available_words = request('words');
+        $user->available_images =  request('images');
+        $user->available_chars = request('chars');
+        $user->available_minutes = request('minutes');
+        $user->available_words_prepaid = request('words_prepaid');
+        $user->available_images_prepaid =  request('images_prepaid');
+        $user->available_chars_prepaid = request('chars_prepaid');
+        $user->available_minutes_prepaid = request('minutes_prepaid');
         $user->save();
 
-        toastr()->success(__('Credits have been added successfully'));
+        toastr()->success(__('Credits have been updated successfully'));
+        return redirect()->back();
+    }
+
+
+    /**
+     * Change user subscription
+     */
+    public function assignSubscription(Request $request, User $user)
+    {
+        $plan = SubscriptionPlan::where('id', $request->plan)->first();
+
+        if (!is_null($user->plan_id)) {
+            if ($user->plan_id == $request->plan) {
+                toastr()->warning(__('User has already this plan assigned, select a different plan'));
+                return redirect()->back();
+            } else {
+                $subscriber = Subscriber::where('status', 'Active')->where('user_id', $user->id)->first();
+
+                if ($subscriber) {
+                    $this->stopSubscription($subscriber->id);
+                }
+            }
+        }
+
+
+        $subscription_id = strtoupper(Str::random(10));
+
+        switch ($plan->payment_frequency) {
+            case 'monthly':
+                $days = 30;
+                break;
+            case 'yearly':
+                $days = 365;
+                break;
+            case 'lifetime':
+                $days = 18250;
+                break;
+        }
+
+        Subscriber::create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => 'Active',
+            'created_at' => now(),
+            'gateway' => 'Manual',
+            'frequency' => $plan->payment_frequency,
+            'plan_name' => $plan->plan_name,
+            'words' => $plan->words,
+            'images' => $plan->images,
+            'characters' => $plan->characters,
+            'minutes' => $plan->minutes,
+            'subscription_id' => $subscription_id,
+            'active_until' => Carbon::now()->addDays($days),
+        ]);  
+        
+
+        $group = ($user->hasRole('admin')) ? 'admin' : 'subscriber';
+
+        $user->syncRoles($group);    
+        $user->group = $group;
+        $user->plan_id = $plan->id;
+        $user->total_words = $plan->words;
+        $user->total_images = $plan->images;
+        $user->total_chars = $plan->characters;
+        $user->total_minutes = $plan->minutes;
+        $user->available_words = $plan->words;
+        $user->available_images = $plan->images;
+        $user->available_chars = $plan->characters;
+        $user->available_minutes = $plan->minutes;
+        $user->member_limit = $plan->team_members;
+        $user->save(); 
+
+        toastr()->success(__('Subscription plan has been assigned successfully'));
         return redirect()->back();
     }
 
@@ -404,4 +516,255 @@ class AdminUserController extends Controller
         return $countries;        
     }
 
+
+    /**
+     * Cancel active subscription
+     */
+    public function stopSubscription($id)
+    {   
+            
+        $id = Subscriber::where('id', $id)->first();
+
+        if ($id->status == 'Cancelled') {
+            $data['status'] = 200;
+            $data['message'] = __('This subscription was already cancelled before');
+            return $data;
+        } elseif ($id->status == 'Suspended') {
+            $data['status'] = 400;
+            $data['message'] = __('Subscription has been suspended due to failed renewal payment');
+            return $data;
+        } elseif ($id->status == 'Expired') {
+            $data['status'] = 400;
+            $data['message'] = __('Subscription has been expired, please create a new one');
+            return $data;
+        }
+
+        if ($id->frequency == 'lifetime') {
+            $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+            $user = User::where('id', $id->user_id)->firstOrFail();
+            $user->plan_id = null;
+            $user->group = 'user';
+            $user->total_words = 0;
+            $user->total_images = 0;
+            $user->total_chars = 0;
+            $user->total_minutes = 0;
+            $user->member_limit = null;
+            $user->save();
+
+            $data['status'] = 200;
+            $data['message'] = __('Subscription has been successfully cancelled');
+            return $data;
+
+        } else {
+
+            switch ($id->gateway) {
+                case 'PayPal':
+                    $platformID = 1;
+                    break;
+                case 'Stripe':
+                    $platformID = 2;
+                    break;
+                case 'BankTransfer':
+                    $platformID = 3;
+                    break;
+                case 'Paystack':
+                    $platformID = 4;
+                    break;
+                case 'Razorpay':
+                    $platformID = 5;
+                    break;
+                case 'Mollie':
+                    $platformID = 7;
+                    break;
+                case 'Flutterwave':
+                    $platformID = 10;
+                    break;
+                case 'Yookassa':
+                    $platformID = 11;
+                    break;
+                case 'Paddle':
+                    $platformID = 12;
+                    break;
+                case 'Manual':
+                case 'FREE':
+                    $platformID = 99;
+                    break;
+                default:
+                    $platformID = 1;
+                    break;
+            }
+            
+
+            if ($id->gateway == 'PayPal' || $id->gateway == 'Stripe' || $id->gateway == 'Paystack' || $id->gateway == 'Razorpay' || $id->gateway == 'Mollie' || $id->gateway == 'Flutterwave' || $id->gateway == 'Yookassa' || $id->gateway == 'Paddle') {
+                $paymentPlatform = $this->paymentPlatformResolver->resolveService($platformID);
+
+                $status = $paymentPlatform->stopSubscription($id->subscription_id);
+
+                if ($platformID == 2) {
+                    if ($status) {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $user->plan_id = null;
+                        $user->group = 'user';
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 4) {
+                    if ($status->status) {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 5) {
+                    if ($status->status == 'cancelled') {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 7) {
+                    if ($status->status == 'Cancelled') {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 10) {
+                    if ($status == 'cancelled') {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 11) {
+                    if ($status == 'cancelled') {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 12) {
+                    if ($status == 'cancelled') {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                } elseif ($platformID == 99) { 
+                    $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                    $user = User::where('id', $id->user_id)->firstOrFail();
+                    $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                    $user->syncRoles($group); 
+                    $user->plan_id = null;
+                    $user->group = $group;
+                    $user->total_words = 0;
+                    $user->total_images = 0;
+                    $user->total_chars = 0;
+                    $user->total_minutes = 0;
+                    $user->member_limit = null;
+                    $user->save();
+                } else {
+                    if (is_null($status)) {
+                        $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                        $user = User::where('id', $id->user_id)->firstOrFail();
+                        $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                        $user->syncRoles($group); 
+                        $user->plan_id = null;
+                        $user->group = $group;
+                        $user->total_words = 0;
+                        $user->total_images = 0;
+                        $user->total_chars = 0;
+                        $user->total_minutes = 0;
+                        $user->member_limit = null;
+                        $user->save();
+                    }
+                }
+            } else {
+                $id->update(['status'=>'Cancelled', 'active_until' => Carbon::createFromFormat('Y-m-d H:i:s', now())]);
+                $user = User::where('id', $id->user_id)->firstOrFail();
+                $group = ($user->hasRole('admin'))? 'admin' : 'user';
+                $user->syncRoles($group); 
+                $user->plan_id = null;
+                $user->group = $group;
+                $user->total_words = 0;
+                $user->total_images = 0;
+                $user->total_chars = 0;
+                $user->total_minutes = 0;
+                $user->member_limit = null;
+                $user->save();
+            }
+            
+            $data['status'] = 200;
+            $data['message'] = __('Subscription has been successfully cancelled');
+            return $data;
+        }
+    }
+
+
+    public function hiddenPlans(Request $request)
+    {
+        if ($request->ajax()) {
+   
+            $status = ($request->status == 'true') ? 1 : 0;
+            $user = User::where('id', $request->user_id)->first();
+            $user->hidden_plan = $status;
+            $user->save();
+
+            $data['status'] = 200;
+            return $data;
+        }  
+    }
 }   

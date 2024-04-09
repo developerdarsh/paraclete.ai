@@ -70,7 +70,18 @@
 							<h6 class="font-weight-bold mb-1">{{ __('Included Images') }}: </h6>
 							<span class="fs-14">{{ number_format($id->images) }}</span>
 						</div>
-					</div>			
+					</div>	
+					
+					<div class="row pt-5">
+						<div class="col-lg-4 col-md-4 col-12">
+							<h6 class="font-weight-bold mb-1">{{ __('Included Characters') }}: </h6>
+							<span class="fs-14">{{ ucfirst($id->characters) }}</span>
+						</div>
+						<div class="col-lg-4 col-md-4 col-12">
+							<h6 class="font-weight-bold mb-1">{{ __('Included Minutes') }}: </h6>
+							<span class="fs-14">{{ number_format($id->minutes) }}</span>
+						</div>
+					</div>
 
 					<!-- SAVE CHANGES ACTION BUTTON -->
 					<div class="border-0 text-right mb-2 mt-7">

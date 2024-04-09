@@ -23,15 +23,15 @@ class VoiceCustomizationController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>        
-                                        <a class="changeVoiceNameButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="Rename Voice"></i></a>      
-                                        <a class="changeAvatarButton" id="' . $row["id"] . '" href="#"><i class="fa-solid fa-user-astronaut table-action-buttons edit-action-button" title="Change Avatar"></i></a>
-                                        <a class="activateVoiceButton" id="' . $row["id"] . '" href="#"><i class="fa fa-check table-action-buttons request-action-button" title="Activate Voice"></i></a>
-                                        <a class="deactivateVoiceButton" id="' . $row["id"] . '" href="#"><i class="fa fa-close table-action-buttons delete-action-button" title="Deactivate Voice"></i></a>  
+                                        <a class="changeVoiceNameButton" id="' . $row["id"] . '" href="#"><i class="fa fa-edit table-action-buttons view-action-button" title="'. __('Rename Voice') .'"></i></a>      
+                                        <a class="changeAvatarButton" id="' . $row["id"] . '" href="#"><i class="fa-solid fa-user-astronaut table-action-buttons edit-action-button" title="'. __('Change Avatar') .'"></i></a>
+                                        <a class="activateVoiceButton" id="' . $row["id"] . '" href="#"><i class="fa fa-check table-action-buttons request-action-button" title="'. __('Activate Voice') .'"></i></a>
+                                        <a class="deactivateVoiceButton" id="' . $row["id"] . '" href="#"><i class="fa fa-close table-action-buttons delete-action-button" title="'. __('Deactivate Voice') .'"></i></a>  
                                     </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["updated_at"], 'd M Y').'</span>';
+                        $created_on = '<span>'.date_format($row["updated_at"], 'd/m/Y').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-voice-type', function($row){
@@ -39,7 +39,7 @@ class VoiceCustomizationController extends Controller
                         return $custom_voice;
                     })
                     ->addColumn('custom-status', function($row){
-                        $custom_voice = '<span class="cell-box status-'.strtolower($row["status"]).'">'.ucfirst($row["status"]).'</span>';
+                        $custom_voice = '<span class="cell-box status-'.strtolower($row["status"]).'">'.ucfirst(__($row["status"])).'</span>';
                         return $custom_voice;
                     })
                     ->addColumn('single', function($row){

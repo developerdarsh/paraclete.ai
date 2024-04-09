@@ -18,7 +18,7 @@
 
 @section('content')						
 	<div class="row">
-		<div class="col-lg-6 col-md-6 col-xm-12">
+		<div class="col-lg-10 col-md-12 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Edit Prepaid Plan') }}</h3>
@@ -33,7 +33,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">						
 								<div class="input-box">	
 									<h6>{{ __('Plan Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="plan-status" name="plan-status" data-placeholder="{{ __('Select Plan Status') }}:">			
+									<select id="plan-status" name="plan-status" class="form-select" data-placeholder="{{ __('Select Plan Status') }}:">			
 										<option value="active" @if ($id->status == 'active') selected @endif>{{ __('Active') }}</option>
 										<option value="closed" @if ($id->status == 'closed') selected @endif>{{ __('Closed') }}</option>
 									</select>
@@ -73,9 +73,9 @@
 							<div class="col-lg-6 col-md-6col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Currency') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="currency" name="currency" data-placeholder="{{ __('Select Currency') }}:">			
+									<select id="currency" name="currency" class="form-select" data-placeholder="{{ __('Select Currency') }}:">			
 										@foreach(config('currencies.all') as $key => $value)
-											<option value="{{ $key }}" @if($id->currency == $key) selected @endif>{{ $value['name'] }} - {{ $key }} ({{ $value['symbol'] }})</option>
+											<option value="{{ $key }}" @if($id->currency == $key) selected @endif>{{ $value['name'] }} - {{ $key }} ({!! $value['symbol'] !!})</option>
 										@endforeach
 									</select>
 									@error('currency')
@@ -87,7 +87,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Featured Plan') }}</h6>
-									<select id="featured" name="featured" data-placeholder="{{ __('Select if Plan is Featured') }}:">		
+									<select id="featured" name="featured" class="form-select" data-placeholder="{{ __('Select if Plan is Featured') }}:">		
 										<option value=1>{{ __('Yes') }}</option>
 										<option value=0 selected>{{ __('No') }}</option>
 									</select>

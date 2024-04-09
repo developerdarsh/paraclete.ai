@@ -30,6 +30,8 @@
 
 	<body class="app sidebar-mini <?php echo $themeClass; ?>">
 
+		<div id="loader-line" class="opacity-on"></div>
+
 		<!-- LOADER -->
 		{{-- <div id="preloader" >
 			<img src="{{URL::asset('img/svgs/preloader.gif')}}" alt="loader">           

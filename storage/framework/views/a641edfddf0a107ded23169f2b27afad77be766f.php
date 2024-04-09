@@ -1,3 +1,13 @@
+<?php
+	$themeClass = '';
+	if (!empty($_COOKIE['theme'])) {
+		if ($_COOKIE['theme'] == 'dark') {
+			$themeClass = 'dark-theme';
+		} else if ($_COOKIE['theme'] == 'light') {
+			$themeClass = 'light-theme';
+		}  
+	}
+?>
 <!DOCTYPE html>
 <html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 	<head>
@@ -10,32 +20,18 @@
 		
         <!-- CSRF TOKEN -->
         <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-		
+
         <!-- TITLE -->
         <title><?php echo e(config('app.name', 'Davinci')); ?></title>
-        <script src="https://anywebsite.ai/chatbot/chatbot.js"></script>
-		<script>
-		var _chatbot = window._chatbot = window._chatbot || []
-		_chatbot.website = '01h0hk6cxsdmac89j38d3768fr'
-		_chatbot.domainName = 'paraclete.ai'
-		_chatbot.frameMode = false // Set this to true if you want to display the window directly
-		_chatbot.width = '400px'
-		_chatbot.height = '500px'
-		_chatbot.title = 'Paraclete Helper'
-		_chatbot.hello = 'Hello! You can ask me anything and I\'ll look into our templates and other features to answer your question!'
-		_chatbot.placeholder = 'What Can Paraclete Help You With Today?'
-		_chatbot.replying = 'Paraclete AI is replying...'
-		</script>
+        
         <?php echo $__env->make('layouts.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
 	</head>
 
-	<body class="app sidebar-mini">
+	<body class="app sidebar-mini <?php echo $themeClass; ?>">
 
 		<!-- LOADER -->
-		<div id="preloader" >
-			<img src="<?php echo e(URL::asset('img/svgs/preloader.gif')); ?>" alt="loader">           
-		</div>
+		
 		<!-- END LOADER -->
 
 		<!-- PAGE -->

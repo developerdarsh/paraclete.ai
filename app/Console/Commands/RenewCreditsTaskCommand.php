@@ -63,7 +63,7 @@ class RenewCreditsTaskCommand extends Command
                         $user = User::where('id', $row->user_id)->firstOrFail();
                         if ($user) {
                             $user->available_words = $user->total_words;
-                            $user->available_imates = $user->total_images;
+                            $user->available_images = $user->total_images;
                             $user->available_chars = $user->total_chars;
                             $user->available_minutes = $user->total_minutes;
                             $user->save();
@@ -72,7 +72,7 @@ class RenewCreditsTaskCommand extends Command
                         $user = User::where('id', $row->user_id)->firstOrFail();
                         if ($user) {
                             $user->available_words = $user->total_words;
-                            $user->available_imates = $user->total_images;
+                            $user->available_images = $user->total_images;
                             $user->available_chars = $user->total_chars;
                             $user->available_minutes = $user->total_minutes;
                             $user->save();
@@ -81,6 +81,43 @@ class RenewCreditsTaskCommand extends Command
                     
                 }
             }
+
+            if ($row->gateway == 'Manual') {
+
+                $date = Carbon::createFromFormat('Y-m-d H:i:s', $row->active_until);
+
+                $result = Carbon::createFromFormat('Y-m-d H:i:s', $date)->isPast();
+
+                if (!$result) {            
+
+                    $today = Carbon::now();
+                    $subscription_day = $date->day;
+                    $current_day = $today->day;
+                    $days_in_month = $today->daysInMonth;
+
+                    if ($subscription_day == $current_day) {
+                        $user = User::where('id', $row->user_id)->firstOrFail();
+                        if ($user) {
+                            $user->available_words = $user->total_words;
+                            $user->available_images = $user->total_images;
+                            $user->available_chars = $user->total_chars;
+                            $user->available_minutes = $user->total_minutes;
+                            $user->save();
+                        }
+                    } elseif ($subscription_day > $days_in_month) {
+                        $user = User::where('id', $row->user_id)->firstOrFail();
+                        if ($user) {
+                            $user->available_words = $user->total_words;
+                            $user->available_images = $user->total_images;
+                            $user->available_chars = $user->total_chars;
+                            $user->available_minutes = $user->total_minutes;
+                            $user->save();
+                        }
+                    }
+                    
+                }
+
+             }
         }
     }
 }

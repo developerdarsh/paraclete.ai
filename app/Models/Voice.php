@@ -10,7 +10,17 @@ class Voice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'status',
         'voice',
+        'voice_id',
+        'gender',
+        'language_code',          
+        'vendor_id',
+        'vendor',
+        'vendor_img',
+        'status',
+        'avatar_url',
+        'voice_type',
+        'sample_url',
+        'description',
     ];
 }

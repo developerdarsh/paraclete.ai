@@ -22,14 +22,14 @@ class FinancePrepaidPlanController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                        <a href="'. route("admin.finance.prepaid.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons edit-action-button" title="View Plan"></i></a>
-                                        <a href="'. route("admin.finance.prepaid.edit", $row["id"] ). '"><i class="fa-solid fa-file-pen table-action-buttons view-action-button" title="Update Plan"></i></a>
-                                        <a class="deletePlanButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Plan"></i></a>
+                                        <a href="'. route("admin.finance.prepaid.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons edit-action-button" title="'. __('View Plan') .'"></i></a>
+                                        <a href="'. route("admin.finance.prepaid.edit", $row["id"] ). '"><i class="fa-solid fa-file-pen table-action-buttons view-action-button" title="'. __('Update Plan') .'"></i></a>
+                                        <a class="deletePlanButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Plan') .'"></i></a>
                                     </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-status', function($row){
@@ -37,19 +37,19 @@ class FinancePrepaidPlanController extends Controller
                         return $custom_priority;
                     })
                     ->addColumn('custom-words', function($row){
-                        $custom_storage = '<span class="font-weight-bold">'.number_format($row["words"]).'</span>';
+                        $custom_storage = '<span>'.number_format($row["words"]).'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-images', function($row){
-                        $custom_storage = '<span class="font-weight-bold">'.number_format($row["images"]).'</span>';
+                        $custom_storage = '<span>'.number_format($row["images"]).'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-characters', function($row){
-                        $custom_storage = '<span class="font-weight-bold">'.number_format($row["characters"]).'</span>';
+                        $custom_storage = '<span>'.number_format($row["characters"]).'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-minutes', function($row){
-                        $custom_storage = '<span class="font-weight-bold">'.number_format($row["minutes"]).'</span>';
+                        $custom_storage = '<span>'.number_format($row["minutes"]).'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-name', function($row){

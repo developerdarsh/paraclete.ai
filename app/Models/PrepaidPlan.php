@@ -25,5 +25,6 @@ class PrepaidPlan extends Model
         'pricing_plan',
         'characters',
         'minutes',
+        'model'
     ];
 }

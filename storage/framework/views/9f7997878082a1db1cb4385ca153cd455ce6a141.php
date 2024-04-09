@@ -102,7 +102,7 @@
 		<div class="col-lg-12 col-md-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-header">
-					<h3 class="card-title"><?php echo e(__('Total Registered Users ')); ?><span class="text-muted">(<?php echo e(__('Current Year')); ?>)</span></h3>
+					<h3 class="card-title"><?php echo e(__('Total Registered Users')); ?><span class="text-muted">(<?php echo e(__('Current Year')); ?>)</span></h3>
 				</div>
 				<div class="card-body">
 					<div class="row mb-5 mt-2">

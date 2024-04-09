@@ -360,13 +360,23 @@
 											<?php elseif($data->gateway == 'Paystack'): ?>
 												<img alt="Paystack Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/paystack.svg')); ?>">	
 											<?php elseif($data->gateway == 'BankTransfer'): ?>
-												<img alt="BankTransfer Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/bank-transfer.png')); ?>">
+												<img alt="Paystack Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/bank-transfer.png')); ?>">
 											<?php elseif($data->gateway == 'Coinbase'): ?>
-												<img alt="BankTransfer Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/coinbase.svg')); ?>">
+												<img alt="Coinbase Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/coinbase.svg')); ?>">
 											<?php elseif($data->gateway == 'Mollie'): ?>
-												<img alt="BankTransfer Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/mollie.svg')); ?>">
+												<img alt="Mollie Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/mollie.svg')); ?>">
 											<?php elseif($data->gateway == 'Braintree'): ?>
-												<img alt="BankTransfer Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/braintree.svg')); ?>">
+												<img alt="Braintree Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/braintree.svg')); ?>">
+											<?php elseif($data->gateway == 'Midtrans'): ?>
+												<img alt="Midtrans Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/midtrans.png')); ?>">
+											<?php elseif($data->gateway == 'Flutterwave'): ?>
+												<img alt="Flutterwave Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/flutterwave.svg')); ?>">
+											<?php elseif($data->gateway == 'Paddle'): ?>
+												<img alt="Paddle Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/paddle.svg')); ?>">
+											<?php elseif($data->gateway == 'Yookassa'): ?>
+												<img alt="Yookassa Gateway" class="w-60" src="<?php echo e(URL::asset('img/payments/yookassa.svg')); ?>">
+											<?php else: ?>
+												<span class="font-weight-bold fs-12"><?php echo e(__('Free')); ?></span>
 										<?php endif; ?>
 										</td>
 										<td><span class="font-weight-bold"><?php echo e(date_format($data->created_at, 'd M Y')); ?></span><br><span><?php echo e(date_format($data->created_at, 'H:i A')); ?></span></td>

@@ -102,7 +102,7 @@
 							<div class="col-12">							
 								<div class="input-box">	
 									<h6>{{ __('SMTP Encryption') }}</h6>
-			  						<select id="smtp-encryption" name="smtp-encryption" data-placeholder="Select SMTP Encryption Type:">			
+			  						<select id="smtp-encryption" name="smtp-encryption" class="form-select" data-placeholder="Select SMTP Encryption Type:">			
 										<option value="tls" @if ( config('mail.mailers.smtp.encryption')  == 'tls') selected @endif>{{ __('TLS') }}</option>
 										<option value="ssl" @if ( config('mail.mailers.smtp.encryption')  == 'ssl') selected @endif>{{ __('SSL') }}</option>
 									</select>

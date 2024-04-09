@@ -142,7 +142,7 @@
   z-index: 999;
   padding-right: 15px;
   padding: 0.75rem 0;
-  box-shadow: $card-shadow;
+  box-shadow: $small-card-shadow;
 }
 
 @media (min-width: 768px) {
@@ -191,7 +191,7 @@
 
 .app-sidebar__toggle {
   a {
-    color: #b6c1d9;
+    color: $text-color;
   }
 
   .header-icon {
@@ -492,8 +492,6 @@
   transition: border-left-color 0.2s ease, background-color 0.2s ease;
   color: #344050;
   margin: 0px 5px 0px 0px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
   height: 46px;
 
   .angle {
@@ -545,7 +543,7 @@
     min-width: 100%;
     margin: 0;
     left: 0;
-    color: rgba(255, 255, 255, 0.8);
+    color: $text-color;
     opacity: 1;
     background: transparent;
     font-size: 12px;
@@ -560,14 +558,14 @@
 }
 
 .slide.is-expanded a.slide-item {
-  // -webkit-transition: all 0.3s;
-  // transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
 
   &:hover {
     margin-left: 5px;
     text-decoration: none;
-    // -webkit-transition: all 0.3s;
-    // transition: all 0.3s;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
     color: $primaryTextHoverColor!important;
   }
 }
@@ -974,8 +972,6 @@
       transition: border-left-color 0.3s ease, background-color 0.3s ease;
       color: #344050;
       margin: 0px 5px 0px 0px;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
     }
 
     .slide-item.active {
@@ -997,11 +993,11 @@
   }
 
   .sidebar-mini.sidenav-toggled.sidenav-toggled1 .app-sidebar .side-menu__item.active .side-menu__label {
-    color: #FFF!important;
+    color: $text-color;
   }
 
   .sidebar-mini.sidenav-toggled.sidenav-toggled1 .app-sidebar .side-menu__item.active .angle {
-    color: #FFF!important;
+    color: $text-color;
   }
 
   .sidebar-mini.sidenav-toggled.sidenav-toggled1 .app-sidebar .side-menu__item .side-menu__icon {
@@ -1524,9 +1520,9 @@
   }
 
   max-height: 100vh;
-  -webkit-transition: max-height 0.2s ease;
-  -o-transition: max-height 0.2s ease;
-  transition: max-height 0.2s ease;
+  -webkit-transition: max-height 2s ease;
+  -o-transition: max-height 2s ease;
+  transition: max-height 2s ease;
 }
 
 .sub-side-menu__item {
@@ -1609,7 +1605,7 @@
   color: #727685;
   font-size: 10px;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 20px;
   padding: 0 20px 0 21px;
 

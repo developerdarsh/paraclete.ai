@@ -223,6 +223,12 @@ class FinanceSettingController extends Controller
         $this->storeConfiguration('PADDLE_VENDOR_ID', request('paddle_vendor_id'));
         $this->storeConfiguration('PADDLE_VENDOR_AUTH_CODE', request('paddle_vendor_auth_code'));
         $this->storeConfiguration('PADDLE_SANDBOX', request('paddle_sandbox'));
+
+        $this->storeConfiguration('IYZICO_ENABLED', request('enable-iyzico'));
+        $this->storeConfiguration('IYZICO_SUBSCRIPTION_ENABLED', request('enable-iyzico-subscription'));
+        $this->storeConfiguration('IYZICO_API_KEY', request('iyzico_api_key'));
+        $this->storeConfiguration('IYZICO_SECRET_KEY', request('iyzico_secret_key'));
+        $this->storeConfiguration('IYZICO_SANDBOX', request('iyzico_sandbox'));
         
 
         $rows = ['bank_instructions', 'bank_requisites'];
@@ -362,6 +368,16 @@ class FinanceSettingController extends Controller
             $yookassa->save();
         }
 
+        if (request('enable-iyzico') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'Iyzico')->first();
+            $yookassa->enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'Iyzico')->first();
+            $yookassa->enabled = 0;
+            $yookassa->save();
+        }
+
         # Enable/Disable Payment Gateways Subscription
         if (request('enable-paypal-subscription') == 'on') {
             $paypal = PaymentPlatform::where('name', 'PayPal')->first();
@@ -456,6 +472,16 @@ class FinanceSettingController extends Controller
             $yookassa->save();
         } else {
             $yookassa = PaymentPlatform::where('name', 'Paddle')->first();
+            $yookassa->subscriptions_enabled = 0;
+            $yookassa->save();
+        }
+
+        if (request('enable-iyzico-subscription') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'Iyzico')->first();
+            $yookassa->subscriptions_enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'Iyzico')->first();
             $yookassa->subscriptions_enabled = 0;
             $yookassa->save();
         }

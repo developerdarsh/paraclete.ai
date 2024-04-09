@@ -46,7 +46,7 @@
 									<th width="10%">{{ __('Pricing Plan') }}</th>
 									<th width="7%">{{ __('Featured') }}</th>
 									<th width="10%">{{ __('Created On') }}</th>
-									<th width="10%">{{ __('Action') }}</th>
+									<th width="10%">{{ __('Actions') }}</th>
 								</tr>
 							</thead>
 					</table> <!-- END SET DATATABLE -->
@@ -73,6 +73,8 @@
 				colReorder: true,
 				"order": [[ 0, "desc" ]],
 				language: {
+					"emptyTable": "<div><br>{{ __('There are no prepaid plans yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
 					search: "<i class='fa fa-search search-icon'></i>",
 					lengthMenu: '_MENU_ ',
 					paginate : {

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('avatar_url')->nullable();
             $table->string('voice_type')->default('standard')->comment('standard|neural');
             $table->string('sample_url')->nullable();
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }

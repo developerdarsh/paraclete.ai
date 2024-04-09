@@ -148,7 +148,6 @@
 					if (result.isConfirmed) {
 						var formData = new FormData();
 						formData.append("id", $(this).attr('id'));
-						console.log($(this).attr('id'))
 						$.ajax({
 							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 							method: 'post',
@@ -165,6 +164,7 @@
 								}      
 							},
 							error: function(data) {
+								console.log(data)
 								Swal.fire('Oops...','Something went wrong!', 'error')
 							}
 						})

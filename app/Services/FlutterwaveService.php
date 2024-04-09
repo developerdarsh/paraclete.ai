@@ -148,7 +148,7 @@ class FlutterwaveService
         $type = session()->get('type');  
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
 
         $status = request()->status;

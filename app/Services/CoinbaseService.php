@@ -57,7 +57,7 @@ class CoinbaseService
         $total_value = $request->value;
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
         
         try {

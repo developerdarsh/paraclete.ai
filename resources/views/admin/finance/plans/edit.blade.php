@@ -37,8 +37,9 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">						
 								<div class="input-box">	
 									<h6>{{ __('Plan Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="plan-status" name="plan-status" data-placeholder="{{ __('Select Plan Status') }}:">			
+									<select id="plan-status" name="plan-status" class="form-select" data-placeholder="{{ __('Select Plan Status') }}:">			
 										<option value="active" @if ($id->status == 'active') selected @endif>{{ __('Active') }}</option>
+										<option value="hidden" @if ($id->status == 'hidden') selected @endif>{{ __('Hidden') }}</option>
 										<option value="closed" @if ($id->status == 'closed') selected @endif>{{ __('Closed') }}</option>
 									</select>
 									@error('plan-status')
@@ -73,9 +74,9 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Currency') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="currency" name="currency" data-placeholder="{{ __('Select Currency') }}:">			
+									<select id="currency" name="currency" class="form-select" data-placeholder="{{ __('Select Currency') }}:">			
 										@foreach(config('currencies.all') as $key => $value)
-											<option value="{{ $key }}" @if( $id->currency == $key) selected @endif>{{ $value['name'] }} - {{ $key }} ({{ $value['symbol'] }})</option>
+											<option value="{{ $key }}" @if( $id->currency == $key) selected @endif>{{ $value['name'] }} - {{ $key }} ({!! $value['symbol'] !!})</option>
 										@endforeach
 									</select>
 									@error('currency')
@@ -87,10 +88,11 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Payment Frequence') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="frequency" name="frequency" data-placeholder="{{ __('Select Payment Frequency') }}:" data-callback="duration_select">		
+									<select id="frequency" name="frequency" class="form-select" data-placeholder="{{ __('Select Payment Frequency') }}:" data-callback="duration_select">		
 										<option value="monthly" @if ($id->payment_frequency == 'monthly') selected @endif>{{ __('Monthly') }}</option>
 										<option value="yearly" @if ($id->payment_frequency == 'yearly') selected @endif>{{ __('Yearly') }}</option>
 										<option value="lifetime" @if ($id->payment_frequency == 'lifetime') selected @endif>{{ __('Lifetime') }}</option>
+										
 									</select>
 								</div> 						
 							</div>
@@ -98,7 +100,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">								
 									<h6>{{ __('Featured Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-									<select id="featured" name="featured" data-placeholder="{{ __('Select if Plan is Featured') }}:">		
+									<select id="featured" name="featured" class="form-select" data-placeholder="{{ __('Select if Plan is Featured') }}:">		
 										<option value=1 @if ($id->featured == true) selected @endif>{{ __('Yes') }}</option>
 										<option value=0 @if ($id->featured == false) selected @endif>{{ __('No') }}</option>
 									</select>
@@ -109,13 +111,25 @@
 								<div class="input-box">								
 									<h6>{{ __('Free Plan') }}</h6>
 									<div class="form-group">							    
-										<select id="free-plan" name="free-plan" data-placeholder="{{ __('Make this plan a Free Plan?') }}:">			
+										<select id="free-plan" name="free-plan" class="form-select" data-placeholder="{{ __('Make this plan a Free Plan?') }}:">			
 											<option value=1 @if ($id->free == true) selected @endif>{{ ('Yes') }}</option>
 											<option value=0 @if ($id->free == false) selected @endif>{{ ('No') }}</option>
 										</select>
 									</div> 
 									@error('free-plan')
 										<p class="text-danger">{{ $errors->first('free-plan') }}</p>
+									@enderror
+								</div> 						
+							</div>
+
+							<div class="col-lg-6 col-md-6 col-sm-12">							
+								<div class="input-box">								
+									<h6>{{ __('Free Plan Days') }}</h6>
+									<div class="form-group">							    
+										<input type="number" class="form-control" id="days" name="days" min=0 value="{{ $id->days }}">
+									</div> 
+									@error('days')
+										<p class="text-danger">{{ $errors->first('days') }}</p>
 									@enderror
 								</div> 						
 							</div>
@@ -211,7 +225,7 @@
 											<h6>{{ __('Words included in the Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span> <span class="text-muted ml-3">({{ __('Renewed Monthly') }})</span></h6>
 											<div class="form-group">							    
 												<input type="number" class="form-control" id="words" name="words" value="{{ $id->words }}" required>
-												<span class="text-muted fs-10">{{ __('Each text generation task will count total input by user and output words by openai') }}</span>
+												<span class="text-muted fs-10">{{ __('Each text generation task counts output words created') }}. {{ __('Set as -1 for unlimited words') }}.</span>
 											</div> 
 											@error('words')
 												<p class="text-danger">{{ $errors->first('words') }}</p>
@@ -224,7 +238,7 @@
 											<h6>{{ __('Images included in the Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span> <span class="text-muted ml-3">({{ __('Renewed Monthly') }})</span></h6>
 											<div class="form-group">							    
 												<input type="number" class="form-control" id="images" name="images" value="{{ $id->images }}" required>
-												<span class="text-muted fs-10">{{ __('Valid for all image sizes') }}</span>
+												<span class="text-muted fs-10">{{ __('Valid for all image sizes') }}. {{ __('Set as -1 for unlimited images') }}.</span>
 											</div> 
 											@error('images')
 												<p class="text-danger">{{ $errors->first('images') }}</p>
@@ -237,7 +251,7 @@
 											<h6>{{ __('Characters included in the Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span> <span class="text-muted ml-3">({{ __('Renewed Monthly') }})</span></h6>
 											<div class="form-group">							    
 												<input type="number" class="form-control" id="characters" name="characters" value="{{ $id->characters }}" required>
-												<span class="text-muted fs-10">{{ __('For AI Voiceover feature') }}</span>
+												<span class="text-muted fs-10">{{ __('For AI Voiceover feature') }}. {{ __('Set as -1 for unlimited characters') }}.</span>
 											</div> 
 											@error('characters')
 												<p class="text-danger">{{ $errors->first('characters') }}</p>
@@ -250,7 +264,7 @@
 											<h6>{{ __('Minutes included in the Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span><span class="text-muted ml-3">({{ __('Renewed Monthly') }})</span></h6>
 											<div class="form-group">							    
 												<input type="number" class="form-control" id="minutes" name="minutes" value="{{ $id->minutes }}" required>
-												<span class="text-muted fs-10">{{ __('For AI Speech to Text feature') }}</span>
+												<span class="text-muted fs-10">{{ __('For AI Speech to Text feature') }}. {{ __('Set as -1 for unlimited minutes') }}.</span>
 											</div> 
 											@error('minutes')
 												<p class="text-danger">{{ $errors->first('minutes') }}</p>
@@ -260,29 +274,60 @@
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
-											<h6>{{ __('OpenAI Model for All Text Results') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="default-model-user" name="model" data-placeholder="{{ __('Select OpenAI Model Type') }}:">			
-												<option value="text-ada-001" @if ($id->model == 'text-ada-001') selected @endif>{{ __('Ada') }} ({{ __('GPT 3') }})</option>
-												<option value="text-babbage-001" @if ($id->model == 'text-babbage-001') selected @endif>{{ __('Babbage') }} ({{ __('GPT 3') }})</option>
-												<option value="text-curie-001" @if ($id->model == 'text-curie-001') selected @endif>{{ __('Curie') }} ({{ __('GPT 3') }})</option>
-												<option value="text-davinci-003" @if ($id->model == 'text-davinci-003') selected @endif>{{ __('Davinci') }} ({{ __('GPT 3') }})</option>
+											<h6>{{ __('OpenAI Model for All Template Results') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="default-model-user" name="model" class="form-select" data-placeholder="{{ __('Select OpenAI Model Type') }}:">		
 												<option value="gpt-3.5-turbo" @if ($id->model == 'gpt-3.5-turbo') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
 												<option value="gpt-3.5-turbo-16k" @if ( $id->model == 'gpt-3.5-turbo-16k') selected @endif>{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
 												<option value="gpt-4" @if ($id->model == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>
 												<option value="gpt-4-32k" @if ($id->model == 'gpt-4-32k') selected @endif>{{ __('GPT 4') }} ({{ __('32K') }})</option>
+												<option value="gpt-4-1106-preview" @if ( $id->model == 'gpt-4-1106-preview') selected @endif>{{ __('GPT 4 Turbo') }} ({{ __('Preview') }})</option>
+												<option value="gpt-4-vision-preview" @if ( $id->model == 'gpt-4-vision-preview') selected @endif>{{ __('GPT 4 Turbo with Vision') }} ({{ __('Preview') }})</option>
+												@foreach ($models as $model)
+													<option value="{{ $model->model }}" @if ( $id->model == $model->model) selected @endif>{{ $model->description }} (Fine Tune Model)</option>
+												@endforeach
 											</select>
 										</div>
 									</div>
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
-											<h6>{{ __('Templates Access') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="templates" name="templates" data-placeholder="{{ __('Set Templates Access') }}">
+											<h6>{{ __('OpenAI Model for All AI Chats') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="default-model-chat-user" name="chat-model" class="form-select" data-placeholder="{{ __('Select OpenAI Model Type') }}:">		
+												<option value="gpt-3.5-turbo" @if ( $id->model_chat == 'gpt-3.5-turbo') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
+												<option value="gpt-3.5-turbo-16k" @if ( $id->model_chat == 'gpt-3.5-turbo-16k') selected @endif>{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
+												<option value="gpt-4" @if ( $id->model_chat == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>
+												<option value="gpt-4-1106-preview" @if ( $id->model_chat == 'gpt-4-1106-preview') selected @endif>{{ __('GPT 4 Turbo') }} ({{ __('Preview') }})</option>
+												<option value="gpt-4-vision-preview" @if ( $id->model_chat == 'gpt-4-vision-preview') selected @endif>{{ __('GPT 4 Turbo with Vision') }} ({{ __('Preview') }})</option>
+												@foreach ($models as $model)
+													<option value="{{ $model->model }}" @if ( $id->model_chat == $model->model) selected @endif>{{ $model->description }} (Fine Tune Model)</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Template Categories Access') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="templates" name="templates" class="form-select" data-placeholder="{{ __('Set Templates Access') }}">
 												<option value="all" @if ($id->templates == 'all') selected @endif>{{ __('All Templates') }}</option>
 												<option value="free" @if ($id->templates == 'free') selected @endif>{{ __('Only Free Templates') }}</option>																																											
 												<option value="standard" @if ($id->templates == 'standard') selected @endif> {{ __('Up to Standard Templates') }}</option>
 												<option value="professional" @if ($id->templates == 'professional') selected @endif> {{ __('Up to Professional Templates') }}</option>
 												<option value="premium" @if ($id->templates == 'premium') selected @endif> {{ __('Up to Premium Templates') }} ({{ __('All') }})</option>																																																														
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Chat Categories Access') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="chats" name="chats" class="form-select" data-placeholder="{{ __('Set AI Chat Type Access') }}">
+												<option value="all" @if ($id->chats == 'all') selected @endif>{{ __('All Chat Types') }}</option>
+												<option value="free" @if ($id->chats == 'free') selected @endif>{{ __('Only Free Chat Types') }}</option>																																											
+												<option value="standard" @if ($id->chats == 'standard') selected @endif> {{ __('Up to Standard Chat Types') }}</option>
+												<option value="professional" @if ($id->chats == 'professional') selected @endif> {{ __('Up to Professional Chat Types') }}</option>
+												<option value="premium" @if ($id->chats == 'premium') selected @endif> {{ __('Up to Premium Chat Types') }} ({{ __('All') }})</option>																																																														
 											</select>
 										</div>
 									</div>
@@ -302,7 +347,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
 											<h6>{{ __('AI Image Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="image-feature" name="image-feature" data-placeholder="{{ __('Allow/Deny AI Image Feature Usage') }}">
+											<select id="image-feature" name="image-feature" class="form-select" data-placeholder="{{ __('Allow/Deny AI Image Feature Usage') }}">
 												<option value=1 @if ($id->image_feature == true) selected @endif>{{ __('Allow') }}</option>
 												<option value=0 @if ($id->image_feature == false) selected @endif> {{ __('Deny') }}</option>																														
 											</select>
@@ -312,7 +357,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
 											<h6>{{ __('AI Voiceover Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="voiceover-feature" name="voiceover-feature" data-placeholder="{{ __('Allow/Deny AI Voiceover Feature Usage') }}">
+											<select id="voiceover-feature" name="voiceover-feature" class="form-select" data-placeholder="{{ __('Allow/Deny AI Voiceover Feature Usage') }}">
 												<option value=1 @if ($id->voiceover_feature == true) selected @endif>{{ __('Allow') }}</option>
 												<option value=0 @if ($id->voiceover_feature == false) selected @endif> {{ __('Deny') }}</option>																														
 											</select>
@@ -322,7 +367,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
 											<h6>{{ __('AI Speech to Text Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="whisper-feature" name="whisper-feature" data-placeholder="{{ __('Allow/Deny AI Speech to Text Feature Usage') }}">
+											<select id="whisper-feature" name="whisper-feature" class="form-select" data-placeholder="{{ __('Allow/Deny AI Speech to Text Feature Usage') }}">
 												<option value=1 @if ($id->transcribe_feature == true) selected @endif>{{ __('Allow') }}</option>
 												<option value=0 @if ($id->transcribe_feature == false) selected @endif> {{ __('Deny') }}</option>																															
 											</select>
@@ -332,7 +377,7 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
 											<h6>{{ __('AI Chat Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="chat-feature" name="chat-feature" data-placeholder="{{ __('Allow/Deny AI Chat Feature Usage') }}">
+											<select id="chat-feature" name="chat-feature" class="form-select" data-placeholder="{{ __('Allow/Deny AI Chat Feature Usage') }}">
 												<option value=1 @if ($id->chat_feature == true) selected @endif>{{ __('Allow') }}</option>
 												<option value=0 @if ($id->chat_feature == false) selected @endif> {{ __('Deny') }}</option>																														
 											</select>
@@ -342,22 +387,124 @@
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
 											<h6>{{ __('AI Code Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="code-feature" name="code-feature" data-placeholder="{{ __('Allow/Deny AI Code Feature Usage') }}">
+											<select id="code-feature" name="code-feature" class="form-select" data-placeholder="{{ __('Allow/Deny AI Code Feature Usage') }}">
 												<option value=1 @if ($id->code_feature == true) selected @endif>{{ __('Allow') }}</option>
 												<option value=0 @if ($id->code_feature == false) selected @endif> {{ __('Deny') }}</option>																														
+											</select>
+										</div>
+									</div>	
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Smart Ads Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="smart-ads-feature" name="smart-ads-feature" class="form-select" data-placeholder="{{ __('Allow/Deny Smart Ads Feature Usage') }}">
+												<option value=1 @if ($id->smart_ads_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->smart_ads_feature == false) selected @endif> {{ __('Deny') }}</option>											
+											</select>
+										</div>
+									</div>	
+
+                                    <div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Automation Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="automation_feature" name="automation_feature" class="form-select" data-placeholder="{{ __('Allow/Deny Automation Feature Usage') }}">
+												<option value=1 @if ($id->automation_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->automation_feature == false) selected @endif> {{ __('Deny') }}</option>											
+											</select>
+										</div>
+									</div>		
+									
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Personal OpenAI API Usage Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="personal-openai-api" name="personal-openai-api" class="form-select">
+												<option value=1 @if ($id->personal_openai_api == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->personal_openai_api == false) selected @endif>{{ __('Deny') }}</option>																																																																																																								
+											</select>
+										</div>
+									</div>
+		
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Personal Stable Diffusion API Usage Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="personal-sd-api" name="personal-sd-api" class="form-select">
+												<option value=1 @if ($id->personal_sd_api == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->personal_sd_api == false) selected @endif>{{ __('Deny') }}</option>																																																																																																								
+											</select>
+										</div>
+									</div>
+									
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('OpenAI Image Engine') }} <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Make sure that AI Image Feature is Enabled first and also that this AI Image vendor is enabled in your Davinci Settings page') }}."></i></h6>
+											<select id="dalle-image-engine" name="dalle-image-engine" class="form-select">
+												<option value='none'>{{ __('Not Allowed') }}</option>
+												<option value='dall-e-2' @if ($id->dalle_image_engine == 'dall-e-2') selected @endif>{{ __('Dalle 2') }}</option>
+												<option value='dall-e-3' @if ($id->dalle_image_engine == 'dall-e-3') selected @endif> {{ __('Dalle 3') }}</option>																															
+												<option value='dall-e-3-hd' @if ($id->dalle_image_engine == 'dall-e-3-hd') selected @endif> {{ __('Dalle 3 HD') }}</option>																																																															
 											</select>
 										</div>
 									</div>
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">
-											<h6>{{ __('AI Chat Types Access') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-											<select id="chats" name="chats" data-placeholder="{{ __('Set AI Chat Type Access') }}">
-												<option value="all" @if ($id->chats == 'all') selected @endif>{{ __('All Chat Types') }}</option>
-												<option value="free" @if ($id->chats == 'free') selected @endif>{{ __('Only Free Chat Types') }}</option>																																											
-												<option value="standard" @if ($id->chats == 'standard') selected @endif> {{ __('Up to Standard Chat Types') }}</option>
-												<option value="professional" @if ($id->chats == 'professional') selected @endif> {{ __('Up to Professional Chat Types') }}</option>
-												<option value="premium" @if ($id->chats == 'premium') selected @endif> {{ __('Up to Premium Chat Types') }} ({{ __('All') }})</option>																																																														
+											<h6>{{ __('Stable Diffusion Image Engine') }} <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Make sure that AI Image Feature is Enabled first and also that this AI Image vendor is enabled in your Davinci Settings page') }}."></i></h6>
+											<select id="sd-image-engine" name="sd-image-engine" class="form-select">
+												<option value='none'>{{ __('Not Allowed') }}</option>	
+												<option value='stable-diffusion-v1-6' @if ($id->sd_image_engine == 'stable-diffusion-v1-6') selected @endif>{{ __('Stable Diffusion v1.6') }}</option>
+												<option value='stable-diffusion-xl-beta-v2-2-2' @if ($id->sd_image_engine == 'stable-diffusion-xl-beta-v2-2-2') selected @endif> {{ __('Stable Diffusion v2.2.2-XL Beta') }}</option>																															
+												<option value='stable-diffusion-xl-1024-v0-9' @if ($id->sd_image_engine == 'stable-diffusion-xl-1024-v0-9') selected @endif> {{ __('SDXL v0.9') }}</option>																															
+												<option value='stable-diffusion-xl-1024-v1-0' @if ($id->sd_image_engine == 'stable-diffusion-xl-1024-v1-0') selected @endif> {{ __('SDXL v1.0') }}</option>																																																														
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Article Wizard Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="wizard-feature" name="wizard-feature" class="form-select">
+												<option value=1 @if ($id->wizard_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->wizard_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Vision Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="vision-feature" name="vision-feature" class="form-select">
+												<option value=1 @if ($id->vision_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->vision_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Chat Image Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="chat-image-feature" name="chat-image-feature" class="form-select">
+												<option value=1 @if ($id->chat_image_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->chat_image_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Chat PDF Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="chat-pdf-feature" name="chat-pdf-feature" class="form-select">
+												<option value=1 @if ($id->chat_pdf_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->chat_pdf_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Internet Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="internet-feature" name="internet-feature" class="form-select">
+												<option value=1 @if ($id->internet_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->internet_feature == false) selected @endif> {{ __('Deny') }}</option>																															
 											</select>
 										</div>
 									</div>
@@ -370,6 +517,72 @@
 											</div> 
 											@error('team-members')
 												<p class="text-danger">{{ $errors->first('team-members') }}</p>
+											@enderror
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Web Chat Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="chat-web-feature" name="chat-web-feature" class="form-select">
+												<option value=1 @if ($id->chat_web_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->chat_web_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Chat CSV Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="chat-csv-feature" name="chat-csv-feature" class="form-select">
+												<option value=1 @if ($id->chat_csv_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->chat_csv_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('Smart Editor Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="smart-editor-feature" name="smart-editor-feature" class="form-select">
+												<option value=1 @if ($id->smart_editor_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->smart_editor_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Rewriter Feature') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="rewriter-feature" name="rewriter-feature" class="form-select">
+												<option value=1 @if ($id->rewriter_feature == true) selected @endif>{{ __('Allow') }}</option>
+												<option value=0 @if ($id->rewriter_feature == false) selected @endif> {{ __('Deny') }}</option>																															
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Maximum Allowed CSV File Size') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum CSV file size limit that subscriber is allowed to process') }}."></i></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" min="1" id="chat-csv-file-size" name="chat-csv-file-size" min=0 value="{{ $id->chat_csv_file_size }}">
+												<span class="text-muted fs-10">{{ __('Maximum Size limit is in Megabytes (MB)') }}.</span>
+											</div> 
+											@error('chat-csv-file-size')
+												<p class="text-danger">{{ $errors->first('chat-csv-file-size') }}</p>
+											@enderror
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Maximum Allowed PDF File Size') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum PDF file size limit that subscriber is allowed to process') }}."></i></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" min="1" id="chat-pdf-file-size" name="chat-pdf-file-size" min=0 value="{{ $id->chat_pdf_file_size }}">
+												<span class="text-muted fs-10">{{ __('Maximum Size limit is in Megabytes (MB)') }}.</span>
+											</div> 
+											@error('chat-pdf-file-size')
+												<p class="text-danger">{{ $errors->first('chat-pdf-file-size') }}</p>
 											@enderror
 										</div> 						
 									</div>

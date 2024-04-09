@@ -132,7 +132,7 @@ unset($__errorArgs, $__bag); ?>
 										<option value="free" <?php if($id->package == 'free'): ?> selected <?php endif; ?>><?php echo e(__('Free Package')); ?></option>
 										<option value="all" <?php if($id->package == 'all'): ?> selected <?php endif; ?>><?php echo e(__('Standard Package')); ?></option>
 										<option value="professional" <?php if($id->package == 'professional'): ?> selected <?php endif; ?>> <?php echo e(__('Professional Package')); ?></option>																															
-										<option value="premium" <?php if($id->package == 'premium'): ?> selected <?php endif; ?>> <?php echo e(__('Premuim Package')); ?></option>																																																																																																									
+										<option value="premium" <?php if($id->package == 'premium'): ?> selected <?php endif; ?>> <?php echo e(__('Premium Package')); ?></option>																																																																																																									
 									</select>
 								</div>
 							</div>						

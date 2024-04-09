@@ -66,21 +66,21 @@ class FinanceController extends Controller
                     ->addColumn('actions', function($row){
                         if ($row["gateway"] == 'BankTransfer') {
                             $actionBtn = '<div>                                            
-                                            <a href="'. route("admin.finance.transaction.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons edit-action-button" title="View Transaction"></i></a>
-                                            <a href="'. route("admin.finance.transaction.edit", $row["id"] ). '"><i class="fa-solid fa-file-pen table-action-buttons view-action-button" title="Update Transaction"></i></a>
-                                            <a class="deleteTransactionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Transaction"></i></a>
+                                            <a href="'. route("admin.finance.transaction.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons edit-action-button" title="'. __('View Transaction') .'"></i></a>
+                                            <a href="'. route("admin.finance.transaction.edit", $row["id"] ). '"><i class="fa-solid fa-file-pen table-action-buttons view-action-button" title="'. __('Update Transaction') .'"></i></a>
+                                            <a class="deleteTransactionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Transaction') .'"></i></a>
                                         </div>';
                         } else {
                             $actionBtn = '<div>                                            
-                                            <a href="'. route("admin.finance.transaction.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons view-action-button" title="View Transaction"></i></a>
-                                            <a class="deleteTransactionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Transaction"></i></a>
+                                            <a href="'. route("admin.finance.transaction.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons view-action-button" title="'. __('View Transaction') .'"></i></a>
+                                            <a class="deleteTransactionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Transaction') .'"></i></a>
                                         </div>';
                         }
 
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('user', function($row){
@@ -104,7 +104,7 @@ class FinanceController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-amount', function($row){
-                        $custom_amount = '<span class="font-weight-bold">'.$row["price"]. $row['currency'].'</span>';
+                        $custom_amount = '<span>'.$row["price"]. $row['currency'].'</span>';
                         return $custom_amount;
                     })
                     ->addColumn('custom-frequency', function($row){
@@ -112,12 +112,8 @@ class FinanceController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-order', function($row){
-                        $custom_order = '<span class="font-weight-bold">'.$row["order_id"].'</span>';
+                        $custom_order = '<span>'.$row["order_id"].'</span>';
                         return $custom_order;
-                    })
-                    ->addColumn('custom-country', function($row){
-                        $custom_country = '<span class="font-weight-bold">'.$row["country"].'</span>';
-                        return $custom_country;
                     })
                     ->addColumn('custom-gateway', function($row){
                         switch ($row['gateway']) {
@@ -157,6 +153,18 @@ class FinanceController extends Controller
                             case 'Paddle':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
                                 break;
+                            case 'Iyzico':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Iyzico Gateway" class="w-40" src="' . URL::asset('img/payments/iyzico.svg') . '"></div>';
+                                break;
+                            case 'TwoCheckout':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="TwoCheckout Gateway" class="w-40" src="' . URL::asset('img/payments/twocheckout.svg') . '"></div>';
+                                break;
+                            case 'Manual':
+                                $custom_gateway = '<div>Manual Assign</div>';
+                                break;
+                            case 'FREE':
+                                $custom_gateway = '<div>Free Plan</div>';
+                                break;
                             default:
                                 $custom_gateway = '<div class="overflow-hidden">Unknown</div>';
                                 break;
@@ -165,10 +173,11 @@ class FinanceController extends Controller
                         return $custom_gateway;
                     })
                     ->addColumn('custom-plan-name', function($row){
-                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.number_format($row["words"]).' words</span>';
+                        $words = ($row['words'] == -1) ? __('Unlimited') : number_format($row['words']);
+                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.$words.' words</span>';
                         return $custom_status;
                     })
-                    ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-amount', 'custom-plan-name', 'user', 'custom-order', 'custom-country', 'custom-gateway', 'custom-frequency'])
+                    ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-amount', 'custom-plan-name', 'user', 'custom-order', 'custom-gateway', 'custom-frequency'])
                     ->make(true);
                     
         }
@@ -188,16 +197,16 @@ class FinanceController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
-                                            <a class="cancelSubscriptionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-file-slash table-action-buttons delete-action-button" title="Cancel Transaction"></i></a>
+                                            <a class="cancelSubscriptionButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-file-slash table-action-buttons delete-action-button" title="'. __('Cancel Transaction') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span class="font-weight-bold">'.date_format($row["created_at"], 'd M Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y').'</span><br><span>'.date_format($row["created_at"], 'H:i A').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-until', function($row){
-                        $custom_until = '<span class="font-weight-bold">'.date_format(Carbon::parse($row["active_until"]), 'd M Y').'</span><br><span>'.date_format(Carbon::parse($row["active_until"]), 'H:i A').'</span>';
+                        $custom_until = '<span>'.date_format(Carbon::parse($row["active_until"]), 'd/m/Y').'</span><br><span>'.date_format(Carbon::parse($row["active_until"]), 'H:i A').'</span>';
                         return $custom_until;
                     })
                     ->addColumn('custom-frequency', function($row){
@@ -229,7 +238,8 @@ class FinanceController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-words', function($row){
-                        $custom_storage = '<span class="font-weight-bold">'.number_format($row["words"]).'</span>';
+                        $words = ($row['words'] == -1) ? __('Unlimited') : number_format($row["words"]);
+                        $custom_storage = '<span>'.$words.'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-gateway', function($row){
@@ -270,8 +280,17 @@ class FinanceController extends Controller
                             case 'Paddle':
                                 $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
                                 break;
+                            case 'Iyzico':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="Iyzico Gateway" class="w-40" src="' . URL::asset('img/payments/iyzico.svg') . '"></div>';
+                                break;
+                            case 'TwoCheckout':
+                                $custom_gateway = '<div class="overflow-hidden"><img alt="TwoCheckout Gateway" class="w-40" src="' . URL::asset('img/payments/twocheckout.svg') . '"></div>';
+                                break;
+                            case 'Manual':
+                                $custom_gateway = '<div class="">Manual Assign</div>';
+                                break;
                             case 'FREE':
-                                $custom_gateway = '<div class="font-weight-bold">Free Plan</div>';
+                                $custom_gateway = '<div class="">Free Plan</div>';
                                 break;
                             default:
                                 $custom_gateway = '<div class="overflow-hidden">Unknown</div>';

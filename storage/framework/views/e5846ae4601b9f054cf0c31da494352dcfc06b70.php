@@ -24,9 +24,15 @@
 <link href="<?php echo e(URL::asset('plugins/toastr/toastr.min.css')); ?>" rel="stylesheet" />
 
 <link href="<?php echo e(URL::asset('plugins/awselect/awselect.min.css')); ?>" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- multiselect select  -->
+<link rel="stylesheet" href="<?php echo e(URL::asset('plugins/bootstrap-5.0.2/css/bootstrap-multiselect.min.css')); ?>">
 
 <?php echo $__env->yieldContent('css'); ?>
 
 <!-- All Styles -->
 <link href="<?php echo e(URL::asset('css/app.css')); ?>" rel="stylesheet" />
+
+
 	<?php /**PATH /home/customer/www/paraclete.ai/public_html/resources/views/layouts/header.blade.php ENDPATH**/ ?>

@@ -22,18 +22,18 @@ class UserNotificationController extends Controller
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>
-                                        <a href="'. route("user.notifications.show", $row["id"] ). '"><i class="fa-solid fa-bell-exclamation table-action-buttons view-action-button" title="View Notification"></i></a>
-                                        <a class="deleteNotificationButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="Delete Notification"></i></a> 
+                                        <a href="'. route("user.notifications.show", $row["id"] ). '"><i class="fa-solid fa-bell-exclamation table-action-buttons view-action-button" title="'. __('View Notification') .'"></i></a>
+                                        <a class="deleteNotificationButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Notification') .'"></i></a> 
                                     </div>';
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        $created_on = '<span>'.date_format($row["created_at"], 'd M Y H:i:s').'</span>';
+                        $created_on = '<span>'.date_format($row["created_at"], 'd/m/Y H:i:s').'</span>';
                         return $created_on;
                     })
                     ->addColumn('read-on', function($row){
                         if (!is_null($row["read_at"])) {
-                            $read_on = '<span>'.date_format($row["read_at"], 'd M Y H:i:s').'</span>';
+                            $read_on = '<span>'.date_format($row["read_at"], 'd/m/Y H:i:s').'</span>';
                             return $read_on;
                         } else {
                             return '<span>'.$row["read_at"].'</span>';

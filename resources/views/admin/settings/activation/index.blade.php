@@ -16,32 +16,29 @@
 @endsection
 
 @section('content')
-	<div class="row">
-		<div class="col-xl-5 col-lg-5 col-sm-12">
-			<div class="card border-0">
-				<div class="card-header">
-					<h3 class="card-title">{{__('License Activation') }}: @if ($notification) <span class="text-success">{{ __('Activated') }}</span> @else <span class="text-danger">{{ __('Not Activated') }}</span>@endif</h3>
-				</div>
-				<div class="card-body">
+	<div class="row justify-content-center">
+		<div class="col-xl-4 col-lg-4 col-sm-12">
+			<div class="card border-0">				
+				<div class="card-body pt-7 pl-7 pr-7 pb-6">
 					<form method="POST" action="{{ route('admin.settings.activation.store') }}" enctype="multipart/form-data">
 						@csrf
 						
 						<div class="row">
 
-							<div class="col-sm-12 col-md-12 mb-6">
-								<div>
-									<h6 class="fs-12 font-weight-bold">{{ __('Important') }}:</h6>
-									<span class="fs-12 mb-2"><i class="mdi mdi-alert-circle mr-2 text-danger"></i>{{ __('License is valid for only one installation and is strictly bounded with your domain name') }}</span><br>
-									<span class="fs-12 mb-2"><i class="mdi mdi-alert-circle mr-2 text-danger"></i>{{ __('Upon change of your domain name, deactivate the license first') }}</span><br>
-									<span class="fs-12 mb-2"><i class="mdi mdi-alert-circle mr-2 text-danger"></i>{{ __('Deactivation of license does not affect the integrity of your database at all') }}</span><br>
-									<span class="fs-12 mb-2"><i class="mdi mdi-alert-circle mr-2 text-danger"></i>{{ __('If you will have any questions you can refer to the documentation or create a support ticket') }}</span>
+							<div class="col-sm-12">								
+								<div class="text-center mb-7">
+									<div class="mb-7">
+										<img src="{{ URL::asset('/img/files/lock.webp') }}" alt="" style="width:200px">
+									</div>
+									<h3 class="card-title fs-18">{{__('License Status') }}: @if ($notification) <span class="text-success font-weight-bold">{{ __('Activated') }}</span> @else <span class="text-danger fs-24 font-weight-bold">{{ __('Not Activated') }}</span>@endif</h3>
+									<h3 class="card-title fs-12 mt-6 font-weight-bold">{{__('License Type') }}: <span class="text-primary font-weight-bold" style="padding: 0.2rem 1.5rem; margin-left: 0.5rem; border-radius: 1rem; background:#e1f0ff; ">{{ $type }}</span></h3>
 								</div>
 							</div>
 
 							<div class="col-sm-12 col-md-12">
 								<div class="input-box">
 									<div class="form-group">
-										<label class="form-label fs-12">{{ __('Enter Activation License') }}</label>
+										<label class="form-label fs-12 font-weight-bold text-muted">{{ __('Your Activation Code') }}</label>
 										<input type="text" class="form-control @error('license') is-danger @enderror" name="license" value="{{ $information['license'] }}" required>
 										@error('license')
 											<p class="text-danger">{{ $errors->first('license') }}</p>
@@ -53,22 +50,21 @@
 							<div class="col-sm-12 col-md-12">
 								<div class="input-box mb-1">
 									<div class="form-group mb-1">
-										<label class="form-label fs-12">{{ __('Enter Envato Username') }}</label>
+										<label class="form-label fs-12 font-weight-bold text-muted">{{ __('Your Envato Username') }}</label>
 										<input type="text" class="form-control @error('username') is-danger @enderror" name="username" value="{{ $information['username'] }}" required>
 										@error('username')
 											<p class="text-danger">{{ $errors->first('username') }}</p>
 										@enderror									
 									</div>
 								</div>
-								@if ($notification) <span class="text-success fs-12">{{ __('Congratulations! Application Successfully Activated!') }}</span> @else <span class="text-danger fs-12">{{ __('Application is Not Activated') }}.</span>@endif
+								
 							</div>
 						</div>
-						<div class="card-footer border-0 text-right pb-2 pt-2 pr-0">							
-							<a href="{{ route('admin.dashboard') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
+						<div class="card-footer border-0 text-center pb-2 pt-5 pr-0">							
 							@if (!$notification)
-								<button type="submit" class="btn btn-primary">{{ __('Activate') }}</button>						
+								<button type="submit" class="btn btn-primary pl-7 pr-7">{{ __('Activate') }}</button>						
 							@else
-								<a class="btn btn-primary" id="deactivateButton" data-toggle="modal" data-target="#deleteModal" href="" data-attr={{ route("admin.settings.activation.remove")}}>{{ __('Deactivate') }}</a>
+								<a class="btn btn-primary pl-7 pr-7" id="deactivateButton" data-toggle="modal" data-target="#deleteModal" href="" data-attr={{ route("admin.settings.activation.remove")}}>{{ __('Deactivate') }}</a>
 							@endif							
 						</div>		
 					</form>
@@ -82,7 +78,7 @@
 		<div class="modal-dialog modal-dialog-centered modal-md" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h4 class="modal-title" id="myModalLabel"><i class="mdi mdi-alert-circle-outline color-red"></i> {{ __('Confirm License Code Deletion') }}</h4>
+					<h4 class="modal-title" id="myModalLabel"><i class="mdi mdi-alert-circle-outline color-red"></i> {{ __('Confirm License Code Deactivation') }}</h4>
 					<button type="button" class="close btn" data-bs-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>

@@ -50,7 +50,7 @@
 							<div class="col-lg-6 col-md-6 col-sm-12">							
 								<div class="input-box">	
 									<h6>{{ __('FAQ Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-			  						<select id="faq-status" name="status" data-placeholder="{{ __('FAQ Status') }}:">			
+			  						<select id="faq-status" name="status" class="form-select" data-placeholder="{{ __('FAQ Status') }}:">			
 										<option value="visible" selected>{{ __('Visible') }}</option>
 										<option value="hidden">{{ __('Hidden') }}</option>
 									</select>

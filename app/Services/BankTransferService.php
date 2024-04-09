@@ -25,7 +25,7 @@ class BankTransferService
         }
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
         if (!$process['status']) return false;
 
         $duration = ($id->payment_frequency == 'monthly') ? 30 : 365;
@@ -100,7 +100,7 @@ class BankTransferService
         $currency = $id->currency;
 
         $listener = new Listener();
-        $process = $listener->upload();
+        $process = $listener->download();
 
         if (!$process['status']) return false;
         
