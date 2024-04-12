@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -47,7 +46,7 @@ return new class extends Migration
             $table->decimal('available_minutes_prepaid', 15, 3)->default(0);
             $table->text('profile_photo_path')->nullable();
             $table->string('oauth_id')->nullable();
-            $table->string('oauth_type')->nullable();     
+            $table->string('oauth_type')->nullable();
             $table->timestamp('last_seen')->nullable();
             $table->text('google2fa_secret')->nullable();
             $table->boolean('google2fa_enabled')->nullable()->default(0);
@@ -59,16 +58,18 @@ return new class extends Migration
             $table->string('default_voiceover_language')->nullable();
             $table->string('default_voiceover_voice')->nullable();
             $table->string('default_template_language')->default('en-US')->nullable();
-            $table->integer('member_of')->nullable(); 
-            $table->integer('member_limit')->default(0)->nullable(); 
-            $table->boolean('member_use_credits_template')->default(1)->nullable(); 
-            $table->boolean('member_use_credits_chat')->default(1)->nullable(); 
-            $table->boolean('member_use_credits_code')->default(1)->nullable(); 
-            $table->boolean('member_use_credits_voiceover')->default(1)->nullable(); 
-            $table->boolean('member_use_credits_speech')->default(1)->nullable(); 
-            $table->boolean('member_use_credits_image')->default(1)->nullable(); 
+            $table->integer('member_of')->nullable();
+            $table->integer('member_limit')->default(0)->nullable();
+            $table->boolean('member_use_credits_template')->default(1)->nullable();
+            $table->boolean('member_use_credits_chat')->default(1)->nullable();
+            $table->boolean('member_use_credits_code')->default(1)->nullable();
+            $table->boolean('member_use_credits_voiceover')->default(1)->nullable();
+            $table->boolean('member_use_credits_speech')->default(1)->nullable();
+            $table->boolean('member_use_credits_image')->default(1)->nullable();
             $table->string('personal_openai_key')->nullable();
             $table->string('personal_sd_key')->nullable();
+            $table->boolean('enable_openai_api_usage')->default(false)->nullable();
+            $table->boolean('enable_sd_api_usage')->default(false)->nullable();
             $table->boolean('hidden_plan')->nullable()->default(false);
             $table->boolean('used_free_tier')->nullable()->default(false);
             $table->rememberToken();
