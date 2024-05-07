@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\User;
 
+require_once(base_path('libraries/mpdf/vendor/autoload.php'));
+
+
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admin\LicenseController;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +27,7 @@ use App\Models\ResumeUserSkill;
 use App\Models\ResumeUserSocialLink;
 use Dompdf\Dompdf;
 use Illuminate\Support\Facades\View;
+use Mpdf\Mpdf;
 
 
 
@@ -61,7 +65,7 @@ class AiResumeController extends Controller
     {
         $open_ai = new OpenAi(auth()->user()->personal_openai_key);   
         $jobTitle = $request->job_title;
-       	$prompt = 'As a '.$jobTitle.', please genrate some resume objecte and each new object start with ##';
+       	$prompt = 'As a '.$jobTitle.', please generate some resume objecte and each new object start with ##';
         $prompt1 = 'display List of skills title for a '.$jobTitle.' resume and each new object start with ##';
         $complete = $open_ai->chat([
                 'model' => 'gpt-3.5-turbo',
@@ -107,11 +111,57 @@ class AiResumeController extends Controller
         return response()->json(['objective' => $generatedText , 'skills' => $skills]);
     }  
     public function storeResume(Request $request){
+        
+        $validatedData = $request->validate([
+            'template_image' => 'required',
+            'photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
 
-        // dd($request->all());
-        // Get the job title ID based on the job title name
+        ], [
+            'template_image.required' => 'Please choose a template image.',
+            'photo.image' => 'Please upload a valid image file.',
+            'photo.mimes' => 'Supported image formats are jpeg, png, jpg, and gif.',
+            'photo.max' => 'The image size must not exceed 2MB.',
+        ]);
+
+        // Get the job title ID based on the job title name 
         $jobTitleName = $request->input('jobTitleInput');
         $jobTitle = EmployeeJob::where('title', $jobTitleName)->first();
+
+        $base64URL = '';
+
+        if($request->has('photo')){
+            $uploadedFile = $request->file('photo');
+            $fileContents = file_get_contents($uploadedFile->path());
+            $base64Encoded = base64_encode($fileContents);
+            $base64URL = 'data:' . $uploadedFile->getClientMimeType() . ';base64,' . $base64Encoded;
+        }
+
+        $data=$request->all();
+
+        if($request->input('template_image') == 1){
+            $file = 'user.resume.template1';
+        }else if($request->input('template_image') == 2){
+            $file = 'user.resume.template2';
+        }else if($request->input('template_image') == 3){
+            $file = 'user.resume.template3';
+        }else if($request->input('template_image') == 4){
+            $file = 'user.resume.template4';
+        }else{
+            $file = 'user.resume.template5';
+        }
+        $view = view($file,compact('data','base64URL'))->render();
+
+        $filename = 'resume-' . time() . '.pdf';
+        $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4' , 'margin_top' => 0 , 'margin_left' => 0 , 'margin_right' => 0]);
+        $mpdf->WriteHTML($view);
+        $mpdf->Output($filename, 'D');
+            
+        // $dompdf = new Dompdf();
+        // $dompdf->loadHtml($view);
+        // $dompdf->setPaper('A4', 'portrait');
+        // $dompdf->render();
+        // $dompdf->stream();
+        // $dompdf->SetFont('Arial');
 
         // Store basic details
         // $resumeUser = ResumeUser::create([
@@ -175,26 +225,5 @@ class AiResumeController extends Controller
 
         // $request->input('lang_name');
         // $request->input('lang_level');
-
-        $uploadedFile = $request->file('photo');
-
-        // Read the file contents
-        $fileContents = file_get_contents($uploadedFile->path());
-
-        // Encode the file contents to base64
-        $base64Encoded = base64_encode($fileContents);
-
-        // Construct the base64 URL
-        $base64URL = 'data:' . $uploadedFile->getClientMimeType() . ';base64,' . $base64Encoded;
-
-           $data=$request->all();
-           $dompdf = new Dompdf();
-            $view=view('user.resume.template1',compact('data','base64URL'))->render();
-            $dompdf->loadHtml($view);
-            // $dompdf->loadHtml('<h1>Hello World</h1>');
-            $dompdf->setPaper('A4', 'portrait');
-            $dompdf->render();
-            $dompdf->stream();
-            $dompdf->SetFont('Arial');
     }
 }

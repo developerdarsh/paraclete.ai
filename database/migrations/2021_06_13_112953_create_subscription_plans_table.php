@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -52,7 +53,6 @@ return new class extends Migration {
             $table->boolean('personal_openai_api')->default(false)->nullable();
             $table->boolean('personal_sd_api')->default(false)->nullable();
             $table->integer('days')->nullable();
-            $table->string('image_engine')->nullable();
             $table->string('dalle_image_engine')->nullable();
             $table->string('sd_image_engine')->nullable();
             $table->boolean('wizard_feature')->nullable()->default(1);

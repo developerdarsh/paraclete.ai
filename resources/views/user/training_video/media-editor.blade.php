@@ -195,6 +195,7 @@
     @endsection
 
     @section('content')
+    
     <div class="editing-tools-layout">
 
     <div id="image-buttons" class="editing-tools-btn-group">
