@@ -149,20 +149,22 @@ a:hover {
   
   .btn-primary {
 	font-size: 10px;
-	min-width: 80px;
-    padding-left: 15px;
-    padding-right: 15px;
+	min-width: 100px;
+    padding: 7px 15px;
 	border-radius: 35px;
 	text-transform: uppercase;
 	color: $white !important;
 	background-color: $btnMainBGColor;
 	border-color: $btnMainBGColor;
 	box-shadow: 0 1px 3px 0 rgb(50 50 50 / 20%), 0 2px 1px -1px rgb(50 50 50 / 12%), 0 1px 1px 0 rgb(50 50 50 / 14%);
+	transition: all .3s;
   
 	&:hover {
 	  color: $white !important;
 	  background-color: $primaryTextColor;
 	  border-color: $primaryTextColor;
+	  transform: translateY(-3px);
+	  box-shadow: 0 0.5rem 1rem rgba(29, 39, 59, 0.25);
 	}
   
 	&:focus, &.focus {
@@ -237,20 +239,22 @@ a:hover {
   .btn-cancel,
   .btn-cancel-black {
 	font-size: 10px;
-	min-width: 80px;
-    padding-left: 15px;
-    padding-right: 15px;
+	min-width: 100px;
+    padding: 7px 15px;
 	border-radius: 35px;
 	text-transform: uppercase;
 	color: $white !important;
 	background-color: $primaryTextColor;
 	border-color: $primaryTextColor;
 	box-shadow: 0 1px 3px 0 rgb(50 50 50 / 20%), 0 2px 1px -1px rgb(50 50 50 / 12%), 0 1px 1px 0 rgb(50 50 50 / 14%);
+	transition: all .3s;
   
 	&:hover {
 	  color: $white !important;
 	  background-color: $btnCancelBGColor;
 	  border-color: $btnCancelBGColor;
+	  transform: translateY(-3px);
+	  box-shadow: 0 0.5rem 1rem rgba(29, 39, 59, 0.25);
 	}
   
 	&:focus, &.focus {

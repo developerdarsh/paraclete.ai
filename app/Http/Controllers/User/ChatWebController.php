@@ -15,6 +15,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\BrandVoice;
+use App\Models\FineTuneModel;
+use App\Services\HelperService;
 
 class ChatWebController extends Controller
 {
@@ -31,25 +34,39 @@ class ChatWebController extends Controller
         $chats = ChatSpecial::where('user_id', auth()->user()->id)->where('type', 'web')->orderBy('created_at', 'desc')->get();
         $first_chat = ChatSpecial::where('user_id', auth()->user()->id)->where('type', 'web')->first();
         $chat_code = ($first_chat) ? $first_chat->id : 'new';
-        $prompts = ChatPrompt::all();
+        $prompts = ChatPrompt::where('status', true)->get();
+
+         # Apply proper model based on role and subsciption
+         if (auth()->user()->group == 'user') {
+            $models = explode(',', config('settings.free_tier_models'));
+        } elseif (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $models = explode(',', $plan->model_chat);
+        } else {            
+            $models = explode(',', config('settings.free_tier_models'));
+        }
+
+        $fine_tunes = FineTuneModel::all();
+        $brands = BrandVoice::where('user_id', auth()->user()->id)->get();
+        $brands_feature = \App\Services\HelperService::checkBrandsFeature();
 
         if (auth()->user()->group == 'user') {
             if (config('settings.chat_web_user_access') != 'allow') {
                 toastr()->warning(__('AI Web Chat feature is not available for free tier users, subscribe to get a proper access'));
                 return redirect()->route('user.plans');
             } else {
-                return view('user.chat_web.index', compact('chats', 'chat_code', 'prompts'));
+                return view('user.chat_web.index', compact('chats', 'chat_code', 'prompts', 'brands', 'models', 'fine_tunes', 'brands_feature'));
             }
         } elseif (auth()->user()->group == 'subscriber') {
             $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-            if ($plan->chat_pdf_feature == false) {     
+            if ($plan->chat_web_feature == false) {     
                 toastr()->warning(__('Your current subscription plan does not include support for AI Web Chat feature'));
                 return redirect()->back();                   
             } else {
-                return view('user.chat_web.index', compact('chats', 'chat_code', 'prompts'));
+                return view('user.chat_web.index', compact('chats', 'chat_code', 'prompts', 'brands', 'models', 'fine_tunes', 'brands_feature'));
             }
         } else {
-            return view('user.chat_web.index', compact('chats', 'chat_code', 'prompts'));
+            return view('user.chat_web.index', compact('chats', 'chat_code', 'prompts', 'brands', 'models', 'fine_tunes', 'brands_feature'));
         }
     }
 
@@ -67,6 +84,7 @@ class ChatWebController extends Controller
 
     public function process(Request $request)
     {
+
         return response()->stream(function () use ($request) {
             try {
                 $chat = ChatSpecial::where('user_id', auth()->user()->id)->where('id', $request->chat_id)->first();
@@ -84,7 +102,7 @@ class ChatWebController extends Controller
                     return $item->text;
                 })->implode("\n");
 
-                $stream = $this->query->askQuestionStreamed($context, $question);
+                $stream = $this->query->askQuestionStreamed($context, $question, $request->model);
                 $resultText = "";
                 foreach ($stream as $response) {
                     $text = $response->choices[0]->delta->content;
@@ -95,23 +113,28 @@ class ChatWebController extends Controller
                     ServerEvent::send($text, "");
                 }
 
+                $words = count(explode(' ', ($resultText)));                
+
                 ChatHistorySpecial::insert([[
                     'chat_special_id' => $request->chat_id,
                     'role' => ChatHistorySpecial::ROLE_USER,
                     'content' => $question, 
-                    'user_id' => auth()->user()->id
+                    'user_id' => auth()->user()->id,
+                    'model' => $request->model,
+                    'words' => 0,
                 ], [
                     'chat_special_id' => $request->chat_id,
                     'role' => ChatHistorySpecial::ROLE_BOT,
                     'content' => $resultText,
-                    'user_id' => auth()->user()->id
+                    'user_id' => auth()->user()->id,
+                    'model' => $request->model,
+                    'words' => $words,
                 ]]);
 
                 $chat->messages = $chat->messages + 1;
                 $chat->save();
-
-                $words = count(explode(' ', ($resultText)));
-                $this->updateBalance($words);
+                
+                HelperService::updateBalance($words, $request->model);
 
             } catch (Exception $e) {
                 Log::error($e);
@@ -217,131 +240,18 @@ class ChatWebController extends Controller
             }    
         } 
 
-        if ($request->task == 'process') {
-            $words = count(explode(' ', ($request->message)));
-
-            # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $words) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $words) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
-                } else {
-                    $data['status'] = 'success';
-                    return $data;
-                }
+        $verify = HelperService::creditCheck($request->model, 20);
+        if (isset($verify['status'])) {
+            if ($verify['status'] == 'error') {
+                return $verify;
             } else {
                 $data['status'] = 'success';
                 return $data;
             }
         } else {
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < 100) { 
-                    $data['status'] = 'error';
-                    $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                    return $data;
-                } else {
-                    $data['status'] = 'success';
-                    return $data;
-                }
-            } else {
-                $data['status'] = 'success';
-                return $data;
-            }   
-        }        
-    }
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalance($words) {
-
-        $user = User::find(Auth::user()->id);
-
-        if (auth()->user()->available_words != -1) {
-        
-            if (Auth::user()->available_words > $words) {
-
-                $total_words = Auth::user()->available_words - $words;
-                $user->available_words = ($total_words < 0) ? 0 : $total_words;
-                $user->update();
-
-            } elseif (Auth::user()->available_words_prepaid > $words) {
-
-                $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-                $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-                $user->update();
-
-            } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-
-                $user->available_words = 0;
-                $user->available_words_prepaid = 0;
-                $user->update();
-
-            } else {
-
-                if (!is_null(Auth::user()->member_of)) {
-
-                    $member = User::where('id', Auth::user()->member_of)->first();
-
-                    if ($member->available_words > $words) {
-
-                        $total_words = $member->available_words - $words;
-                        $member->available_words = ($total_words < 0) ? 0 : $total_words;
-            
-                    } elseif ($member->available_words_prepaid > $words) {
-            
-                        $total_words_prepaid = $member->available_words_prepaid - $words;
-                        $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            
-                    } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-            
-                        $member->available_words = 0;
-                        $member->available_words_prepaid = 0;
-            
-                    } else {
-                        $remaining = $words - $member->available_words;
-                        $member->available_words = 0;
-        
-                        $prepaid_left = $member->available_words_prepaid - $remaining;
-                        $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-
-                    $member->update();
-
-                } else {
-                    $remaining = $words - Auth::user()->available_words;
-                    $user->available_words = 0;
-
-                    $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                    $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    $user->update();
-                }  
-            }
-        }
-
-        return true;
+            $data['status'] = 'success';
+            return $data;
+        }           
     }
 
 

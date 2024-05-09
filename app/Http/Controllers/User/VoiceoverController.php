@@ -11,6 +11,7 @@ use App\Services\Service;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\MergeService;
+use App\Services\AWSTTSService;
 use App\Services\AzureTTSService;
 use App\Services\GCPTTSService;
 use App\Services\OpenaiTTSService;
@@ -84,12 +85,21 @@ class VoiceoverController extends Controller
                     
         }
 
+        if (is_null(auth()->user()->plan_id)) {
+            $vendors = explode(', ', config('settings.voiceover_free_tier_vendors'));
+        } else {
+           $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+           $vendors = explode(', ', $plan->voiceover_vendors);
+
+        }
+
         # Set Voice Types
         $languages = DB::table('voices')
             ->join('vendors', 'voices.vendor_id', '=', 'vendors.vendor_id')
             ->join('voiceover_languages', 'voices.language_code', '=', 'voiceover_languages.language_code')
             ->where('vendors.enabled', '1')
             ->where('voices.status', 'active')
+            ->whereIn('voices.vendor', $vendors)
             ->select('voiceover_languages.id', 'voiceover_languages.language', 'voices.language_code', 'voiceover_languages.language_flag')                
             ->distinct()
             ->orderBy('voiceover_languages.language', 'asc')
@@ -99,6 +109,7 @@ class VoiceoverController extends Controller
             ->join('vendors', 'voices.vendor_id', '=', 'vendors.vendor_id')
             ->where('vendors.enabled', '1')
             ->where('voices.status', 'active')
+            ->whereIn('voices.vendor', $vendors)
             ->orderBy('voices.voice_type', 'desc')
             ->orderBy('voices.voice', 'asc')
             ->get();
@@ -200,6 +211,10 @@ class VoiceoverController extends Controller
 
                 # Count characters based on vendor requirements
                 switch ($voice->vendor) {
+                    case 'aws':                        
+                            $text_characters = mb_strlen($no_ssml_tags, 'UTF-8');
+                            $total_text_characters += $text_characters;
+                        break;
                     case 'gcp':               
                             $text_characters = mb_strlen($value, 'UTF-8');
                             $total_text_characters += $text_characters;
@@ -244,6 +259,11 @@ class VoiceoverController extends Controller
 
 
                 switch ($voice->vendor) {
+                    case 'aws':
+                            if (request('format') != 'wav' && request('format') != 'webm') {
+                                $response = $this->processText($voice, $value, request('format'), $temp_file_name);
+                            } else {continue 2;}
+                        break;
                     case 'azure':
                             if (request('format') != 'wav') {
                                 $response = $this->processText($voice, $value, request('format'), $temp_file_name);
@@ -276,6 +296,10 @@ class VoiceoverController extends Controller
                         Storage::disk('s3')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
                         $result_url = Storage::disk('s3')->url($temp_file_name); 
                         Storage::disk('audio')->delete($temp_file_name);   
+                    } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                        Storage::disk('r2')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
+                        $result_url = Storage::disk('r2')->url($temp_file_name); 
+                        Storage::disk('audio')->delete($temp_file_name); 
                     } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                         Storage::disk('wasabi')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
                         $result_url = Storage::disk('wasabi')->url($temp_file_name);
@@ -384,6 +408,10 @@ class VoiceoverController extends Controller
                     Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('s3')->url($file_name); 
                     Storage::disk('audio')->delete($file_name);   
+                } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                    Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                    $result_url = Storage::disk('r2')->url($file_name); 
+                    Storage::disk('audio')->delete($file_name);
                 } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('wasabi')->url($file_name);
@@ -517,6 +545,10 @@ class VoiceoverController extends Controller
 
                 # Count characters based on vendor requirements
                 switch ($voice->vendor) {
+                    case 'aws':                        
+                            $text_characters = mb_strlen($no_ssml_tags, 'UTF-8');
+                            $total_text_characters += $text_characters;
+                        break;
                     case 'gcp':
                             $text_characters = mb_strlen($value, 'UTF-8');
                             $total_text_characters += $text_characters;
@@ -561,6 +593,11 @@ class VoiceoverController extends Controller
 
 
                 switch ($voice->vendor) {
+                    case 'aws':
+                            if (request('format') != 'wav' && request('format') != 'webm') {
+                                $response = $this->processText($voice, $value, request('format'), $file_name);
+                            } else {continue 2;}
+                        break;
                     case 'azure':
                             if (request('format') != 'wav') {
                                 $response = $this->processText($voice, $value, request('format'), $file_name);
@@ -593,6 +630,10 @@ class VoiceoverController extends Controller
                         Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                         $result_url = Storage::disk('s3')->url($file_name); 
                         Storage::disk('audio')->delete($file_name);   
+                    } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                        Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                        $result_url = Storage::disk('r2')->url($file_name); 
+                        Storage::disk('audio')->delete($file_name); 
                     } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                         Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                         $result_url = Storage::disk('wasabi')->url($file_name);
@@ -707,6 +748,10 @@ class VoiceoverController extends Controller
                     Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('s3')->url($file_name); 
                     Storage::disk('audio')->delete($file_name);   
+                } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                    Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                    $result_url = Storage::disk('r2')->url($file_name); 
+                    Storage::disk('audio')->delete($file_name);
                 } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('wasabi')->url($file_name);
@@ -811,6 +856,9 @@ class VoiceoverController extends Controller
 
             # Count characters based on vendor requirements
             switch ($voice->vendor) {
+                case 'aws':                        
+                        $text_characters = mb_strlen($no_ssml_tags, 'UTF-8');
+                    break;
                 case 'gcp':
                         $text_characters = mb_strlen($input_text, 'UTF-8');
                     break;
@@ -874,6 +922,13 @@ class VoiceoverController extends Controller
 
 
             switch ($voice->vendor) {
+                case 'aws':
+                        if (request('format') != 'wav' && request('format') != 'webm') {
+                            $response = $this->processText($voice, $input_text, request('format'), $file_name);
+                        } else {
+                            return response()->json(["error" => __("Selected voice supports MP3 and OGG formats. You have selected unsupported audio format. Please change it and try again.")], 422);
+                        }
+                    break;
                 case 'azure':
                         if (request('format') != 'wav') {
                             $response = $this->processText($voice, $input_text, request('format'), $file_name);
@@ -910,7 +965,11 @@ class VoiceoverController extends Controller
             if (config('settings.voiceover_default_storage') === 'aws') {
                 Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                 $result_url = Storage::disk('s3')->url($file_name); 
-                Storage::disk('audio')->delete($file_name);   
+                Storage::disk('audio')->delete($file_name);  
+            } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                $result_url = Storage::disk('r2')->url($file_name); 
+                Storage::disk('audio')->delete($file_name);  
             } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                 Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                 $result_url = Storage::disk('wasabi')->url($file_name);
@@ -1027,6 +1086,11 @@ class VoiceoverController extends Controller
                     case 'aws':
                         if (Storage::disk('s3')->exists($result->result_url)) {
                             Storage::disk('s3')->delete($result->result_url);
+                        }
+                        break;
+                    case 'r2':
+                        if (Storage::disk('r2')->exists($result->result_url)) {
+                            Storage::disk('r2')->delete($result->result_url);
                         }
                         break;
                     case 'wasabi':
@@ -1160,12 +1224,16 @@ class VoiceoverController extends Controller
      */
     private function processText(Voice $voice, $text, $format, $file_name)
     {   
+        $aws = new AWSTTSService();
         $gcp = new GCPTTSService();
         $azure = new AzureTTSService();
         $openai = new OpenaiTTSService();
         $elevenlabs = new ElevenlabsTTSService();
         
         switch($voice->vendor) {
+            case 'aws':
+                return $aws->synthesizeSpeech($voice, $text, $format, $file_name);
+                break;
             case 'azure':
                 return $azure->synthesizeSpeech($voice, $text, $format, $file_name);
                 break;

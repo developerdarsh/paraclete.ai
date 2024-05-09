@@ -91,12 +91,30 @@ class UserController extends Controller
      */
     public function editDefaults($id = null)
     {   
+        if (is_null(auth()->user()->plan_id)) {
+            $vendors = explode(', ', config('settings.voiceover_free_tier_vendors'));
+        } else {
+           $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+           $vendors = explode(', ', $plan->voiceover_vendors);
+        }
+
+        # Apply proper model based on role and subsciption
+        if (auth()->user()->group == 'user') {
+            $models = explode(',', config('settings.free_tier_models'));
+        } elseif (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $models = explode(',', $plan->model);
+        } else {            
+            $models = explode(',', config('settings.free_tier_models'));
+        }
+
         # Set Voice Types
         $languages = DB::table('voices')
             ->join('vendors', 'voices.vendor_id', '=', 'vendors.vendor_id')
             ->join('voiceover_languages', 'voices.language_code', '=', 'voiceover_languages.language_code')
             ->where('vendors.enabled', '1')
             ->where('voices.status', 'active')
+            ->whereIn('voices.vendor', $vendors)
             ->select('voiceover_languages.id', 'voiceover_languages.language', 'voices.language_code', 'voiceover_languages.language_flag')                
             ->distinct()
             ->orderBy('voiceover_languages.language', 'asc')
@@ -106,6 +124,7 @@ class UserController extends Controller
             ->join('vendors', 'voices.vendor_id', '=', 'vendors.vendor_id')
             ->where('vendors.enabled', '1')
             ->where('voices.status', 'active')
+            ->whereIn('voices.vendor', $vendors)
             ->orderBy('voices.voice_type', 'desc')
             ->orderBy('voices.voice', 'asc')
             ->get();
@@ -114,7 +133,7 @@ class UserController extends Controller
 
         $check_api_feature = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
 
-        return view('user.profile.default', compact('languages', 'voices', 'template_languages', 'check_api_feature'));
+        return view('user.profile.default', compact('languages', 'voices', 'template_languages', 'check_api_feature', 'models'));
     }
 
 
@@ -145,11 +164,11 @@ class UserController extends Controller
         
             try {
                 request()->validate([
-                    'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5048'
+                    'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5048'
                 ]);
                 
             } catch (\Exception $e) {
-                toastr()->error(__('PHP FileInfo function is not enabled in your hosting, make sure to enable it first'));
+                toastr()->error($e->getMessage());
                 return redirect()->back();
             }
             
@@ -160,12 +179,19 @@ class UserController extends Controller
             $folder = '/uploads/img/users/';
             
             $filePath = $folder . $name . '.' . $image->getClientOriginalExtension();
+
+            $imageTypes = ['jpg', 'jpeg', 'png', 'webp'];
+            if (!in_array(Str::lower($image->getClientOriginalExtension()), $imageTypes)) {
+                toastr()->error(__('Avatar image must be in png, jpeg or webp formats'));
+                return redirect()->back();
+            } else {
+                $this->uploadImage($image, $folder, 'public', $name);
+
+                $user->profile_photo_path = $filePath;
+
+                $user->save();
+            }
             
-            $this->uploadImage($image, $folder, 'public', $name);
-
-            $user->profile_photo_path = $filePath;
-
-            $user->save();
         }
 
         toastr()->success(__('Profile Successfully Updated'));
@@ -188,6 +214,8 @@ class UserController extends Controller
             'default_voiceover_voice' => 'nullable|string|max:255',
             'default_voiceover_language' => 'nullable|string|max:255',
             'default_template_language' => 'nullable|string|max:255',
+            'default_model_template' => 'nullable|string|max:255',
+            'default_model_chat' => 'nullable|string|max:255',
         ]));
 
         $user->save();
@@ -244,7 +272,6 @@ class UserController extends Controller
 
         toastr()->success(__('Your personal api keys have been saved successfully'));
         return redirect()->route('user.profile.api');
-        
     }
 
 
@@ -326,5 +353,36 @@ class UserController extends Controller
             $data['status'] = 'success';
             return $data;
         } 
+    }
+
+
+     /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function theme(Request $request)
+    {           
+        $user = User::where('id', auth()->user()->id)->first();
+        $user->update(['theme' => $request->theme]);
+
+        $user->save();
+    }
+
+
+    public function emailNewsletter(Request $request)
+    {
+        if ($request->ajax()) {
+   
+            $status = ($request->status == 'true') ? 1 : 0;
+            $user = User::where('id', auth()->user()->id)->first();
+            $user->email_opt_in = $status;
+            $user->save();
+
+            $data['status'] = 200;
+            return $data;
+        }  
     }
 }

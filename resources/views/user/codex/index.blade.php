@@ -34,19 +34,24 @@
 					<div class="row">
 						<div class="col-sm-12">
 							<div class="text-left mb-5" id="balance-status">
-								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }} {{ __('Words') }} @endif</span> </span>
+								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->gpt_3_turbo_credits + auth()->user()->gpt_3_turbo_credits_prepaid) }} {{ __('GPT 3.5 Turbo') }} {{ __('Words') }} @endif</span></span>
 							</div>							
 						</div>	
 						<div class="col-sm-12">
 							<div id="form-group" class="mb-5">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Programming Language') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 								<select id="creativity" name="language" class="form-select" data-placeholder="{{ __('Specify Your Programming Language') }}">									
+									<option value='c'>{{ __('C') }}</option>
+									<option value='c#'>{{ __('C#') }}</option>
+									<option value='c++'>{{ __('C++') }}</option>
 									<option value='go'>{{ __('Go') }}</option>
 									<option value='html'>{{ __('HTML') }}</option>
 									<option value='javascript'> {{ __('JavaScript') }}</option>																																																													
+									<option value='java'> {{ __('Java') }}</option>																																																													
 									<option value='perl'> {{ __('Perl') }}</option>																																																													
 									<option value='php'> {{ __('PHP') }}</option>																																																													
 									<option value='python' selected> {{ __('Python') }}</option>																																																													
+									<option value='powershell'> {{ __('Powershell') }}</option>																																																													
 									<option value='ruby'> {{ __('Ruby') }}</option>																																																													
 									<option value='shell'> {{ __('Shell') }}</option>																																																													
 									<option value='swift'> {{ __('Swift') }}</option>	
@@ -66,6 +71,31 @@
 									@enderror
 								</div> 
 							</div> 
+						</div>
+
+						<div class="col-sm-12 mb-5">
+							<div class="form-group">	
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('AI Model') }}</h6>								
+								<select id="model" name="model" class="form-select">
+									<option value="gpt-3.5-turbo-0125">{{ __('GPT 3.5 Turbo') }}</option>
+									@foreach ($models as $model)
+										@if (trim($model) == 'gpt-4')
+											<option value="{{ trim($model) }}">{{ __('GPT 4') }}</option>
+										@elseif (trim($model) == 'gpt-4-0125-preview')
+											<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo') }}</option>
+										@elseif (trim($model) == 'gpt-4-turbo-2024-04-09')
+											<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo with Vision') }}</option>
+										@else
+											@foreach ($fine_tunes as $fine_tune)
+												@if (trim($model) == $fine_tune->model)
+													<option value="{{ trim($model) }}">{{ $fine_tune->description }} ({{ __('Fine Tune') }})</option>
+												@endif
+											@endforeach
+										@endif
+										
+									@endforeach																	
+								</select>	
+							</div>
 						</div>
 					</div>						
 

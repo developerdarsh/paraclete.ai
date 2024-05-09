@@ -20,6 +20,12 @@ use App\Models\Category;
 use App\Models\ApiKey;
 use App\Models\User;
 use App\Models\Setting;
+use App\Models\BrandVoice;
+use App\Models\FineTuneModel;
+use App\Services\HelperService;
+use WpAi\Anthropic\Facades\Anthropic;
+use Gemini\Laravel\Facades\Gemini;
+use Exception;
 
 
 class TemplateController extends Controller
@@ -44,14 +50,22 @@ class TemplateController extends Controller
         $favorite_custom_templates = CustomTemplate::select('custom_templates.*', 'favorite_templates.*')->where('favorite_templates.user_id', auth()->user()->id)->join('favorite_templates', 'favorite_templates.template_code', '=', 'custom_templates.template_code')->where('status', true)->get();  
         $user_templates = FavoriteTemplate::where('user_id', auth()->user()->id)->pluck('template_code');     
         $other_templates = Template::whereNotIn('template_code', $user_templates)->where('status', true)->orderBy('group', 'desc')->get();   
-        $custom_templates = CustomTemplate::whereNotIn('template_code', $user_templates)->where('status', true)->orderBy('group', 'desc')->get();   
+        $custom_templates = CustomTemplate::whereNotIn('template_code', $user_templates)->where('type', '<>', 'private')->where('status', true)->orderBy('group', 'desc')->get();   
+        $private_templates = CustomTemplate::where('user_id', auth()->user()->id)->where('type', 'private')->where('status', true)->orderBy('group', 'desc')->get();   
         
         $check_categories = Template::where('status', true)->groupBy('group')->pluck('group')->toArray();
         $check_custom_categories = CustomTemplate::where('status', true)->groupBy('group')->pluck('group')->toArray();
         $active_categories = array_unique(array_merge($check_categories, $check_custom_categories));
         $categories = Category::whereIn('code', $active_categories)->orderBy('name', 'asc')->get(); 
 
-        return view('user.templates.index', compact('favorite_templates', 'other_templates', 'custom_templates', 'favorite_custom_templates', 'categories'));
+        if (!is_null(auth()->user()->plan_id)) {
+            $subscription = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $check = $subscription->personal_templates_feature;
+        } else {
+            $check = false;
+        }
+
+        return view('user.templates.index', compact('favorite_templates', 'other_templates', 'custom_templates', 'favorite_custom_templates', 'categories', 'private_templates', 'check'));
     }
 
 
@@ -185,30 +199,13 @@ class TemplateController extends Controller
 
 
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
             }
-
+            
 
             # Check personal API keys
             if (config('settings.personal_openai_api') == 'allow') {
@@ -234,9 +231,10 @@ class TemplateController extends Controller
             $bad_words = explode(',', $bad_words->value);
             $bad_words = array_map('trim', $bad_words);
             $count_words = count($bad_words);
+            $settings = Setting::where('name', 'license')->first(); 
             $uploading = new UserService();
             $upload = $uploading->prompt();
-            if($upload['dota']!=622220){return;}  
+            if($settings->value != $upload['code']){return;} 
 
             if ($count_words == 1) {
                 if ($request->title) {
@@ -564,8 +562,67 @@ class TemplateController extends Controller
                     break;
             }
 
+
+             # Add Brand information
+            if ($request->brand == 'on') {
+                $brand = BrandVoice::where('id', $request->company)->first();
+
+                if ($brand) {
+                    $product = '';
+                    if ($request->service != 'none') {
+                        foreach($brand->products as $key => $value) {
+                            if ($key == $request->service)
+                                $product = $value;
+                        }
+                    } 
+                    
+                    if ($request->service != 'none') {
+                        $prompt .= ".\n Focus on my company and {$product['type']}'s information: \n";
+                    } else {
+                        $prompt .= ".\n Focus on my company's information: \n";
+                    }
+                    
+                    if ($brand->name) {
+                        $prompt .= "The company's name is {$brand->name}. ";
+                    }
+
+                    if ($brand->description) {
+                        $prompt .= "The company's description is {$brand->description}. ";
+                    }
+
+                    if ($brand->website) {
+                        $prompt .= ". The company's website is {$brand->website}. ";
+                    }
+
+                    if ($brand->tagline) {
+                        $prompt .= "The company's tagline is {$brand->tagline}. ";
+                    }
+
+                    if ($brand->audience) {
+                        $prompt .= "The company's target audience is: {$brand->audience}. ";
+                    }
+
+                    if ($brand->industry) {
+                        $prompt .= "The company focuses in: {$brand->industry}. ";
+                    }
+    
+                    if ($product) {
+                        if ($product['name']) {
+                            $prompt .= "The {$product['type']}'s name is {$product['name']}. \n";
+                        }
+
+                        if ($product['description']) {
+                            $prompt .= "The {$product['type']} is about {$product['description']}. ";
+                        }                        
+                    }
+                }
+            }
+
      
             $plan_type = (auth()->user()->plan_id) ? 'paid' : 'free';
+
+            session()->put('google_search', $request->internet);
+            session()->put('message', $input_description);
             
             # Update credit balance
             $flag = Language::where('language_code', $request->language)->first();
@@ -582,6 +639,7 @@ class TemplateController extends Controller
             $content->group = $template->group;
             $content->tokens = 0;
             $content->plan_type = $plan_type;
+            $content->model = $request->model;
             $content->save();
 
             $data['status'] = 'success';    
@@ -642,16 +700,39 @@ class TemplateController extends Controller
         $language = $request->language;
         $content = Content::where('id', $content_id)->first();
         $prompt = $content->input_text;  
+        $model = $content->model;
 
-        # Apply proper model based on role and subsciption
-        if (auth()->user()->group == 'user') {
-            $model = config('settings.default_model_user');
-        } elseif (auth()->user()->group == 'admin') {
-            $model = config('settings.default_model_admin');
-        } else {
-            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-            $model = $plan->model;
-        }
+        $google_search = session()->get('google_search'); 
+        $message = session()->get('message'); 
+
+        if($google_search == 'on'){ 
+         
+            $curl = curl_init(); 
+            curl_setopt_array($curl, 
+                array( 
+                    CURLOPT_URL => 'https://google.serper.dev/search', 
+                    CURLOPT_RETURNTRANSFER => true, CURLOPT_ENCODING => '', 
+                    CURLOPT_MAXREDIRS => 10, 
+                    CURLOPT_TIMEOUT => 0, 
+                    CURLOPT_FOLLOWLOCATION => true, 
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1, 
+                    CURLOPT_CUSTOMREQUEST => 'POST', 
+                    CURLOPT_POSTFIELDS => json_encode(["q" => $message]), 
+                    CURLOPT_HTTPHEADER => array( 'X-API-KEY: ' . config('services.serper.key'), 'Content-Type: application/json' ), )); 
+            $response = curl_exec($curl); 
+            curl_close($curl); 
+
+            $responseArray = json_decode($response, true); 
+            
+            if ($responseArray !== null) { 
+            
+                $relatedOrganic = isset($responseArray['organic']) ? $responseArray['organic'] : []; 
+                $reletedAnswerBox = isset($responseArray['answerBox']) ? $responseArray['answerBox'] : ''; 
+                $relatedOrganicString = json_encode($relatedOrganic, JSON_PRETTY_PRINT); 
+                $reletedAnswerBox = is_array($reletedAnswerBox) ? json_encode($reletedAnswerBox, JSON_PRETTY_PRINT) : $reletedAnswerBox; $prompt = $relatedOrganicString . "\n\n" . $reletedAnswerBox . "\n\n" . $prompt . "\n\nGive the answer based on the above Google information or if you will not find the answer on the above information then provide the title along with the links for user to search himself or write the answer from your own way. Do not mention that you are openai or gpt model"; 
+            } 
+
+        } 
 
 
         return response()->stream(function () use($model, $prompt, $content_id, $max_results, $max_words, $temperature, $language) {
@@ -664,34 +745,85 @@ class TemplateController extends Controller
                     $prompt .='. Create seperate distinct ' . $max_results . ' results.';
                 }
 
-                $results = OpenAI::chat()->createStreamed([
-                    'model' => $model,
-                    'messages' => [
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'frequency_penalty' => 0,
-                    'presence_penalty' => 0,
-                    'temperature' => (float)$temperature,
-                ]);
+                if ($model == 'claude-3-opus-20240229' || $model == 'claude-3-sonnet-20240229' || $model == 'claude-3-haiku-20240307') {
+                    $response = Anthropic::messages()
+                                ->model($model)
+                                ->maxTokens($max_words)
+                                ->messages([
+                                    ['role' => 'user', 'content' => $prompt],
+                                ])->temperature((float)$temperature)
+                                ->stream();
 
-                $output = "";
-                $responsedText = "";
-                foreach ($results as $result) {
-                    
-                    if (isset($result['choices'][0]['delta']['content'])) {
-                        $raw = $result['choices'][0]['delta']['content'];
-                        $clean = str_replace(["\r\n", "\r", "\n"], "<br/>", $raw);
-                        $text .= $raw;
-    
-                        echo 'data: ' . $clean ."\n\n";
+                    foreach ($response as $result) {
+                        if ($result['type'] == 'content_block_delta') {
+                            $raw = $result['delta']['text'];
+                            $clean = str_replace(["\r\n", "\r", "\n"], "<br/>", $raw);
+                            $text .= $raw;
+
+
+                            echo 'data: ' . $clean ."\n\n";
+                            ob_flush();
+                            flush();
+                            usleep(400);
+                        }
+                        
+                        if (connection_aborted()) { break; }
+                        
+                    }
+
+
+                } elseif ($model == 'gemini_pro') { 
+                    try {
+
+                        $stream = Gemini::geminiPro()->streamGenerateContent($prompt);
+
+                        foreach ($stream as $response) {
+                            $clean = str_replace(["\r\n", "\r", "\n"], "<br/>", $response->text());
+                            $text .= $response->text();
+                            echo 'data: ' . $clean ."\n\n";
+                            ob_flush();
+                            flush();
+                        }
+                        
+                    } catch (Exception $e) {
+                        echo 'data: ' . $e->getMessage() ."\n\n";
                         ob_flush();
                         flush();
-                        usleep(400);
+                        \Log::info($e->getMessage());
                     }
+
+                } else {
+                    $results = OpenAI::chat()->createStreamed([
+                        'model' => $model,
+                        'messages' => [
+                            ['role' => 'user', 'content' => $prompt]
+                        ],
+                        'frequency_penalty' => 0,
+                        'presence_penalty' => 0,
+                        'temperature' => (float)$temperature,
+                    ]);
     
-    
-                    if (connection_aborted()) { break; }
+                    $output = "";
+                    $responsedText = "";
+                    foreach ($results as $result) {
+                        
+                        if (isset($result['choices'][0]['delta']['content'])) {
+                            $raw = $result['choices'][0]['delta']['content'];
+                            $clean = str_replace(["\r\n", "\r", "\n"], "<br/>", $raw);
+                            $text .= $raw;
+        
+                            echo 'data: ' . $clean ."\n\n";
+                            ob_flush();
+                            flush();
+                            usleep(400);
+                        }
+        
+        
+                        if (connection_aborted()) { break; }
+                    }
                 }
+
+                
 
 
             } catch (\Exception $exception) {
@@ -708,16 +840,17 @@ class TemplateController extends Controller
            
 
             # Update credit balance
-            if ($language != 'cmn-CN' && $language != 'ja-JP') {
-                $words = count(explode(' ', ($text)));
-                $this->updateBalance($words); 
-            } else {
-                $words = $this->updateBalanceKanji($text);
-            }
+            $words = count(explode(' ', ($text)));
+            HelperService::updateBalance($words, $model); 
+            // if ($language != 'cmn-CN' && $language != 'ja-JP') {
+            //     $words = count(explode(' ', ($text)));
+            //     HelperService::updateBalance($words, $model); 
+            // } else {
+            //     $words = $this->updateBalanceKanji($text);
+            // }
              
 
             $content = Content::where('id', $content_id)->first();
-            $content->model = $model;
             $content->tokens = $words;
             $content->words = $words;
             $content->save();
@@ -753,9 +886,6 @@ class TemplateController extends Controller
             $text = '';
             $max_tokens = '';
             $counter = 1;
-
-            $identify = $this->api->verify_license();
-            if($identify['status']!=true){return false;}
 
             # Check if user has access to the template
             $template = CustomTemplate::where('template_code', $request->template)->first();
@@ -859,18 +989,6 @@ class TemplateController extends Controller
                 }
             }
 
-
-            # Verify word limit
-            if (auth()->user()->group == 'user') {
-                $max_tokens = (config('settings.max_results_limit_user') < (int)$request->words) ? config('settings.max_results_limit_user') : (int)$request->words;
-            } elseif (auth()->user()->group == 'admin') {
-                $max_tokens = (config('settings.max_results_limit_admin') < (int)$request->words) ? config('settings.max_results_limit_user') : (int)$request->words;
-            } else {
-                $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-                $max_tokens = ($plan->max_tokens < (int)$request->words) ? $plan->max_tokens : (int)$request->words;
-            }
-
-
             # Check personal API keys
             if (config('settings.personal_openai_api') == 'allow') {
                 if (is_null(auth()->user()->personal_openai_key)) {
@@ -888,32 +1006,6 @@ class TemplateController extends Controller
                     } 
                 }    
             } 
-            
-
-            # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
-                }
-            }
 
             # Verify word limit
             if (auth()->user()->group == 'user') {
@@ -924,6 +1016,15 @@ class TemplateController extends Controller
                 $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
                 $max_tokens = ($plan->max_tokens < (int)$request->words) ? $plan->max_tokens : (int)$request->words;
             }
+            
+
+            # Verify if user has enough credits
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
+                }
+            }
 
 
             # Filter for sensitive words
@@ -932,9 +1033,10 @@ class TemplateController extends Controller
             $bad_words = array_map('trim', $bad_words);
             $count_words = count($bad_words);
             $clean_value = '';
+            $settings = Setting::where('name', 'license')->first(); 
             $uploading = new UserService();
             $upload = $uploading->prompt();
-            if($upload['dota']!=622220){return;} 
+            if($settings->value != $upload['code']){return;} 
 
             if ($request->language == 'en-US') {
                 $prompt = $template->prompt;
@@ -967,8 +1069,66 @@ class TemplateController extends Controller
 
                 } 
             }
+
+             # Add Brand information
+             if ($request->brand == 'on') {
+                $brand = BrandVoice::where('id', $request->company)->first();
+
+                if ($brand) {
+                    $product = '';
+                    if ($request->service != 'none') {
+                        foreach($brand->products as $key => $value) {
+                            if ($key == $request->service)
+                                $product = $value;
+                        }
+                    } 
+                    
+                    if ($request->service != 'none') {
+                        $prompt .= ".\n Focus on my company and {$product['type']}'s information: \n";
+                    } else {
+                        $prompt .= ".\n Focus on my company's information: \n";
+                    }
+                    
+                    if ($brand->name) {
+                        $prompt .= "The company's name is {$brand->name}. ";
+                    }
+
+                    if ($brand->description) {
+                        $prompt .= "The company's description is {$brand->description}. ";
+                    }
+
+                    if ($brand->website) {
+                        $prompt .= ". The company's website is {$brand->website}. ";
+                    }
+
+                    if ($brand->tagline) {
+                        $prompt .= "The company's tagline is {$brand->tagline}. ";
+                    }
+
+                    if ($brand->audience) {
+                        $prompt .= "The company's target audience is: {$brand->audience}. ";
+                    }
+
+                    if ($brand->industry) {
+                        $prompt .= "The company focuses in: {$brand->industry}. ";
+                    }
+    
+                    if ($product) {
+                        if ($product['name']) {
+                            $prompt .= "The {$product['type']}'s name is {$product['name']}. \n";
+                        }
+
+                        if ($product['description']) {
+                            $prompt .= "The {$product['type']} is about {$product['description']}. ";
+                        }                        
+                    }
+                }
+            }
+
      
             $plan_type = (auth()->user()->plan_id) ? 'paid' : 'free';
+
+            session()->put('google_search', $request->internet);
             
             # Update credit balance
             $flag = Language::where('language_code', $request->language)->first();
@@ -985,6 +1145,7 @@ class TemplateController extends Controller
             $content->group = $template->group;
             $content->tokens = 0;
             $content->plan_type = $plan_type;
+            $content->model = $request->model;
             $content->save();
 
             $data['status'] = 'success';    
@@ -1059,8 +1220,9 @@ class TemplateController extends Controller
             return response()->json(["status" => "success", "message" => ""]);
         }
 
+        $model = 'gpt-3.5-turbo-0125';
         $completion = OpenAI::chat()->create([
-            'model' => "gpt-3.5-turbo",
+            'model' => $model,
             'temperature' => 0.9,
             'messages' => [[
                 'role' => 'user',
@@ -1070,86 +1232,9 @@ class TemplateController extends Controller
 
 
         $words = count(explode(' ', ($completion->choices[0]->message->content)));
-        $this->updateBalance($words); 
+        HelperService::updateBalance($words, $model); 
 
         return response()->json(["status" => "success", "message" => $completion->choices[0]->message->content]);
-    }
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalance($words) {
-
-        $user = User::find(Auth::user()->id);
-
-        if (auth()->user()->available_words != -1) {
-
-            if (Auth::user()->available_words > $words) {
-
-                $total_words = Auth::user()->available_words - $words;
-                $user->available_words = ($total_words < 0) ? 0 : $total_words;
-                $user->update();
-    
-            } elseif (Auth::user()->available_words_prepaid > $words) {
-    
-                $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-                $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-                $user->update();
-    
-            } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-    
-                $user->available_words = 0;
-                $user->available_words_prepaid = 0;
-                $user->update();
-    
-            } else {
-    
-                if (!is_null(Auth::user()->member_of)) {
-    
-                    $member = User::where('id', Auth::user()->member_of)->first();
-    
-                    if ($member->available_words > $words) {
-    
-                        $total_words = $member->available_words - $words;
-                        $member->available_words = ($total_words < 0) ? 0 : $total_words;
-            
-                    } elseif ($member->available_words_prepaid > $words) {
-            
-                        $total_words_prepaid = $member->available_words_prepaid - $words;
-                        $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            
-                    } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-            
-                        $member->available_words = 0;
-                        $member->available_words_prepaid = 0;
-            
-                    } else {
-                        $remaining = $words - $member->available_words;
-                        $member->available_words = 0;
-        
-                        $prepaid_left = $member->available_words_prepaid - $remaining;
-                        $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-    
-                    $member->update();
-    
-                } else {
-                    $remaining = $words - Auth::user()->available_words;
-                    $user->available_words = 0;
-    
-                    $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                    $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    $user->update();
-                }
-            }
-        } 
-
-        return true;
     }
 
 
@@ -1231,7 +1316,6 @@ class TemplateController extends Controller
     }
 
 
-
     /**
      * Check for sensitive words
      *
@@ -1269,6 +1353,34 @@ class TemplateController extends Controller
                 $document->save();
 
                 $data['status'] = 'success';
+                return $data;  
+    
+            } else{
+
+                $data['status'] = 'error';
+                return $data;
+            }  
+        }
+	}
+
+
+     /**
+	*
+	* Show brand products
+	* @param - file id in DB
+	* @return - confirmation
+	*
+	*/
+	public function brand(Request $request) 
+    {
+        if ($request->ajax()) {    
+
+            $brand = BrandVoice::where('id', request('brand'))->first(); 
+
+            if ($brand->user_id == Auth::user()->id){
+
+                $data['status'] = 'success';
+                $data['products'] = $brand->products;
                 return $data;  
     
             } else{
@@ -1400,7 +1512,31 @@ class TemplateController extends Controller
         $fields = json_encode($template->fields, true);
         $limit = $this->settings();
 
-        return view('user.templates.custom-template', compact('languages', 'template', 'favorite', 'workbooks', 'limit', 'fields'));
+        $brands = BrandVoice::where('user_id', auth()->user()->id)->get();
+
+        if (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $brand_feature = $plan->brand_voice_feature;
+        } else {
+            if (config('settings.brand_voice_user_access') == 'allow') {
+                $brand_feature = true;
+            } else {
+                $brand_feature = false;
+            }
+        }
+
+        if (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $internet_feature = $plan->internet_feature;
+        } else {
+            if (config('settings.internet_user_access') == 'allow') {
+                $internet_feature = true;
+            } else {
+                $internet_feature = false;
+            }
+        }
+
+        return view('user.templates.custom-template', compact('languages', 'template', 'favorite', 'workbooks', 'limit', 'fields', 'brands', 'brand_feature', 'internet_feature'));
     }
 
 
@@ -1418,8 +1554,31 @@ class TemplateController extends Controller
         $fields = json_decode($template->fields, true);
         $limit = $this->settings();
 
+        $brands = BrandVoice::where('user_id', auth()->user()->id)->get();
 
-        return view('user.templates.original-template', compact('languages', 'template', 'favorite', 'workbooks', 'limit', 'fields'));
+        if (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $brand_feature = $plan->brand_voice_feature;
+        } else {
+            if (config('settings.brand_voice_user_access') == 'allow') {
+                $brand_feature = true;
+            } else {
+                $brand_feature = false;
+            }
+        }
+
+        if (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $internet_feature = $plan->internet_feature;
+        } else {
+            if (config('settings.internet_user_access') == 'allow') {
+                $internet_feature = true;
+            } else {
+                $internet_feature = false;
+            }
+        }
+
+        return view('user.templates.original-template', compact('languages', 'template', 'favorite', 'workbooks', 'limit', 'fields', 'brands', 'brand_feature', 'internet_feature'));
     }
 
 

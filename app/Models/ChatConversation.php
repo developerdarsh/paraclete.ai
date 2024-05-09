@@ -21,7 +21,8 @@ class ChatConversation extends Model
         'title',
         'messages',
         'words',
-        'favorite'
+        'favorite',
+        'vector_store',
     ];
 }
  

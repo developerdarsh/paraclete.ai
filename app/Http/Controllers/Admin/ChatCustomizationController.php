@@ -11,7 +11,6 @@ use App\Models\ChatCategory;
 use App\Models\ChatPrompt;
 use App\Models\Chat;
 use DataTables;
-use App\Models\ChatTemplates;
 
 class ChatCustomizationController extends Controller
 {
@@ -33,13 +32,7 @@ class ChatCustomizationController extends Controller
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
-                        // $created_on = '<span>'.date_format($row["updated_at"], 'd M Y').'</span>';
-                        // return $created_on;
-                        if ($row["updated_at"] !== null) {
-                            $created_on = '<span>'.date_format($row["updated_at"], 'd M Y').'</span>';
-                        } else {
-                            $created_on = '<span>No Date Available</span>'; // Or any default value/message you want to display
-                        }
+                        $created_on = '<span>'.date_format($row["updated_at"], 'd M Y').'</span>';
                         return $created_on;
                     })
                     ->addColumn('custom-status', function($row){
@@ -99,11 +92,10 @@ class ChatCustomizationController extends Controller
     public function edit($id)
     {   
         $chat = Chat::where('id', $id)->first();
-        $templates = ChatTemplates::where('chat_id',$chat->id)->get();
 
         $categories = ChatCategory::all();
 
-        return view('admin.davinci.chats.edit', compact('chat', 'categories','templates'));     
+        return view('admin.davinci.chats.edit', compact('chat', 'categories'));     
     }
 
 
@@ -131,7 +123,6 @@ class ChatCustomizationController extends Controller
     {   
         $code = strtoupper(Str::random(5));
         $status = (request('activate') == 'on') ? true : false;
-        $dataArrayField = request('dataArrayField');
 
         $chat = new Chat([
             'status' => $status,
@@ -142,23 +133,10 @@ class ChatCustomizationController extends Controller
             'category' => request('category'),
             'chat_code' => $code,
             'type' => 'custom',
-            'group' => request('group'),
-            'voice_code' => request('flexRadioDefault'),
+            'group' => request('group')
         ]); 
 
         $chat->save();
-
-        $chatId = $chat->id; // Get the last inserted chat id
-        
-        if ($dataArrayField) {
-            $templateValues = explode(',', $dataArrayField);
-            foreach ($templateValues as $templateValue) {
-                $template = new ChatTemplates();
-                $template->chat_id = $chatId;
-                $template->template = $templateValue;
-                $template->save();
-            }
-        }
 
         if (request()->has('logo')) {
         
@@ -182,18 +160,6 @@ class ChatCustomizationController extends Controller
             
             $chat->logo = $filePath;
             $chat->save();
-
-            $chatId = $chat->id; // Get the last inserted chat id
-            $dataArrayField = $request('dataArrayField');
-            if ($dataArrayField) {
-                $templateValues = explode(',', $dataArrayField);
-                foreach ($templateValues as $templateValue) {
-                    $template = new ChatTemplates();
-                    $template->chat_id = $chatId;
-                    $template->template = $templateValue;
-                    $template->save();
-                }
-            }
         }
 
         toastr()->success(__('Chat Bot has been successfully created'));
@@ -221,8 +187,7 @@ class ChatCustomizationController extends Controller
             'description' => request('introduction'),
             'prompt' => request('prompt'),
             'category' => request('category'),
-            'group' => request('group'),
-            'voice_code' => request('flexRadioDefault'),
+            'group' => request('group')
         ]);
 
         if (request()->has('logo')) {
@@ -247,37 +212,8 @@ class ChatCustomizationController extends Controller
             
             $chat->logo = $filePath;
             $chat->save();
-
-            $chatId = $chat->id;
-            $template = request('templates');
-            foreach ($template as $templateId) {
-                if (is_numeric($templateId)) {
-                    if (is_int($templateId + 0)) {
-                        
-                    } else {
-                        $template = new ChatTemplates();
-                        $template->chat_id = $chatId;
-                        $template->template = $templateId;
-                        $template->save();
-                    }
-                } else {
-                    $template = new ChatTemplates();
-                    $template->chat_id = $chatId;
-                    $template->template = $templateId;
-                    $template->save();
-                }
-            }
-            $dataArrayField = request('dataArrayField');
-            $selectedLabels = explode(',', $dataArrayField);
-            foreach ($selectedLabels as $label) {
-                $chatTemplate = ChatTemplates::where([['template' , $label],['chat_id' , $chatId ]])->first();
-                if ($chatTemplate) {
-                    // Update the status of the chat template
-                    $chatTemplate->status = 1; // Update to the desired new status
-                    $chatTemplate->save();
-                }
-            }
         }
+
         toastr()->success(__('Chat Bot has been successfully updated'));
         return redirect()->route('admin.davinci.chats');     
     }
@@ -362,11 +298,11 @@ class ChatCustomizationController extends Controller
                     return $actionBtn;
                 })
                 ->addColumn('updated-on', function($row){
-                    $created_on = '<span class="font-weight-bold">'.date_format($row["updated_at"], 'd/m/Y').'</span><br><span>'.date_format($row["updated_at"], 'H:i A').'</span>';
+                    $created_on = '<span>'.date_format($row["updated_at"], 'd/m/Y').'</span><br><span>'.date_format($row["updated_at"], 'H:i A').'</span>';
                     return $created_on;
                 })
                 ->addColumn('custom-name', function($row){
-                    $user = '<span class="font-weight-bold">'. ucfirst(__($row['name'])) .'</span>';
+                    $user = '<span>'. ucfirst(__($row['name'])) .'</span>';
                     return $user;
                 })  
                 ->addColumn('custom-type', function($row){

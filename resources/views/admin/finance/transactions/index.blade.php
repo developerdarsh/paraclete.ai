@@ -66,7 +66,7 @@
 				"lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
 				responsive: true,
 				colReorder: true,
-				"order": [[ 0, "desc" ]],
+				"order": [[ 6, "desc" ]],
 				language: {
 					"emptyTable": "<div><br>{{ __('There are no transactions yet') }}</div>",
 					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",

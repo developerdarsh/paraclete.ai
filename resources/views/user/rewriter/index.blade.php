@@ -33,9 +33,45 @@
 					<div class="row">
 						<div class="col-sm-12">
 							<div class="text-left mb-4" id="balance-status">
-								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }} {{ __('Words') }} @endif</span></span>
-							</div>							
-						</div>											
+								<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->gpt_3_turbo_credits + auth()->user()->gpt_3_turbo_credits_prepaid) }} @endif {{ __('GPT 3.5 Turbo') }} {{ __('Words') }}</span></span>
+							</div>								
+						</div>				
+						
+						@if ($brand_feature)
+							<div class="col-sm-12">
+								<div class="input-box mb-4">									
+									<div class="form-group">
+										<label class="custom-switch mb-0">
+											<input type="checkbox" id="brand" name="brand" class="custom-switch-input">
+											<span class="custom-switch-indicator"></span>
+											<span class="custom-switch-description">{{ __('Include Your Brand') }}</span>
+										</label>
+									</div>
+								</div>								
+							</div>	
+						@endif							
+
+						<div class="col-sm-12 brand-details">
+							<div class="form-group mb-5">	
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Select Company') }}</h6>								
+								<select id="company" name="company" class="form-select"  onchange="updateService(this)">		
+									<option value="none"> {{ __('Select your Company / Brand') }}</option>
+									@foreach ($brands as $brand)
+										<option value="{{ $brand->id }}"> {{ __($brand->name) }}</option>
+									@endforeach									
+								</select>
+							</div>
+						</div>
+
+						<div class="col-sm-12 brand-details">
+							<div class="form-group mb-5">
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Select Product / Service') }} </h6>
+								<select id="service" name="service" class="form-select">
+									<option value="none">{{ __('Select your Product / Service') }}</option>
+								</select>
+							</div>
+						</div>
+
 						<div class="col-sm-12">
 							<div class="form-group">	
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Language') }}</h6>								
@@ -60,9 +96,34 @@
 									@enderror
 								</div> 
 							</div> 
-						</div>						
+						</div>	
+						
+						<div class="col-sm-12">
+							<div class="form-group">	
+								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('AI Model') }}</h6>								
+								<select id="model" name="model" class="form-select">	
+									<option value="gpt-3.5-turbo-0125">{{ __('GPT 3.5 Turbo') }}</option>	
+									@foreach ($models as $model)										
+										@if (trim($model) == 'gpt-4')
+											<option value="{{ trim($model) }}">{{ __('GPT 4') }}</option>
+										@elseif (trim($model) == 'gpt-4-0125-preview')
+											<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo') }}</option>
+										@elseif (trim($model) == 'gpt-4-turbo-2024-04-09')
+											<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo with Vision') }}</option>
+										@else
+											@foreach ($fine_tunes as $fine_tune)
+												@if (trim($model) == $fine_tune->model)
+													<option value="{{ trim($model) }}">{{ $fine_tune->description }} ({{ __('Fine Tune') }})</option>
+												@endif
+											@endforeach
+										@endif
+										
+									@endforeach									
+								</select>	
+							</div>
+						</div>
 	
-						<div class="col-lg-6 col-md-12 col-sm-12">
+						<div class="col-lg-6 col-md-12 col-sm-12 mt-5">
 							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Creativity') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Increase or decrease the creativity level to get various results') }}"></i></h6>
 								<select id="creativity" name="creativity" class="form-select">
@@ -75,7 +136,7 @@
 							</div>
 						</div>
 
-						<div class="col-lg-6 col-md-12 col-sm-12">
+						<div class="col-lg-6 col-md-12 col-sm-12 mt-5">
 							<div id="form-group">
 								<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Tone of Voice') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Set result tone of the text as needed') }}"></i></h6>
 								<select id="tone" name="tone" class="form-select" >
@@ -231,7 +292,7 @@
 				'advlist', 'autolink', 'lists', 'charmap', 'preview', 'anchor', 'wordcount', 'autosave', 'link', 'image', 'code',
 			],
 			toolbar: 'AIMain AIOptions | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | forecolor backcolor emoticons | image link code | blockquote | undo redo',
-			contextmenu: 'customwrite | rewrite summarize improve simplify expand trim fixgrammar tone style translate',
+			contextmenu: 'customwrite | rewrite summarize improve simplify expand trim fixgrammar tone style translate | copy paste',
 			setup: function ( editor ) {
 				const menuItems = {
 					'customwrite': {
@@ -250,7 +311,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on');  
+							document.querySelector('#loader-line')?.classList?.remove('hidden'); 
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -262,17 +323,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						},
@@ -302,20 +363,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -333,7 +394,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -345,20 +406,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on');
+										document.querySelector('#loader-line')?.classList?.add('hidden');
 										calculateCredits();   
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -376,7 +437,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -388,20 +449,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -419,7 +480,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -431,20 +492,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits(); 
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count; 
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -462,7 +523,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -474,20 +535,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -505,7 +566,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -517,20 +578,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits(); 
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count; 
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -548,7 +609,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -560,20 +621,20 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -597,7 +658,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -609,20 +670,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -640,7 +701,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -652,20 +713,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -683,7 +744,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -695,20 +756,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -726,7 +787,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -738,20 +799,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -769,7 +830,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -781,20 +842,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -812,7 +873,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -824,20 +885,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -855,7 +916,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -867,20 +928,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -898,7 +959,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -910,20 +971,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -941,7 +1002,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -953,20 +1014,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -984,7 +1045,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -996,20 +1057,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1027,7 +1088,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1039,20 +1100,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1070,7 +1131,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1082,20 +1143,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1113,7 +1174,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1125,20 +1186,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1156,7 +1217,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1168,20 +1229,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1199,7 +1260,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1211,20 +1272,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1242,7 +1303,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1254,20 +1315,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1285,7 +1346,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1297,20 +1358,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1328,7 +1389,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1340,20 +1401,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1371,7 +1432,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1383,20 +1444,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1414,7 +1475,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1426,20 +1487,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1457,7 +1518,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1469,20 +1530,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1500,7 +1561,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1512,20 +1573,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1552,7 +1613,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1564,20 +1625,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1595,7 +1656,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1607,20 +1668,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1638,7 +1699,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1650,20 +1711,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1681,7 +1742,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1693,20 +1754,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1724,7 +1785,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1736,20 +1797,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1774,7 +1835,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Afrikaans' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1786,20 +1847,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1815,7 +1876,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Arabic' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1827,20 +1888,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1856,7 +1917,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Armenian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1868,20 +1929,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1897,7 +1958,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Azerbaijani' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1909,20 +1970,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1938,7 +1999,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Belarusian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1950,20 +2011,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1978,7 +2039,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Bosnian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1990,20 +2051,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2019,7 +2080,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Bulgarian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2031,20 +2092,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2060,7 +2121,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Catalan' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2072,20 +2133,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2101,7 +2162,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Chinese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2113,20 +2174,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2142,7 +2203,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Croatian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2154,20 +2215,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2183,7 +2244,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Czech' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2195,20 +2256,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2224,7 +2285,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Danish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2236,20 +2297,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2265,7 +2326,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Dutch' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2277,20 +2338,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2306,7 +2367,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to English' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2318,20 +2379,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2347,7 +2408,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Estonian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2359,20 +2420,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2388,7 +2449,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Finnish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2400,20 +2461,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2429,7 +2490,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to French' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2441,20 +2502,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2470,7 +2531,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to German' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2482,20 +2543,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2511,7 +2572,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Greek' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2523,20 +2584,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2552,7 +2613,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Hebrew' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2564,20 +2625,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2593,7 +2654,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Hindi' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2605,20 +2666,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2634,7 +2695,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Hungarian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2646,20 +2707,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2675,7 +2736,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Icelandic' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2687,20 +2748,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2716,7 +2777,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Indonesian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2728,20 +2789,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2757,7 +2818,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Italian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2769,20 +2830,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2798,7 +2859,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Japanese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2810,20 +2871,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2839,7 +2900,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Kazakh' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2851,20 +2912,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2880,7 +2941,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Korean' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2892,20 +2953,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2920,7 +2981,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Malay' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2932,20 +2993,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2961,7 +3022,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Norwegian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2973,20 +3034,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3002,7 +3063,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Persian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3014,20 +3075,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3043,7 +3104,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Polish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3055,20 +3116,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3084,7 +3145,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Portuguese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3096,20 +3157,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3125,7 +3186,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Romanian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3137,20 +3198,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3166,7 +3227,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Russian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3178,20 +3239,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3206,7 +3267,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Serbian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3218,20 +3279,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3247,7 +3308,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Slovak' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3259,20 +3320,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3288,7 +3349,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Slovenian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3300,20 +3361,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3329,7 +3390,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Spanish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3341,20 +3402,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3370,7 +3431,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Swahili' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3382,20 +3443,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3411,7 +3472,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Tamil' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3423,20 +3484,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3452,7 +3513,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Thai' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3464,20 +3525,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3493,7 +3554,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Turkish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3505,20 +3566,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3534,7 +3595,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Ukrainian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3546,20 +3607,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3575,7 +3636,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Urdu' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3587,20 +3648,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3616,7 +3677,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Vietnamese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3628,20 +3689,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count;
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3657,7 +3718,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Welsh' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3669,20 +3730,20 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 												let count = tinymce.activeEditor.plugins.wordcount.getCount();
 												let words = document.getElementById('total-words-templates');
 												words.innerHTML = count; 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3738,20 +3799,20 @@
 
 									if (data.status == 'success') {
 										tinymce.activeEditor.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 										let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										let words = document.getElementById('total-words-templates');
 										words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 						
 							} );
@@ -3763,7 +3824,7 @@
 					predicate: function (node) {
 						return !editor.selection.isCollapsed();
 					},
-					items: 'AIMain AIOptions | bold italic underline | bullist numlist blockquote',
+					items: 'AIMain AIOptions | bold italic underline | bullist numlist blockquote | copy paste',
 					position: 'selection',
 					scope: 'node'
 				});
@@ -3848,7 +3909,7 @@
 						let btn = document.getElementById('generate');					
 						btn.innerHTML = '{{ __('Rewrite') }}';
 						toastr.warning(data['message']);
-						document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+						document.querySelector('#loader-line')?.classList?.add('hidden'); 
 					} else {					
 						const eventSource = new EventSource( "/user/rewriter/process?content_id=" + data.id+"&max_results=" + data.max_results + "&temperature=" + data.temperature + "&language=" + data.language);
 
@@ -3864,7 +3925,7 @@
 								btn.innerHTML = '{{ __('Rewrite') }}'; 
 								var $body = $(tinymce.activeEditor.getBody());
 								$body.find('p:last').append('<br><br>');
-								document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+								document.querySelector('#loader-line')?.classList?.add('hidden');  
 								calculateCredits();  
 							
 							} else if (e.data == '[ERROR]') {
@@ -3872,7 +3933,7 @@
 								$('#generate').prop('disabled', false);
 								let btn = document.getElementById('generate');					
 								btn.innerHTML = '{{ __('Rewrite') }}'; 
-								document.querySelector('#loader-line')?.classList?.add('opacity-on');   
+								document.querySelector('#loader-line')?.classList?.add('hidden');   
 							} else {
 
 								let stream = e.data
@@ -3895,7 +3956,7 @@
 							$('#generate').prop('disabled', false);
 							let btn = document.getElementById('generate');					
 							btn.innerHTML = '{{ __('Rewrite') }}';  
-							document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.add('hidden'); 
 						};
 					}
 				},
@@ -3903,7 +3964,7 @@
 				error: function(data) {
 					$('#generate').prop('disabled', false);
 					$('#generate').html('{{ __('Rewrite') }}'); 
-					document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+					document.querySelector('#loader-line')?.classList?.add('hidden'); 
 					console.log(data)
 				}
 			});	
@@ -3940,11 +4001,11 @@
 		let workbook = document.getElementById('project').value;
 		let language = document.getElementById("language");
 		let title = document.getElementById("document").value;
-		document.querySelector('#loader-line')?.classList?.remove('opacity-on');  
+		document.querySelector('#loader-line')?.classList?.remove('hidden'); 
 
 		if (!event.target) {
 			toastr.warning('{{ __('You will need to rewrite an article first before saving your changes') }}');
-			document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+			document.querySelector('#loader-line')?.classList?.add('hidden');  
 		} else {
 			$.ajax({
 				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
@@ -3954,15 +4015,15 @@
 				success: function (data) {					
 					if (data['status'] == 'success') {
 						toastr.success('{{ __('Successfully saved in the documents') }}');
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+						document.querySelector('#loader-line')?.classList?.add('hidden');  
 					} else {						
 						toastr.warning('{{ __('There was an issue while saving your changes') }}');
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');
+						document.querySelector('#loader-line')?.classList?.add('hidden');
 					}
 				},
 				error: function(data) {
 					toastr.warning('{{ __('There was an issue while saving your changes') }}');
-					document.querySelector('#loader-line')?.classList?.add('opacity-on');
+					document.querySelector('#loader-line')?.classList?.add('hidden');
 				}
 			});
 
@@ -3978,14 +4039,14 @@
 		$.ajax({
 			headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 			method: 'post',
-			url: '/user/chat/csv/credits',
+			url: '/user/chat/file/credits',
 			data: 'credit',
 			processData: false,
 			contentType: false,
 			success: function (data) {
 				console.log(data)
 				if (data['credits'] != 'Unlimited') {
-					animateValue("balance-number", parseInt(current.replace(/,/g, '')), data['credits'], 300);
+					//animateValue("balance-number", parseInt(current.replace(/,/g, '')), data['credits'], 300);
 				}
 					
 			},
@@ -4051,6 +4112,64 @@
 			if (val.indexOf(name) === 0) res = val.substring(name.length);
 		})
 		return res
+	}
+
+	let brandCheckbox = document.getElementById('brand');
+
+	if (brandCheckbox) {
+		brandCheckbox.addEventListener('change', (event) => {
+			if (event.currentTarget.checked) {
+				let myElements = document.querySelectorAll(".brand-details");
+
+				for (let i = 0; i < myElements.length; i++) {
+					myElements[i].style.display = 'block';
+				}
+			} else {
+				let myElements = document.querySelectorAll(".brand-details");
+
+				for (let i = 0; i < myElements.length; i++) {
+					myElements[i].style.display = 'none';
+				}
+			}
+		});
+	}
+
+	function updateService(input) {
+
+		if (input.value != 'none') {
+
+			let services = document.getElementById('service');
+
+			$.ajax({
+				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+				method: 'POST',
+				url: '/user/rewriter/brand',
+				data: { 'brand': input.value},
+				success: function (data) {					
+					if (data['status'] == 'success') {
+						removeOptions(document.getElementById('service'));
+						services.options.add( new Option("{{ __('Select your Product / Service') }}", 'none') )
+						let result = data['products'];
+						for(let i = 0; i < result.length; i++) {
+							let obj = result[i];
+							services.options.add( new Option(obj.name, i) )
+						}
+					} else {						
+						
+					}
+				},
+				error: function(data) {
+					toastr.warning('{{ __('There was an issue') }}');
+				}
+			});
+		}
+	}
+
+	function removeOptions(selectElement) {
+		var i, L = selectElement.options.length - 1;
+		for(i = L; i >= 0; i--) {
+			selectElement.remove(i);
+		}
 	}
 
 

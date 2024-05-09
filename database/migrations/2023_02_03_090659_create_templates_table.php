@@ -27,6 +27,8 @@ return new class extends Migration
             $table->string('slug'); 
             $table->string('package')->nullable()->default('all');
             $table->longText('fields')->nullable(); 
+            $table->string('model')->default('gpt-3.5-turbo');
+            $table->string('model_mode')->default('individual');
             $table->timestamps();
         });
     }

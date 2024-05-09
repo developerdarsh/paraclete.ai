@@ -4,16 +4,18 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Spatie\Backup\Listeners\Listener;
 use App\Services\Statistics\UserService;
 use App\Events\PaymentReferrerBonus;
 use App\Events\PaymentProcessed;
-use App\Models\Subscriber;
 use App\Models\Payment;
 use App\Models\PrepaidPlan;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PaymentSuccess;
+use App\Mail\NewPaymentNotification;
+use App\Services\HelperService;
+use Exception;
 
 class BraintreeService 
 {
@@ -85,10 +87,6 @@ class BraintreeService
         $nonce = $payload['nonce'];
         $total_amount = session()->get('total_amount');
 
-        $listener = new Listener();
-        $process = $listener->download();
-        if (!$process['status']) return false;
-
         try {
             $result = $this->gateway->transaction()->sale([
                 'amount' => $total_amount,
@@ -124,69 +122,29 @@ class BraintreeService
                 $subscription_id = Str::random(10);
                 $days = 18250;
 
-                $subscription = Subscriber::create([
-                    'user_id' => auth()->user()->id,
-                    'plan_id' => $plan->id,
-                    'status' => 'Active',
-                    'created_at' => now(),
-                    'gateway' => 'Braintree',
-                    'frequency' => 'lifetime',
-                    'plan_name' => $plan->plan_name,
-                    'words' => $plan->words,
-                    'images' => $plan->images,
-                    'characters' => $plan->characters,
-                    'minutes' => $plan->minutes,
-                    'subscription_id' => $subscription_id,
-                    'active_until' => Carbon::now()->addDays($days),
-                ]);  
+                HelperService::registerSubscriber($plan, 'Braintree', 'Active', $subscription_id, $days);
+
             }
 
-            $record_payment = new Payment();
-            $record_payment->user_id = auth()->user()->id;
-            $record_payment->order_id = $result->transaction->id;
-            $record_payment->plan_id = $plan->id;
-            $record_payment->plan_name = $plan->plan_name;
-            $record_payment->frequency = $type;
-            $record_payment->price = $result->transaction->amount;
-            $record_payment->currency = $result->transaction->currencyIsoCode;
-            $record_payment->gateway = 'Braintree';
-            $record_payment->status = 'completed';
-            $record_payment->words = $plan->words;
-            $record_payment->images = $plan->images;
-            $record_payment->characters = $plan->characters;
-            $record_payment->minutes = $plan->minutes;
-            $record_payment->save();
+            $payment = HelperService::registerPayment($type, $plan->id, $result->transaction->id, $result->transaction->amount, 'Braintree', 'completed');
 
-            $user = User::where('id',auth()->user()->id)->first();
+            HelperService::registerCredits($type, $plan->id);
 
-            if ($type == 'lifetime') {
-                $group = (auth()->user()->hasRole('admin'))? 'admin' : 'subscriber';
-                $user->syncRoles($group);    
-                $user->group = $group;
-                $user->plan_id = $plan->id;
-                $user->total_words = $plan->words;
-                $user->total_images = $plan->images;
-                $user->total_chars = $plan->characters;
-                $user->total_minutes = $plan->minutes;
-                $user->available_words = $plan->words;
-                $user->available_images = $plan->images;
-                $user->available_chars = $plan->characters;
-                $user->available_minutes = $plan->minutes;
-                $user->member_limit = $plan->team_members;
-            } else {
-                $user->available_words_prepaid = $user->available_words_prepaid + $plan->words;
-                $user->available_images_prepaid = $user->available_images_prepaid + $plan->images;
-                $user->available_chars_prepaid = $user->available_chars_prepaid + $plan->characters;
-                $user->available_minutes_prepaid = $user->available_minutes_prepaid + $plan->minutes;
-            }
-
-            $user->save();
 
             event(new PaymentProcessed(auth()->user()));
 
             $data['result'] = $result;
             $data['plan'] = $plan->id;
             $data['order_id'] = $result->transaction->id;
+
+            $admin = User::where('group', 'admin')->first();
+
+            try {
+                Mail::to($admin)->send(new NewPaymentNotification($payment));
+                Mail::to($request->user())->send(new PaymentSuccess($payment));
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not setup to send payment notifications via email');
+            }
 
             return response()->json($data);
 

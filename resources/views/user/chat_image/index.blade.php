@@ -11,9 +11,9 @@
 		<div class="row justify-content-md-center">	
 			<div class="col-sm-12 text-center">
 				<h3 class="card-title fs-20 mb-3 super-strong"><i class="fa-solid fa-image-landscape mr-2 text-primary"></i>{{ __('Chat Image') }}</h3>
-				<h6 class="mb-0 fs-12 text-muted">{{ $chat->description }}</h6>
+				<h6 class="mb-0 fs-12 text-muted">{{ __($chat->description) }}</h6>
 				<div class="mb-4" id="balance-status">
-					<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid) }}@endif</span> {{ __('Images') }}</span>
+					<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_dalle_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid) }}@endif</span> {{ __('Dalle Images') }}</span>
 				</div>	
 			</div>
 
@@ -484,7 +484,7 @@
 			processData: false,
 			cache: false,
 			beforeSend: function() {  
-				let notification = '{{ __(" Generating your image ") }}' + '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>';
+				let notification = '{{ __("Generating your image ") }}' + '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>';
 				$msg_txt.html(notification);  
 			},
 			complete: function() {          

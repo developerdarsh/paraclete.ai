@@ -32,17 +32,57 @@
 						<h6 class="font-weight-bold fs-12">{{ auth()->user()->job_role }}</h6>
 					</div>
 				</div>
-				<div class="card-footer p-0">								
+				<div class="card-footer p-0">	
 					<div class="row text-center pt-4 pb-4">
 						<div class="col-sm">
-							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableWords() }} @endif</h4>
-							<h6 class="fs-12">{{ __('Words Left') }}</h6>
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gpt_4_turbo_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableGPT4TWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('GPT 4 Turbo') }} {{ __('Words') }}</h6>
 						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gpt_4_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableGPT4Words() }} @endif</h4>
+							<h6 class="fs-12">{{ __('GPT 4') }} {{ __('Words') }}</h6>
+						</div>
+					</div>							
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('GPT 3.5 Turbo') }} {{ __('Words') }}</h6>
+						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->fine_tune_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableFineTuneWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Fine Tune') }} {{ __('Words') }}</h6>
+						</div>
+					</div>
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->claude_3_opus_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableClaudeOpusWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Claude 3 Opus') }} {{ __('Words') }}</h6>
+						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->claude_3_sonnet_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableClaudeSonnetWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Claude 3 Sonnet') }} {{ __('Words') }}</h6>
+						</div>
+					</div>
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->claude_3_haiku_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableClaudeHaikuWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Claude 3 Haiku') }} {{ __('Words') }}</h6>
+						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gemini_pro_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableGeminiProWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Gemini Pro') }} {{ __('Words') }}</h6>
+						</div>
+					</div>
+					<div class="row text-center pt-4 pb-4">
 						@role('user|subscriber|admin')
 							@if (config('settings.image_feature_user') == 'allow')
 								<div class="col-sm">
-									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableImages() }} @endif</h4>
-									<h6 class="fs-12">{{ __('Images Left') }}</h6>
+									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableDEImages() }}</h4>
+									<h6 class="fs-12">{{ __('Dalle Images Left') }}</h6>
+								</div>
+								<div class="col-sm">
+									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableSDImages() }}</h4>
+									<h6 class="fs-12">{{ __('SD Images Left') }}</h6>
 								</div>
 							@endif
 						@endrole
@@ -108,10 +148,20 @@
 							@endif
 						@endif							
 						<div class="col-sm-12">
-							<div class="text-center pb-4">
+							<div class="text-center pb-3">
 								<a href="{{ route('user.profile.delete') }}" class="fs-13"><i class="fa fa-user-xmark mr-1"></i> {{ __('Delete Account') }}</a>
 							</div>
 						</div>
+						<div class="col-sm-12">
+							<div class="text-center pb-4">                       
+								<label class="custom-switch">
+									<input type="checkbox" class="custom-switch-input" name="newsletter" id="newsletter" onchange="toggleEmail()" @if (auth()->user()->email_opt_in) checked @endif>
+									<span class="custom-switch-indicator"></span>
+									<span class="custom-switch-description fs-12 text-muted">{{__('Receive Newsletters via Email')}}</span>
+								</label>   
+							</div>
+						</div>
+						
 					</div>
 				</div>
 			</div>
@@ -315,9 +365,9 @@
 						<div class="card-body">
 							<div class="mb-3">
 								@if ($user_subscription == '')
-								<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }}: @if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }}: {{ number_format(auth()->user()->available_words_prepaid) }}. </span>
+								<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }}: @if (auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->gpt_3_turbo_credits) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }}: {{ number_format(auth()->user()->gpt_3_turbo_credits_prepaid) }}. </span>
 								@else
-									<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }} {{ number_format(auth()->user()->available_words) }} {{ __('out of') }} {{ number_format(auth()->user()->total_words) }}. </span> <span class="fs-12 text-muted">{{ __('Total prepaid words available') }} {{ number_format(auth()->user()->available_words_prepaid) }}. </span>
+									<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }} {{ number_format(auth()->user()->gpt_3_turbo_credits) }}. </span> <span class="fs-12 text-muted">{{ __('Total prepaid words available') }} {{ number_format(auth()->user()->gpt_3_turbo_credits_prepaid) }}. </span>
 								@endif
 							</div>
 							<div class="progress mb-4">
@@ -507,6 +557,32 @@
 					}
 				})
 			});
+
 		});
+
+		function toggleEmail() {
+
+			var formData = new FormData();
+			formData.append("status", $('#newsletter').is(':checked') );
+
+			$.ajax({
+				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+				method: 'post',
+				url: '/user/profile/email',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (data) {
+					if (data['status'] == 200) {
+						toastr.success('{{ __('Email newsletter status has been updated successfully') }}');								
+					} else {
+						toastr.error('{{ __('There was an issue updating email newsletter status') }}');
+					}      
+				},
+				error: function(data) {
+					toastr.error('{{ __('There was an issue updating email newsletter status') }}');
+				}
+			})
+		}
 	</script>
 @endsection

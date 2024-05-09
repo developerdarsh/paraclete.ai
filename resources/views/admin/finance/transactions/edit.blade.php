@@ -2,8 +2,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Update Bank Transfer Transaction') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-sack-dollar mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -17,7 +17,7 @@
 @endsection
 
 @section('content')						
-	<div class="row">
+	<div class="row justify-content-center">
 		<div class="col-lg-6 col-md-6 col-xm-12">
 			<div class="card border-0">
 				<div class="card-header">
@@ -71,7 +71,20 @@
 						@method('PUT')
 						@csrf
 
+						
+
 						<div class="row pt-8">
+
+							<div class="col-12 mb-7">
+								<h6 class="font-weight-bold mb-2">{{ __('Payment Confirmation') }}: </h6>
+								@if (is_null($id->invoice))
+									<span class="fs-14">{{ __('User did not upload any payment confirmation yet') }}</span>
+								@else
+									<a href="{{ URL::asset($id->invoice) }}" download class="btn btn-primary pl-5 pr-5">{{ __('Download Confirmation') }}</a>	
+								@endif
+													
+							</div>
+
 							<div class="col-sm-12">				
 								<div class="input-box">	
 									<h6>{{ __('Update Payment Status') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
@@ -89,9 +102,9 @@
 						</div>
 
 						<!-- SAVE CHANGES ACTION BUTTON -->
-						<div class="border-0 text-right mb-2 mt-7">
-							<a href="{{ route('admin.finance.transactions') }}" class="btn btn-cancel mr-2">{{ __('Return') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Update') }}</button>
+						<div class="border-0 text-center mb-2 mt-7">
+							<a href="{{ route('admin.finance.transactions') }}" class="btn btn-cancel mr-2 pl-7 pr-7">{{ __('Return') }}</a>
+							<button type="submit" class="btn btn-primary pl-7 pr-7">{{ __('Update') }}</button>
 						</div>
 
 					</form>

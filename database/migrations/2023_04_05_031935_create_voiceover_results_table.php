@@ -24,7 +24,7 @@ return new class extends Migration
             $table->longText('text')->nullable();
             $table->longText('text_raw')->nullable();
             $table->string('file_name')->nullable();
-            $table->string('result_url')->nullable();
+            $table->longText('result_url')->nullable();
             $table->string('result_ext')->nullable();
             $table->string('storage')->nullable()->comment('local|s3|wasabi');
             $table->string('title')->nullable();
@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('mode')->nullable();
             $table->string('project')->nullable();
             $table->dateTime('expires_at')->nullable();
+            $table->string('type')->nullable();
             $table->timestamps();
         });
     }

@@ -91,23 +91,19 @@
 	.copy {
 		display: none;
 		position: absolute;
-		right: 3px;
+		right: 5px;
 		background: #fff;
 		padding: 10px;
 		border-radius: 50%;
-		bottom: 3px;
+		bottom: -15px;
 		box-shadow: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);
-		transition-property: all;
-		transition-timing-function: cubic-bezier(.4,0,.2,1);
-		transition-duration: .15s;
+		transition: all 1s ease;
 	 }
 
 	 &:hover, &:focus {
 		.copy {
 			display: block;
-			transition-property: all;
-			transition-timing-function: cubic-bezier(.4,0,.2,1);
-			transition-duration: .15s;
+			transition: all 1s ease;
 		}
 	 }
  }

@@ -9,12 +9,12 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Chat Category Manager') }}</h4>
 			<ol class="breadcrumb mb-2">
-				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
-				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-brain-circuit mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Chat Settings') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Chat Category Manager') }}</a></li>
 			</ol>
 		</div>
@@ -23,12 +23,12 @@
 @endsection
 
 @section('content')	
-	<div class="row">
-		<div class="col-md-12 col-sm-12">
+	<div class="row justify-content-center">
+		<div class="col-md-8 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('All Chat Categories') }}</h3>
-					<a href="#" id="createButton" class="btn btn-primary text-right right">{{ __('Create New') }}</a>
+					<a href="#" id="createButton" class="btn btn-primary text-right ripple right">{{ __('Create New') }}</a>
 				</div>
 				<div class="card-body pt-2">
 					<!-- BOX CONTENT -->
@@ -45,10 +45,6 @@
 								</thead>
 						</table> <!-- END SET DATATABLE -->
 					</div> <!-- END BOX CONTENT -->
-
-					<div class="col-md-12 col-sm-12 text-center mb-2">
-						<a href="{{ route('admin.davinci.chats') }}" class="btn btn-cancel">{{ __('Return') }}</a>
-					</div>	
 				</div>
 			</div>
 		</div>
@@ -92,7 +88,7 @@
 						name: 'custom-name',
 						orderable: true,
 						searchable: true
-					},	
+					},					
 					{
 						data: 'custom-type',
 						name: 'custom-type',

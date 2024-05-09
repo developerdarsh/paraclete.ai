@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\CustomTemplate;
 use App\Models\Category;
+use App\Models\FineTuneModel;
 use Yajra\DataTables\DataTables;
 
 class CustomTemplateController extends Controller
@@ -82,7 +83,25 @@ class CustomTemplateController extends Controller
 
         $categories = Category::orderBy('name', 'asc')->get();
 
-        return view('admin.davinci.custom.index', compact('categories'));
+        $models = FineTuneModel::all();
+
+        return view('admin.davinci.custom.index', compact('categories', 'models'));
+    }
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function createTemplate()
+    {
+        $categories = Category::orderBy('name', 'asc')->get();
+
+        $models = FineTuneModel::all();
+
+        return view('admin.davinci.custom.create', compact('categories', 'models'));
     }
 
 
@@ -102,6 +121,7 @@ class CustomTemplateController extends Controller
         $template_code = strtoupper(Str::random(5));
         $status = (isset($request->activate)) ? true : false;
         $tone = (isset($request->tone)) ? true : false;
+        $model_mode = (isset($request->model_mode)) ? 'fixed' : 'individual';
         $icon = ($request->category == 'text') ? str_replace('"></i>', ' main-icon"></i>', $request->icon) : str_replace('"></i>', ' ' . $request->category . '-icon"></i>', $request->icon);
 
         $fields = array();
@@ -140,6 +160,8 @@ class CustomTemplateController extends Controller
             'tone' => $tone,
             'fields' => $fields,
             'package' => $request->package,
+            'model' => $request->model,
+            'model_mode' => $model_mode,
         ]); 
         
         $template->save();            
@@ -159,7 +181,9 @@ class CustomTemplateController extends Controller
     {
         $categories = Category::orderBy('name', 'asc')->get();
 
-        return view('admin.davinci.custom.edit', compact('id', 'categories'));
+        $models = FineTuneModel::all();
+
+        return view('admin.davinci.custom.edit', compact('id', 'categories', 'models'));
     }
 
 
@@ -179,6 +203,7 @@ class CustomTemplateController extends Controller
 
         $status = (isset($request->activate)) ? true : false;
         $tone = (isset($request->tone)) ? true : false;
+        $model_mode = (isset($request->model_mode)) ? 'fixed' : 'individual';
         $icon = ($request->category == 'text') ? str_replace('"></i>', ' main-icon"></i>', $request->icon) : str_replace('"></i>', ' ' . $request->category . '-icon"></i>', $request->icon);
 
         $fields = array();
@@ -213,6 +238,8 @@ class CustomTemplateController extends Controller
             'tone' => $tone,
             'fields' => $fields,
             'package' => $request->package,
+            'model' => $request->model,
+            'model_mode' => $model_mode,
         ]); 
 
         toastr()->success(__('Custom Template was successfully updated'));

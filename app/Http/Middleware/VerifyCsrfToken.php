@@ -20,6 +20,5 @@ class VerifyCsrfToken extends Middleware
         'install/*',
         'user/payments/approved',
         'user/payments/approved/paddle',
-		'user/flow-Track-webhook',
     ];
 }

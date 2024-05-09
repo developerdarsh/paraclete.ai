@@ -22,8 +22,8 @@ class FineTune extends Model
         'model_name',
         'file_name',
         'status',
-        'result_model'
-
+        'result_model',
+        'description',
     ];
 }
 

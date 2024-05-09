@@ -9,28 +9,25 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
-			<h4 class="page-title mb-0">{{ __('AI Chats Customization') }}</h4>
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
+			<h4 class="page-title mb-0">{{ __('Original Chatbots') }}</h4>
 			<ol class="breadcrumb mb-2">
-				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
-				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
-				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('AI Chats Customization') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-brain-circuit mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Chat Settings') }}</a></li>
+				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Original Chatbots') }}</a></li>
 			</ol>
-		</div>
-		<div class="page-rightheader">
-			<a href="{{ route('admin.davinci.chat.create') }}" class="btn btn-primary mt-1">{{ __('Create New Chat Bot') }}</a>
 		</div>
 	</div>
 	<!-- END PAGE HEADER -->
 @endsection
 
 @section('content')	
-	<div class="row">
-		<div class="col-lg-12 col-md-12 col-xm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-10 col-md-12 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
-					<h3 class="card-title">{{ __('All AI Chats') }}</h3>
+					<h3 class="card-title">{{ __('All Original Chatbots') }}</h3>
 				</div>
 				<div class="card-body pt-2">
 					<!-- BOX CONTENT -->
@@ -38,13 +35,13 @@
 							<!-- SET DATATABLE -->
 							<table id='allResultsTable' class='table' width='100%'>
 									<thead>
-										<tr>	
-											<th width="2%">{{ __('Status') }}</th> 
+										<tr>												
 											<th width="2%">{{ __('Avatar') }}</th>								
-											<th width="8%">{{ __('Name') }}</th> 											
-											<th width="8%">{{ __('Character') }}</th>
-											<th width="3%">{{ __('Package') }}</th>						
-											<th width="3%">{{ __('Group') }}</th>						
+											<th width="6%">{{ __('Name') }}</th> 
+											<th width="8%">{{ __('Role') }}</th>
+											<th width="2%">{{ __('Status') }}</th> 								
+											<th width="3%">{{ __('Group') }}</th>
+											<th width="3%">{{ __('Package') }}</th>							
 											<th width="3%">{{ __('Updated On') }}</th>	    										 						           	
 											<th width="4%">{{ __('Actions') }}</th>
 										</tr>
@@ -89,13 +86,7 @@
 				processing: true,
 				serverSide: true,
 				ajax: "{{ route('admin.davinci.chats') }}",
-				columns: [
-					{
-						data: 'custom-status',
-						name: 'custom-status',
-						orderable: true,
-						searchable: true
-					},	
+				columns: [						
 					{
 						data: 'custom-avatar',
 						name: 'custom-avatar',
@@ -113,19 +104,25 @@
 						name: 'sub_name',
 						orderable: true,
 						searchable: true
+					},
+					{
+						data: 'custom-status',
+						name: 'custom-status',
+						orderable: true,
+						searchable: true
+					},				
+					{
+						data: 'custom-group',
+						name: 'custom-group',
+						orderable: true,
+						searchable: true
 					},		
 					{
 						data: 'custom-package',
 						name: 'custom-package',
 						orderable: true,
 						searchable: true
-					},		
-					{
-						data: 'custom-group',
-						name: 'custom-group',
-						orderable: true,
-						searchable: true
-					},					
+					},			
 					{
 						data: 'created-on',
 						name: 'created-on',

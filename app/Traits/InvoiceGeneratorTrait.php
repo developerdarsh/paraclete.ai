@@ -132,7 +132,7 @@ trait InvoiceGeneratorTrait
         
         $invoice->addTotal("Total", $total);
         $invoice->addTotal("VAT ". config('payment.payment_tax') ."%", $tax_total);
-        $invoice->addTotal("Total Due", $id->amount, true);
+        $invoice->addTotal("Total Due", $id->price, true);
         
         $invoice->addBadge("Payment Pending", '#f00');        
         $invoice->addTitle("Important Notice");        
@@ -201,7 +201,7 @@ trait InvoiceGeneratorTrait
         
         $invoice->addTotal("Total", $total);
         $invoice->addTotal("VAT ". config('payment.payment_tax') ."%", $tax_total);
-        $invoice->addTotal("Total Paid", $id->amount, true);
+        $invoice->addTotal("Total Paid", $id->price, true);
         
         $invoice->addBadge("Payment Paid");        
         $invoice->addTitle("Important Notice");        

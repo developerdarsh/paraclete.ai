@@ -84,19 +84,9 @@ class FinanceController extends Controller
                         return $created_on;
                     })
                     ->addColumn('user', function($row){
-                        if ($row['profile_photo_path']) {
-                            $path = asset($row['profile_photo_path']);
-                            $user = '<div class="d-flex">
-                                        <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" src="' . $path . '"></div>
-                                        <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
-                                    </div>';
-                        } else {
-                            $path = URL::asset('img/users/avatar.png');
-                            $user = '<div class="d-flex">
-                                        <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" class="rounded-circle" src="' . $path . '"></div>
-                                        <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
-                                    </div>';
-                        }
+                        $user = '<div class="d-flex">
+                                    <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
+                                </div>';
                         return $user;
                     })
                     ->addColumn('custom-status', function($row){
@@ -174,7 +164,7 @@ class FinanceController extends Controller
                     })
                     ->addColumn('custom-plan-name', function($row){
                         $words = ($row['words'] == -1) ? __('Unlimited') : number_format($row['words']);
-                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.$words.' words</span>';
+                        $custom_status = '<span>'.ucfirst($row["plan_name"]).'</span>';
                         return $custom_status;
                     })
                     ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-amount', 'custom-plan-name', 'user', 'custom-order', 'custom-gateway', 'custom-frequency'])
@@ -214,19 +204,9 @@ class FinanceController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('user', function($row){
-                        if ($row['profile_photo_path']) {
-                            $path = asset($row['profile_photo_path']);
-                            $user = '<div class="d-flex">
-                                        <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" src="' . $path . '"></div>
-                                        <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
-                                    </div>';
-                        } else {
-                            $path = URL::asset('img/users/avatar.png');
-                            $user = '<div class="d-flex">
-                                        <div class="widget-user-image-sm overflow-hidden mr-4"><img alt="Avatar" class="rounded-circle" src="' . $path . '"></div>
-                                        <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
-                                    </div>';
-                        }
+                        $user = '<div class="d-flex">
+                                    <div class="widget-user-name"><span class="font-weight-bold">'. $row['name'] .'</span><br><span class="text-muted">'.$row["email"].'</span></div>
+                                </div>';
                         return $user;
                     })
                     ->addColumn('custom-status', function($row){
@@ -234,7 +214,7 @@ class FinanceController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-plan-name', function($row){
-                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.$row["price"] . ' ' .$row['currency'].'</span>';
+                        $custom_status = '<span>'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.$row["price"] . ' ' .$row['currency'].'</span>';
                         return $custom_status;
                     })
                     ->addColumn('custom-words', function($row){
@@ -377,13 +357,17 @@ class FinanceController extends Controller
                 $user->syncRoles($group);    
                 $user->group = $group;
                 $user->plan_id = $id->plan_id;
-                $user->total_words = $id->words;
-                $user->available_words = $id->words;
-                $user->total_images = $id->images;
-                $user->available_images = $id->images;
-                $user->total_chars = $id->characters;
+                $user->gpt_3_turbo_credits = $id->gpt_3_turbo_credits;
+                $user->gpt_4_turbo_credits = $id->gpt_4_turbo_credits;
+                $user->gpt_4_credits = $id->gpt_4_credits;
+                $user->claude_3_opus_credits = $id->claude_3_opus_credits;
+                $user->claude_3_sonnet_credits = $id->claude_3_sonnet_credits;
+                $user->claude_3_haiku_credits = $id->claude_3_haiku_credits;
+                $user->gemini_pro_credits = $id->gemini_pro_credits;
+                $user->fine_tune_credits = $id->fine_tune_credits;
+                $user->available_sd_images = $id->sd_images;
+                $user->available_dalle_images = $id->dalle_images;
                 $user->available_chars = $id->characters;
-                $user->total_minutes = $id->minutes;
                 $user->available_minutes = $id->minutes;
                 $user->member_limit = $id->team_members;
                 $user->save();   
@@ -392,8 +376,16 @@ class FinanceController extends Controller
                 $subscription->status = 'Active';
                 $subscription->save();
             } else {
-                $user->available_words_prepaid = ($user->available_words_prepaid + $id->words);
-                $user->available_images_prepaid = ($user->available_images_prepaid + $id->images);
+                $user->gpt_3_turbo_credits_prepaid = ($user->gpt_3_turbo_credits_prepaid + $id->gpt_3_turbo_credits_prepaid);
+                $user->gpt_4_turbo_credits_prepaid = ($user->gpt_4_turbo_credits_prepaid + $id->gpt_4_turbo_credits_prepaid);
+                $user->gpt_4_credits_prepaid = ($user->gpt_4_credits_prepaid + $id->gpt_4_credits_prepaid);
+                $user->fine_tune_credits_prepaid = ($user->fine_tune_credits_prepaid + $id->fine_tune_credits_prepaid);
+                $user->claude_3_opus_credits_prepaid = ($user->claude_3_opus_credits_prepaid + $id->claude_3_opus_credits_prepaid);
+                $user->claude_3_sonnet_credits_prepaid = ($user->claude_3_sonnet_credits_prepaid + $id->claude_3_sonnet_credits_prepaid);
+                $user->claude_3_haiku_credits_prepaid = ($user->claude_3_haiku_credits_prepaid + $id->claude_3_haiku_credits_prepaid);
+                $user->gemini_pro_credits_prepaid = ($user->gemini_pro_credits_prepaid + $id->gemini_pro_credits_prepaid);
+                $user->available_sd_images_prepaid = ($user->available_sd_images_prepaid + $id->sd_images);
+                $user->available_dalle_images_prepaid = ($user->available_dalle_images_prepaid + $id->dalle_images);
                 $user->available_chars_prepaid = ($user->available_chars_prepaid + $id->characters);
                 $user->available_minutes_prepaid = ($user->available_minutes_prepaid + $id->minutes);
                 $user->save();  

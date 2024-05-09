@@ -20,6 +20,10 @@ use App\Models\User;
 use Carbon\Carbon;
 use DataTables;
 use Cache;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AddUser;
+use App\Mail\AddCredits;
+use Exception;
 
 
 class AdminUserController extends Controller
@@ -124,27 +128,18 @@ class AdminUserController extends Controller
                         
                         return $custom_group;
                     })
-                    ->addColumn('words-left', function($row){
-                        $words = ($row['available_words'] == -1) ? __('Unlimited') : number_format($row["available_words"] + $row['available_words_prepaid']);
-                        $used = '<span class="font-weight-bold">'.$words.'</span>';
-                        return $used;
+                    ->addColumn('custom-credits', function($row){
+                        $gpt3t = ($row["gpt_3_turbo_credits"] == -1) ? 'Unlimited' : number_format($row["gpt_3_turbo_credits"] + $row['gpt_3_turbo_credits_prepaid']);
+                        $gpt4t = ($row["gpt_4_turbo_credits"] == -1) ? 'Unlimited' : number_format($row["gpt_4_turbo_credits"] + $row['gpt_4_turbo_credits_prepaid']);
+                        $gpt4 = ($row["gpt_4_credits"] == -1) ? 'Unlimited' : number_format($row["gpt_4_credits"] + $row['gpt_4_credits_prepaid']);
+                        $dalle_images = ($row["available_dalle_images"] == -1) ? 'Unlimited' : number_format($row["available_dalle_images"] + $row["available_dalle_images_prepaid"]);
+                        $sd_images = ($row["available_sd_images"] == -1) ? 'Unlimited' : number_format($row["available_sd_images"] + $row["available_sd_images_prepaid"]);
+                        $characters = ($row["available_chars"] == -1) ? 'Unlimited' : number_format($row["available_chars"] + $row['available_chars_prepaid']);
+                        $minutes = ($row["available_minutes"] == -1) ? 'Unlimited' : number_format($row["available_minutes"] + $row['available_minutes_prepaid']);
+                        $custom_credits = '<span class="font-weight-bold">'. $gpt4 .' / '. $gpt4t .' / ' . $gpt3t .' / '. $characters . ' / ' . $minutes . ' / ' . $dalle_images . ' / '. $sd_images . '</span>';
+                        return $custom_credits;
                     })
-                    ->addColumn('images-left', function($row){
-                        $words = ($row['available_images'] == -1) ? __('Unlimited') : number_format($row["available_images"] + $row['available_images_prepaid']);
-                        $used = '<span class="font-weight-bold">'.$words.'</span>';
-                        return $used;
-                    })
-                    ->addColumn('chars-left', function($row){
-                        $words = ($row['available_chars'] == -1) ? __('Unlimited') : number_format($row["available_chars"] + $row['available_chars_prepaid']);
-                        $used = '<span class="font-weight-bold">'.$words.'</span>';
-                        return $used;
-                    })
-                    ->addColumn('minutes-left', function($row){
-                        $words = ($row['available_minutes'] == -1) ? __('Unlimited') : number_format($row["available_minutes"] + $row['available_minutes_prepaid']);
-                        $used = '<span class="font-weight-bold">'.$words.'</span>';
-                        return $used;
-                    })
-                    ->rawColumns(['actions', 'custom-status', 'custom-group', 'created-on', 'user', 'words-left', 'images-left', 'chars-left', 'minutes-left'])
+                    ->rawColumns(['actions', 'custom-status', 'custom-group', 'created-on', 'user', 'custom-credits'])
                     ->make(true);                    
         }
 
@@ -216,13 +211,27 @@ class AdminUserController extends Controller
         $user->group = $request->role;
         $user->email_verified_at = now();
         $user->referral_id = strtoupper(Str::random(15));
-        $user->available_words = config('settings.free_tier_words');
-        $user->available_images = config('settings.free_tier_images');
+        $user->gpt_3_turbo_credits = config('settings.free_gpt_3_turbo_credits');
+        $user->gpt_4_turbo_credits = config('settings.free_gpt_4_turbo_credits');
+        $user->gpt_4_credits = config('settings.free_gpt_4_credits');
+        $user->fine_tune_credits = config('settings.free_fine_tune_credits');
+        $user->claude_3_opus_credits = config('settings.free_claude_3_opus_credits');
+        $user->claude_3_sonnet_credits = config('settings.free_claude_3_sonnet_credits');
+        $user->claude_3_haiku_credits = config('settings.free_claude_3_haiku_credits');
+        $user->gemini_pro_credits = config('settings.free_gemini_pro_credits');
+        $user->available_dalle_images = config('settings.free_tier_dalle_images');
+        $user->available_sd_images = config('settings.free_tier_sd_images');
         $user->available_chars_prepaid = config('settings.voiceover_welcome_chars');
         $user->available_minutes_prepaid = config('settings.whisper_welcome_minutes');
         $user->default_voiceover_language = config('settings.voiceover_default_language');
         $user->default_voiceover_voice = config('settings.voiceover_default_voice');
         $user->save();        
+
+        try {
+            Mail::to($user)->send(new AddUser($request->email, $request->password));
+        } catch (Exception $e) {
+            \Log::info('SMTP settings are not setup to send payment notifications via email');
+        }
 
         toastr()->success(__('Congratulation! New user has been created'));
         return redirect()->back();
@@ -314,21 +323,43 @@ class AdminUserController extends Controller
      */
     public function increase(Request $request, User $user)
     {
-        $request->validate([
-            'words' => 'nullable|integer',
-            'images' => 'nullable|integer',
-            'chars' => 'nullable|integer',
-        ]);
-
-        $user->available_words = request('words');
-        $user->available_images =  request('images');
+        $user->gpt_3_turbo_credits = request('gpt-3-turbo');
+        $user->gpt_4_turbo_credits = request('gpt-4-turbo');
+        $user->gpt_4_credits = request('gpt-4');
+        $user->fine_tune_credits = request('fine-tune');
+        $user->claude_3_opus_credits = request('claude-3-opus');
+        $user->claude_3_sonnet_credits = request('claude-3-sonnet');
+        $user->claude_3_haiku_credits = request('claude-3-haiku');
+        $user->gemini_pro_credits = request('gemini-pro');
+        $user->available_dalle_images =  request('dalle-images');
+        $user->available_sd_images =  request('sd-images');
         $user->available_chars = request('chars');
         $user->available_minutes = request('minutes');
-        $user->available_words_prepaid = request('words_prepaid');
-        $user->available_images_prepaid =  request('images_prepaid');
+        $user->available_dalle_images_prepaid =  request('dalle_images_prepaid');
+        $user->available_sd_images_prepaid =  request('sd_images_prepaid');
         $user->available_chars_prepaid = request('chars_prepaid');
         $user->available_minutes_prepaid = request('minutes_prepaid');
+        $user->gpt_3_turbo_credits_prepaid = request('gpt-3-turbo-prepaid');
+        $user->gpt_4_turbo_credits_prepaid = request('gpt-4-turbo-prepaid');
+        $user->gpt_4_credits_prepaid = request('gpt-4-prepaid');
+        $user->fine_tune_credits_prepaid = request('fine-tune-prepaid');
+        $user->claude_3_opus_credits_prepaid = request('claude-3-opus-prepaid');
+        $user->claude_3_sonnet_credits_prepaid = request('claude-3-sonnet-prepaid');
+        $user->claude_3_haiku_credits_prepaid = request('claude-3-haiku-prepaid');
+        $user->gemini_pro_credits_prepaid = request('gemini-pro-prepaid');
         $user->save();
+
+        $words = 0;
+        $dalle_images = request('dalle-images') + request('dalle_images_prepaid');
+        $sd_images = request('sd-images') + request('sd_images_prepaid');
+        $minutes = request('minutes') + request('minutes_prepaid');
+        $chars = request('chars') + request('chars_prepaid');
+
+        try {
+            Mail::to($user)->send(new AddCredits($words, $minutes, $chars, $dalle_images, $sd_images));
+        } catch (Exception $e) {
+            \Log::info('SMTP settings are not setup to send payment notifications via email');
+        }
 
         toastr()->success(__('Credits have been updated successfully'));
         return redirect()->back();
@@ -378,8 +409,16 @@ class AdminUserController extends Controller
             'gateway' => 'Manual',
             'frequency' => $plan->payment_frequency,
             'plan_name' => $plan->plan_name,
-            'words' => $plan->words,
-            'images' => $plan->images,
+            'gpt_3_turbo_credits' => $plan->gpt_3_turbo_credits,
+            'gpt_4_turbo_credits' => $plan->gpt_4_turbo_credits,
+            'gpt_4_credits' => $plan->gpt_4_credits,
+            'claude_3_opus_credits' => $plan->claude_3_opus_credits,
+            'claude_3_sonnet_credits' => $plan->claude_3_sonnet_credits,
+            'claude_3_haiku_credits' => $plan->claude_3_haiku_credits,
+            'gemini_pro_credits' => $plan->gemini_pro_credits,
+            'fine_tune_credits' => $plan->fine_tune_credits,
+            'dalle_images' => $plan->dalle_images,
+            'sd_images' => $plan->sd_images,
             'characters' => $plan->characters,
             'minutes' => $plan->minutes,
             'subscription_id' => $subscription_id,
@@ -392,12 +431,16 @@ class AdminUserController extends Controller
         $user->syncRoles($group);    
         $user->group = $group;
         $user->plan_id = $plan->id;
-        $user->total_words = $plan->words;
-        $user->total_images = $plan->images;
-        $user->total_chars = $plan->characters;
-        $user->total_minutes = $plan->minutes;
-        $user->available_words = $plan->words;
-        $user->available_images = $plan->images;
+        $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+        $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+        $user->gpt_4_credits = $plan->gpt_4_credits;
+        $user->fine_tune_credits = $plan->fine_tune_credits;
+        $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+        $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+        $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+        $user->gemini_pro_credits = $plan->gemini_pro_credits;
+        $user->available_dalle_images = $plan->dalle_images;
+        $user->available_sd_images = $plan->sd_images;
         $user->available_chars = $plan->characters;
         $user->available_minutes = $plan->minutes;
         $user->member_limit = $plan->team_members;
@@ -544,10 +587,6 @@ class AdminUserController extends Controller
             $user = User::where('id', $id->user_id)->firstOrFail();
             $user->plan_id = null;
             $user->group = 'user';
-            $user->total_words = 0;
-            $user->total_images = 0;
-            $user->total_chars = 0;
-            $user->total_minutes = 0;
             $user->member_limit = null;
             $user->save();
 
@@ -606,10 +645,6 @@ class AdminUserController extends Controller
                         $user = User::where('id', $id->user_id)->firstOrFail();
                         $user->plan_id = null;
                         $user->group = 'user';
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -621,10 +656,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -636,10 +667,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -651,10 +678,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -666,10 +689,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -681,10 +700,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -696,10 +711,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -710,10 +721,6 @@ class AdminUserController extends Controller
                     $user->syncRoles($group); 
                     $user->plan_id = null;
                     $user->group = $group;
-                    $user->total_words = 0;
-                    $user->total_images = 0;
-                    $user->total_chars = 0;
-                    $user->total_minutes = 0;
                     $user->member_limit = null;
                     $user->save();
                 } else {
@@ -724,10 +731,6 @@ class AdminUserController extends Controller
                         $user->syncRoles($group); 
                         $user->plan_id = null;
                         $user->group = $group;
-                        $user->total_words = 0;
-                        $user->total_images = 0;
-                        $user->total_chars = 0;
-                        $user->total_minutes = 0;
                         $user->member_limit = null;
                         $user->save();
                     }
@@ -739,10 +742,6 @@ class AdminUserController extends Controller
                 $user->syncRoles($group); 
                 $user->plan_id = null;
                 $user->group = $group;
-                $user->total_words = 0;
-                $user->total_images = 0;
-                $user->total_chars = 0;
-                $user->total_minutes = 0;
                 $user->member_limit = null;
                 $user->save();
             }

@@ -19,7 +19,7 @@
     @else
         @if (config('settings.registration') == 'enabled')
             <div class="container-fluid h-100vh ">
-                <div class="row background-white justify-content-center">
+                <div class="row login-background justify-content-center">
                     <div class="col-md-6 col-sm-12" id="login-responsive"> 
                         <div class="row justify-content-center">
                             <div class="col-lg-7 mx-auto">
@@ -45,7 +45,7 @@
                                         </div>
                                     </div>
                                     
-                                    <form method="POST" action="{{ route('register') }}">
+                                    <form method="POST" action="{{ route('register') }}" onsubmit="process()">
                                         @csrf                                
                                         
                                         <h3 class="text-center login-title mb-8">{{__('Sign Up to')}} <span class="text-info"><a href="{{ url('/') }}">{{ config('app.name') }}</a></span></h3>
@@ -120,7 +120,7 @@
                                             <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="off" placeholder="{{ __('Confirm Password') }}">                        
                                         </div>
 
-                                        <div class="form-group mb-3">  
+                                        <div class="form-group mb-2">  
                                             <div class="d-flex">                        
                                                 <label class="custom-switch">
                                                     <input type="checkbox" class="custom-switch-input" name="agreement" id="agreement" {{ old('remember') ? 'checked' : '' }} required>
@@ -130,15 +130,27 @@
                                             </div>
                                         </div>
 
+                                        <div class="form-group mb-3">  
+                                            <div class="d-flex">                        
+                                                <label class="custom-switch">
+                                                    <input type="checkbox" class="custom-switch-input" name="newsletter" id="newsletter" {{ old('remember') ? 'checked' : '' }} checked>
+                                                    <span class="custom-switch-indicator"></span>
+                                                    <span class="custom-switch-description fs-10 text-muted">{{__('I agree to receive newsletters via email')}}</span>
+                                                </label>   
+                                            </div>
+                                        </div>
+
                                         <input type="hidden" name="recaptcha" id="recaptcha">
 
                                         <div class="text-center">
                                             <div class="form-group mb-0">                        
-                                                <button type="submit" class="btn btn-primary font-weight-bold login-main-button">{{ __('Sign Up') }}</button>              
+                                                <button type="submit" class="btn btn-primary font-weight-bold login-main-button" id="register-button">{{ __('Sign Up') }}</button>              
                                             </div>                        
                                         
                                             <p class="fs-10 text-muted pt-3 mb-0">{{ __('Already have an account?') }}</p>
-                                            <a href="{{ route('login') }}"  class="fs-12 font-weight-bold">{{ __('Sign In') }}</a>                                             
+                                            <div class="text-center">
+                                                <a href="{{ route('login') }}"  class="fs-12 font-weight-bold special-action-sign">{{ __('Sign In') }}</a>      
+                                            </div>                                                                                   
                                         </div>
                                     </form>
                                 </div> 
@@ -163,7 +175,6 @@
 	<!-- Awselect JS -->
 	<script src="{{URL::asset('plugins/awselect/awselect.min.js')}}"></script>
 	<script src="{{URL::asset('js/awselect.js')}}"></script>
-
     @if (config('services.google.recaptcha.enable') == 'on')
          <!-- Google reCaptcha JS -->
         <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.google.recaptcha.site_key') }}"></script>
@@ -177,5 +188,21 @@
             });
         </script>
     @endif
+
+    <script type="text/javascript">
+        let loading = `<span class="loading">
+					<span style="background-color: #fff;"></span>
+					<span style="background-color: #fff;"></span>
+					<span style="background-color: #fff;"></span>
+					</span>`;
+
+        function process() {
+            $('#register-button').prop('disabled', true);
+            let btn = document.getElementById('register-button');					
+            btn.innerHTML = loading;  
+            document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+            return; 
+        }
+    </script>
    
 @endsection

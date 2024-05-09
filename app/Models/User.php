@@ -60,6 +60,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'personal_sd_key',
         'hidden_plan',
         'used_free_tier',
+        'theme',
+        'plagiarism_pages',
+        'ai_detector_pages',
+        'subscription_required',
+        'verification_code',
+        'email_opt_in',
+        'default_model_template',
+        'default_model_chat',
     ];
 
     /**
@@ -95,7 +103,29 @@ class User extends Authenticatable implements MustVerifyEmail
         'available_minutes',
         'available_minutes_prepaid',
         'total_chars',
-        'total_minutes'
+        'total_minutes',
+        'total_dalle_images',
+        'available_dalle_images',
+        'available_dalle_images_prepaid',
+        'total_sd_images',
+        'available_sd_images',
+        'available_sd_images_prepaid',
+        'gpt_3_turbo_credits',
+        'gpt_4_turbo_credits',
+        'gpt_4_credits',
+        'claude_3_opus_credits',
+        'claude_3_sonnet_credits',
+        'claude_3_haiku_credits',
+        'fine_tune_credits',
+        'gpt_3_turbo_credits_prepaid',
+        'gpt_4_turbo_credits_prepaid',
+        'gpt_4_credits_prepaid',
+        'claude_3_opus_credits_prepaid',
+        'claude_3_sonnet_credits_prepaid',
+        'claude_3_haiku_credits_prepaid',
+        'fine_tune_credits_prepaid',
+        'gemini_pro_credits',
+        'gemini_pro_credits_prepaid',
     ];
 
     /**

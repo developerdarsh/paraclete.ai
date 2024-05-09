@@ -34,16 +34,15 @@
 					<table id='subscriptionsTable' class='table' width='100%'>
 							<thead>
 								<tr>
-									<th width="15%">{{ __('User') }}</th>
+									<th width="12%">{{ __('User') }}</th>
 									<th width="8%">{{ __('Status') }}</th>	
-									<th width="10%">{{ __('Plan Name') }}</th>								
-									<th width="10%">{{ __('Subscribed On') }}</th>								
-									<th width="10%">{{ __('Subscription ID') }}</th>
-									<th width="10%">{{ __('Paid By') }}</th>																
-									<th width="8%">{{ __('Words') }}</th>
-									<th width="10%">{{ __('Pricing Plan') }}</th>
-									<th width="10%">{{ __('Next Payment') }}</th>
-									<th width="7%">{{ __('Actions') }}</th>
+									<th width="7%">{{ __('Subscribed On') }}</th>	
+									<th width="5%">{{ __('Paid By') }}</th>																					
+									<th width="10%">{{ __('Subscription ID') }}</th>										
+									<th width="7%">{{ __('Plan Name') }}</th>															
+									<th width="5%">{{ __('Pricing Plan') }}</th>
+									<th width="7%">{{ __('Next Payment') }}</th>
+									<th width="3%">{{ __('Actions') }}</th>
 								</tr>
 							</thead>
 					</table> <!-- END SET DATATABLE -->
@@ -97,15 +96,16 @@
 						orderable: true,
 						searchable: true
 					},
-					{
-						data: 'custom-plan-name',
-						name: 'custom-plan-name',
-						orderable: true,
-						searchable: true
-					},					
+									
 					{
 						data: 'created-on',
 						name: 'created-on',
+						orderable: true,
+						searchable: true
+					},
+					{
+						data: 'custom-gateway',
+						name: 'custom-gateway',
 						orderable: true,
 						searchable: true
 					},
@@ -114,19 +114,13 @@
 						name: 'subscription_id',
 						orderable: true,
 						searchable: true
-					},								
+					},												
 					{
-						data: 'custom-gateway',
-						name: 'custom-gateway',
+						data: 'custom-plan-name',
+						name: 'custom-plan-name',
 						orderable: true,
 						searchable: true
-					},					
-					{
-						data: 'custom-words',
-						name: 'custom-words',
-						orderable: false,
-						searchable: true
-					},	
+					},		
 					{
 						data: 'custom-frequency',
 						name: 'custom-frequency',

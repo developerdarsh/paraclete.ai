@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
-use App\Mail\ContactFormEmail;
+use App\Mail\ContactFormAdmin;
+use App\Mail\ContactFormUser;
 use App\Models\SubscriptionPlan;
 use App\Models\PrepaidPlan;
 use App\Models\Setting;
@@ -19,6 +20,7 @@ use App\Models\Category;
 use App\Models\FrontendStep;
 use App\Models\FrontendTool;
 use App\Models\FrontendFeature;
+use App\Models\User;
 use Carbon\Carbon;
 
 class HomeController extends Controller
@@ -199,11 +201,12 @@ class HomeController extends Controller
                 return redirect()->back();
             }
 
-            if ($recaptchaResult->score >= 0.5) {
+            if ($recaptchaResult->score >= 0.3) {
 
                 try {
 
-                    Mail::to(config('mail.from.address'))->send(new ContactFormEmail($request));
+                    Mail::to(config('mail.from.address'))->send(new ContactFormAdmin($request));
+                    Mail::to($request->email)->send(new ContactFormUser($request));
  
                     if (Mail::flushMacros()) {
                         toastr()->error(__('Sending email failed, please try again.'));
@@ -227,7 +230,8 @@ class HomeController extends Controller
 
             try {
 
-                Mail::to(config('mail.from.address'))->send(new ContactFormEmail($request));
+                Mail::to(config('mail.from.address'))->send(new ContactFormAdmin($request));
+                Mail::to($request->email)->send(new ContactFormUser($request));
  
                 if (Mail::flushMacros()) {
                     toastr()->error(__('Sending email failed, please try again.'));
@@ -289,6 +293,30 @@ class HomeController extends Controller
         }
 
         return $information;
+    }
+
+
+    public function showUnsubscribe(Request $request)
+    {
+        $email = $request->email;
+        return view('auth.unsubscribe', compact('email'));
+    }
+
+
+    public function unsubscribe($email)
+    {
+        $user = User::where('email', $email)->first();
+        
+        if ($user) {
+            $user->email_opt_in = false;
+            $user->save();
+
+            toastr()->success(__('You have successfully unsubscribed from our newsletters'));
+            return redirect()->back();
+        } else {
+            toastr()->warning(__('You are not subscribed to any newsletters'));
+            return redirect()->back();
+        }
     }
 
 }

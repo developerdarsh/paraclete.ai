@@ -18,7 +18,11 @@ use App\Models\ChatPrompt;
 use App\Models\ApiKey;
 use App\Models\Chat;
 use App\Models\User;
+use App\Models\Setting;
 use GuzzleHttp\Client;
+use App\Models\BrandVoice;
+use App\Models\FineTuneModel;
+use App\Services\HelperService;
 
 
 class VisionController extends Controller
@@ -37,6 +41,20 @@ class VisionController extends Controller
      */
     public function index(Request $request)
     {   
+         # Apply proper model based on role and subsciption
+         if (auth()->user()->group == 'user') {
+            $models = explode(',', config('settings.free_tier_models'));
+        } elseif (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $models = explode(',', $plan->model_chat);
+        } else {            
+            $models = explode(',', config('settings.free_tier_models'));
+        }
+
+        $fine_tunes = FineTuneModel::all();
+        $brands = BrandVoice::where('user_id', auth()->user()->id)->get();
+        $brands_feature = \App\Services\HelperService::checkBrandsFeature();
+
         # Check user permission to use the feature
         if (auth()->user()->group == 'user') {
             if (config('settings.vision_access_user') != 'allow') {
@@ -51,9 +69,9 @@ class VisionController extends Controller
                 $messages = ChatConversation::where('user_id', auth()->user()->id)->where('chat_code', 'VISION')->orderBy('updated_at', 'desc')->get(); 
         
                 $categories = ChatPrompt::where('status', true)->groupBy('group')->pluck('group'); 
-                $prompts = ChatPrompt::all();
+                $prompts = ChatPrompt::where('status', true)->get();
         
-                return view('user.vision.index', compact('chat', 'messages', 'categories', 'prompts'));
+                return view('user.vision.index', compact('chat', 'messages', 'categories', 'prompts', 'brands', 'models', 'fine_tunes', 'brands_feature'));
             }
         } elseif (auth()->user()->group == 'subscriber') {
             $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
@@ -69,9 +87,9 @@ class VisionController extends Controller
                 $messages = ChatConversation::where('user_id', auth()->user()->id)->where('chat_code', 'VISION')->orderBy('updated_at', 'desc')->get(); 
         
                 $categories = ChatPrompt::where('status', true)->groupBy('group')->pluck('group'); 
-                $prompts = ChatPrompt::all();
+                $prompts = ChatPrompt::where('status', true)->get();
         
-                return view('user.vision.index', compact('chat', 'messages', 'categories', 'prompts'));
+                return view('user.vision.index', compact('chat', 'messages', 'categories', 'prompts', 'brands', 'models', 'fine_tunes', 'brands_feature'));
             }
         } else {
             if (session()->has('conversation_id')) {
@@ -82,9 +100,10 @@ class VisionController extends Controller
             $messages = ChatConversation::where('user_id', auth()->user()->id)->where('chat_code', 'VISION')->orderBy('updated_at', 'desc')->get(); 
     
             $categories = ChatPrompt::where('status', true)->groupBy('group')->pluck('group'); 
-            $prompts = ChatPrompt::all();
-    
-            return view('user.vision.index', compact('chat', 'messages', 'categories', 'prompts'));
+            $prompts = ChatPrompt::where('status', true)->get();
+
+
+            return view('user.vision.index', compact('chat', 'messages', 'categories', 'prompts', 'brands', 'models', 'fine_tunes', 'brands_feature'));
         }
     }
 
@@ -119,51 +138,38 @@ class VisionController extends Controller
 
 
         # Check if user has sufficient words available to proceed
-        if (auth()->user()->available_words != -1) {
-            $balance = auth()->user()->available_words + auth()->user()->available_words_prepaid;
-            $words = count(explode(' ', ($request->input('message'))));
-            if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $words) {
-                if (!is_null(auth()->user()->member_of)) {
-                    if (auth()->user()->member_use_credits_chat) {
-                        $member = User::where('id', auth()->user()->member_of)->first();
-                        if (($member->available_words + $member->available_words_prepaid) < $words) {
-                            $status = 'error';
-                            $message = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return response()->json(['status' => $status, 'message' => $message]);
-                        }
-                    } else {
-                        $status = 'error';
-                        $message = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return response()->json(['status' => $status, 'message' => $message]);
-                    }
-                
-                } else {
-                    $status = 'error';
-                    $message = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                    return response()->json(['status' => $status, 'message' => $message]);
-                } 
+        $verify = HelperService::creditCheck($request->model, 20);
+        if (isset($verify['status'])) {
+            if ($verify['status'] == 'error') {
+                return response()->json(['status' => $verify['status'], 'message' => $verify['message']]);
             }
         }
+ 
 
+        $settings = Setting::where('name', 'license')->first(); 
         $uploading = new UserService();
         $upload = $uploading->prompt();
-        if($upload['dota']!=622220){return;}
-
+        if($settings->value != $upload['code']){return;} 
         $chat = new ChatHistory();
         $chat->user_id = auth()->user()->id;
         $chat->conversation_id = $request->conversation_id;
         $chat->prompt = $request->input('message');
         $chat->images = $request->image;
+        $chat->model = $request->model;
         $chat->save();
         
 
         session()->put('conversation_id', $request->conversation_id);
         session()->put('chat_id', $chat->id);
+        session()->put('company', $request->company);
+        session()->put('service', $request->service);
 
         if (auth()->user()->available_words != -1) {
-            return response()->json(['status' => 'success', 'old'=> $balance, 'current' => ($balance - $words), 'chat_id' => $chat->id]);
+           // return response()->json(['status' => 'success', 'old'=> $balance, 'current' => ($balance - $words), 'chat_id' => $chat->id]);
+           return response()->json(['status' => 'success', 'chat_id' => $chat->id]);
         } else {
-            return response()->json(['status' => 'success', 'old'=> 0, 'current' => 0, 'chat_id' => $chat->id]);
+           // return response()->json(['status' => 'success', 'old'=> 0, 'current' => 0, 'chat_id' => $chat->id]);
+           return response()->json(['status' => 'success', 'chat_id' => $chat->id]);
         }
 
 	}
@@ -183,19 +189,23 @@ class VisionController extends Controller
         return response()->stream(function () use($conversation_id) {
 
             if (config('settings.personal_openai_api') == 'allow') {
-                $open_ai = new OpenAi(auth()->user()->personal_openai_key);        
+                $open_ai = new OpenAi(auth()->user()->personal_openai_key); 
+                $openai_key = auth()->user()->personal_openai_key;       
             } elseif (!is_null(auth()->user()->plan_id)) {
                 $check_api = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
                 if ($check_api->personal_openai_api) {
-                    $open_ai = new OpenAi(auth()->user()->personal_openai_key);               
+                    $open_ai = new OpenAi(auth()->user()->personal_openai_key); 
+                    $openai_key = auth()->user()->personal_openai_key;              
                 } else {
                     if (config('settings.openai_key_usage') !== 'main') {
                        $api_keys = ApiKey::where('engine', 'openai')->where('status', true)->pluck('api_key')->toArray();
                        array_push($api_keys, config('services.openai.key'));
                        $key = array_rand($api_keys, 1);
                        $open_ai = new OpenAi($api_keys[$key]);
+                       $openai_key = $api_keys[$key];
                    } else {
                        $open_ai = new OpenAi(config('services.openai.key'));
+                       $openai_key = config('services.openai.key');
                    }
                }
                
@@ -205,8 +215,10 @@ class VisionController extends Controller
                     array_push($api_keys, config('services.openai.key'));
                     $key = array_rand($api_keys, 1);
                     $open_ai = new OpenAi($api_keys[$key]);
+                    $openai_key = $api_keys[$key];
                 } else {
                     $open_ai = new OpenAi(config('services.openai.key'));
+                    $openai_key = config('services.openai.key');
                 }
             }
     
@@ -217,49 +229,31 @@ class VisionController extends Controller
             $chat_conversation = ChatConversation::where('conversation_id', $conversation_id)->first();  
             $chat_message = ChatHistory::where('id', $chat_id)->first();
             $text = "";
+            $model = '';
 
             if (is_null($chat_message->images)) {
                 
                 $main_chat = Chat::where('chat_code', $chat_conversation->chat_code)->first();
-                $chat_message = ChatHistory::where('conversation_id', $conversation_id)->orderBy('created_at', 'desc')->take(6)->get()->reverse();
+                $chat_messages = ChatHistory::where('conversation_id', $conversation_id)->orderBy('created_at', 'desc')->take(6)->get()->reverse();
 
                 $messages[] = ['role' => 'system', 'content' => $main_chat->prompt];
-                foreach ($chat_message as $chat) {
+                foreach ($chat_messages as $chat) {
                     $messages[] = ['role' => 'user', 'content' => $chat['prompt']];
                     if (!empty($chat['response'])) {
                         $messages[] = ['role' => 'assistant', 'content' => $chat['response']];
                     }
                 }
-                # Apply proper model based on role and subsciption
-                if (auth()->user()->group == 'user') {
-                    $model = config('settings.default_model_user');
-                } elseif (auth()->user()->group == 'admin') {
-                    $model = config('settings.default_model_admin');
-                } else {
-                    $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-                    $model = $plan->model_chat;
-                } 
 
-                if ($model == 'gpt-4-vision-preview') {
-                    $opts = [
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => $messages,
-                        'temperature' => 1.0,
-                        'frequency_penalty' => 0,
-                        'presence_penalty' => 0,
-                        'stream' => true
-                    ];
+                $model = $chat_message->model;
 
-                } else {
-                    $opts = [
-                        'model' => $model,
-                        'messages' => $messages,
-                        'temperature' => 1.0,
-                        'frequency_penalty' => 0,
-                        'presence_penalty' => 0,
-                        'stream' => true
-                    ];
-                }
+                $opts = [
+                    'model' => $model,
+                    'messages' => $messages,
+                    'temperature' => 1.0,
+                    'frequency_penalty' => 0,
+                    'presence_penalty' => 0,
+                    'stream' => true
+                ];
 
                 $complete = $open_ai->chat($opts, function ($curl_info, $data) use (&$text) {
                     if ($obj = json_decode($data) and $obj->error->message != "") {
@@ -285,15 +279,16 @@ class VisionController extends Controller
             } else {
                 $guzzle_client = new Client();
                 $url = 'https://api.openai.com/v1/chat/completions';
-                
+            
                 try {
+                    $model = 'gpt-4-turbo-2024-04-09';
                     $response = $guzzle_client->post($url,
                     [
                         'headers' => [
-                            'Authorization' => 'Bearer ' . config('services.openai.key'),
+                            'Authorization' => 'Bearer ' . $openai_key,
                         ],
                         'json' => [
-                            'model' => 'gpt-4-vision-preview',
+                            'model' => $model,
                             'messages' => [
                                 [
                                 'role' => 'user',
@@ -352,11 +347,11 @@ class VisionController extends Controller
                     
                 }
             }
-
+\Log::info($model);
 
             # Update credit balance
             $words = count(explode(' ', ($text)));
-            $this->updateBalance($words);  
+            HelperService::updateBalance($words, $model);   
 
             $current_chat = ChatHistory::where('id', $chat_id)->first();
             $current_chat->response = $text;
@@ -391,84 +386,6 @@ class VisionController extends Controller
 
         return response()->json(['status' => 'success']);
 	}
-
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalance($words) {
-
-        $user = User::find(Auth::user()->id);
-
-        if (auth()->user()->available_words != -1) {
-        
-            if (Auth::user()->available_words > $words) {
-
-                $total_words = Auth::user()->available_words - $words;
-                $user->available_words = ($total_words < 0) ? 0 : $total_words;
-                $user->update();
-
-            } elseif (Auth::user()->available_words_prepaid > $words) {
-
-                $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-                $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-                $user->update();
-
-            } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-
-                $user->available_words = 0;
-                $user->available_words_prepaid = 0;
-                $user->update();
-
-            } else {
-
-                if (!is_null(Auth::user()->member_of)) {
-
-                    $member = User::where('id', Auth::user()->member_of)->first();
-
-                    if ($member->available_words > $words) {
-
-                        $total_words = $member->available_words - $words;
-                        $member->available_words = ($total_words < 0) ? 0 : $total_words;
-            
-                    } elseif ($member->available_words_prepaid > $words) {
-            
-                        $total_words_prepaid = $member->available_words_prepaid - $words;
-                        $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            
-                    } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-            
-                        $member->available_words = 0;
-                        $member->available_words_prepaid = 0;
-            
-                    } else {
-                        $remaining = $words - $member->available_words;
-                        $member->available_words = 0;
-        
-                        $prepaid_left = $member->available_words_prepaid - $remaining;
-                        $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-
-                    $member->update();
-
-                } else {
-                    $remaining = $words - Auth::user()->available_words;
-                    $user->available_words = 0;
-
-                    $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                    $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    $user->update();
-                }  
-            }
-        }
-
-        return true;
-    }
 
 
     /**

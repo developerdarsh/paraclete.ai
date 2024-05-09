@@ -1,3 +1,16 @@
+<?php
+	$themeClass = '';
+	if (!empty($_COOKIE['theme'])) {
+		if ($_COOKIE['theme'] == 'dark') {
+			$themeClass = 'dark-theme';
+		} else if ($_COOKIE['theme'] == 'light') {
+			$themeClass = 'light-theme';
+		}  
+	} elseif (empty($_COOKIE['theme'])) {
+		$themeClass = config('settings.default_theme');
+		setcookie('theme', $themeClass);
+	} 
+?>
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 	<head>
@@ -22,7 +35,9 @@
 
 	</head>
 
-	<body class="app sidebar-mini">
+	<body class="app sidebar-mini white-background <?php echo $themeClass; ?>">
+
+		<div id="loader-line" class="hidden"></div>
 
 		<!-- Page -->
 		<div class="page">

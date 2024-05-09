@@ -30,7 +30,9 @@ class CustomTemplate extends Model
         'fields',
         'type',
         'package',
-        'new'
+        'new',
+        'model',
+        'model_mode'
     ];
 
 

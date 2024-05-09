@@ -143,7 +143,6 @@
 						<div>
 							<p class=" mb-3 fs-12 font-weight-700">{{ __('Total Images Generated') }} <span class="text-muted">({{ __('Current Month') }})</span></p>
 							<h2 class="mb-0"><span class="number-font fs-20">{{ number_format($total_data_monthly['images_current_month']) }}</span><span class="ml-2 text-muted fs-11 data-percentage-change"><span id="images_change"></span> {{ __('this month') }}</span></h2>
-
 						</div>
 						<span class="fs-40 mt-m1"><i class="fa-solid fa-image-landscape"></i></span>
 					</div>

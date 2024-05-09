@@ -6,6 +6,12 @@
 		} else if ($_COOKIE['theme'] == 'light') {
 			$themeClass = 'light-theme';
 		}  
+	} elseif (empty($_COOKIE['theme'])) {
+		$themeClass = auth()->user()->theme;
+		setcookie('theme', $themeClass);
+	} else {
+		$themeClass = config('settings.default_theme');
+		setcookie('theme', $themeClass);
 	}
 ?>
 <!DOCTYPE html>
@@ -30,7 +36,7 @@
 
 	<body class="app sidebar-mini <?php echo $themeClass; ?>">
 
-		<div id="loader-line" class="opacity-on"></div>
+		<div id="loader-line" class="hidden"></div>
 
 		<!-- LOADER -->
 		{{-- <div id="preloader" >

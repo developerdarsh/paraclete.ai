@@ -5,13 +5,13 @@
  * ========================================================================== */
  
  .btn-primary-pricing {
-	font-size: 14px;
+	font-size: 13px;
     min-width: 100%;
 	border-radius: 35px;
     padding: 0.8rem;
 	color: $white !important;
-	background-color: $primaryTextColor;
-	border-color: $primaryTextColor;
+	background-color: #000;
+	border-color: #000;
 	box-shadow: 0 1px 3px 0 rgb(50 50 50 / 20%), 0 2px 1px -1px rgb(50 50 50 / 12%), 0 1px 1px 0 rgb(50 50 50 / 14%);
   
 	&:hover, &:focus {

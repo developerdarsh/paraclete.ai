@@ -163,7 +163,7 @@
 							contentType: false,
 							success: function (data) {
 								if (data == 'success') {
-									Swal.fire('Audio File Deleted', '{{ __('Selected background audio file has been successfully deleted') }}', 'success');	
+									Swal.fire('{{ __('Audio File Deleted') }}', '{{ __('Selected background audio file has been successfully deleted') }}', 'success');	
 									$("#notificationsTable").DataTable().ajax.reload();								
 								} else {
 									Swal.fire('{{ __('Delete Failed') }}', '{{ __('There was an error while deleting this audio file') }}', 'error');

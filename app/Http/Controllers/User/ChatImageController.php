@@ -53,7 +53,7 @@ class ChatImageController extends Controller
                 $messages = ChatConversation::where('user_id', auth()->user()->id)->where('chat_code', 'IMAGE')->orderBy('updated_at', 'desc')->get(); 
         
                 $categories = ChatPrompt::where('status', true)->groupBy('group')->pluck('group'); 
-                $prompts = ChatPrompt::all();
+                $prompts = ChatPrompt::where('status', true)->get();
         
                 return view('user.chat_image.index', compact('chat', 'messages', 'categories', 'prompts'));
             }
@@ -71,7 +71,7 @@ class ChatImageController extends Controller
                 $messages = ChatConversation::where('user_id', auth()->user()->id)->where('chat_code', 'IMAGE')->orderBy('updated_at', 'desc')->get(); 
         
                 $categories = ChatPrompt::where('status', true)->groupBy('group')->pluck('group'); 
-                $prompts = ChatPrompt::all();
+                $prompts = ChatPrompt::where('status', true)->get();
         
                 return view('user.chat_image.index', compact('chat', 'messages', 'categories', 'prompts'));
             }
@@ -84,7 +84,7 @@ class ChatImageController extends Controller
             $messages = ChatConversation::where('user_id', auth()->user()->id)->where('chat_code', 'IMAGE')->orderBy('updated_at', 'desc')->get(); 
     
             $categories = ChatPrompt::where('status', true)->groupBy('group')->pluck('group'); 
-            $prompts = ChatPrompt::all();
+            $prompts = ChatPrompt::where('status', true)->get();
     
             return view('user.chat_image.index', compact('chat', 'messages', 'categories', 'prompts'));
         }
@@ -146,33 +146,29 @@ class ChatImageController extends Controller
 
 
             # Check if user has sufficient words available to proceed
-            if (auth()->user()->available_images != -1) {
-                if ((auth()->user()->available_images + auth()->user()->available_images_prepaid) <= 0) {
+            if (auth()->user()->available_dalle_images != -1) {
+                if ((auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid) <= 0) {
                     if (!is_null(auth()->user()->member_of)) {
                         if (auth()->user()->member_use_credits_image) {
                             $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_images + $member->available_images_prepaid) <= 0) {
+                            if (($member->available_dalle_images + $member->available_dalle_images_prepaid) <= 0) {
                                 $data['status'] = 'error';
-                                $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                                $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                                 return $data;
                             }
                         } else {
                             $data['status'] = 'error';
-                            $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                            $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                             return $data;
                         }
                         
                     } else {
                         $data['status'] = 'error';
-                        $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                        $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                         return $data;
                     } 
                 }
             }
-
-            $uploading = new UserService();
-            $upload = $uploading->prompt();
-            if($upload['dota']!=622220){return;} 
 
             $chat = new ChatHistory();
             $chat->user_id = auth()->user()->id;
@@ -211,6 +207,9 @@ class ChatImageController extends Controller
                 } elseif (config('settings.default_storage') == 'aws') {
                     Storage::disk('s3')->put('images/' . $name, $contents, 'public');
                     $image_url = Storage::disk('s3')->url('images/' . $name);
+                } elseif (config('settings.default_storage') == 'r2') {
+                    Storage::disk('r2')->put('images/' . $name, $contents, 'public');
+                    $image_url = Storage::disk('r2')->url('images/' . $name);
                 } elseif (config('settings.default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->put('images/' . $name, $contents);
                     $image_url = Storage::disk('wasabi')->url('images/' . $name);
@@ -231,9 +230,9 @@ class ChatImageController extends Controller
         
                 $data['status'] = 'success';
                 $data['url'] = $image_url;
-                $data['old'] = auth()->user()->available_images + auth()->user()->available_images_prepaid;
-                $data['current'] = auth()->user()->available_images + auth()->user()->available_images_prepaid - 1;
-                $data['balance'] = (auth()->user()->available_images == -1) ? 'unlimited' : 'counted';
+                $data['old'] = auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid;
+                $data['current'] = auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid - 1;
+                $data['balance'] = (auth()->user()->available_dalle_images == -1) ? 'unlimited' : 'counted';
                 return $data; 
 
             } else {
@@ -281,22 +280,22 @@ class ChatImageController extends Controller
 
         $user = User::find(Auth::user()->id);
 
-        if (auth()->user()->available_images != -1) {
+        if (auth()->user()->available_dalle_images != -1) {
         
-            if (Auth::user()->available_images > $images) {
+            if (Auth::user()->available_dalle_images > $images) {
 
-                $total_images = Auth::user()->available_images - $images;
-                $user->available_images = ($total_images < 0) ? 0 : $total_images;
+                $total_images = Auth::user()->available_dalle_images - $images;
+                $user->available_dalle_images = ($total_images < 0) ? 0 : $total_images;
 
-            } elseif (Auth::user()->available_images_prepaid > $images) {
+            } elseif (Auth::user()->available_dalle_images_prepaid > $images) {
 
-                $total_images_prepaid = Auth::user()->available_images_prepaid - $images;
-                $user->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+                $total_images_prepaid = Auth::user()->available_dalle_images_prepaid - $images;
+                $user->available_dalle_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
 
-            } elseif ((Auth::user()->available_images + Auth::user()->available_images_prepaid) == $images) {
+            } elseif ((Auth::user()->available_dalle_images + Auth::user()->available_idalle_mages_prepaid) == $images) {
 
-                $user->available_images = 0;
-                $user->available_images_prepaid = 0;
+                $user->available_dalle_images = 0;
+                $user->available_dalle_images_prepaid = 0;
 
             } else {
 
@@ -304,37 +303,37 @@ class ChatImageController extends Controller
 
                     $member = User::where('id', Auth::user()->member_of)->first();
 
-                    if ($member->available_images > $images) {
+                    if ($member->available_dalle_images > $images) {
 
-                        $total_images = $member->available_images - $images;
-                        $member->available_images = ($total_images < 0) ? 0 : $total_images;
+                        $total_images = $member->available_dalle_images - $images;
+                        $member->available_dalle_images = ($total_images < 0) ? 0 : $total_images;
             
-                    } elseif ($member->available_images_prepaid > $images) {
+                    } elseif ($member->available_dalle_images_prepaid > $images) {
             
-                        $total_images_prepaid = $member->available_images_prepaid - $images;
-                        $member->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+                        $total_images_prepaid = $member->available_dalle_images_prepaid - $images;
+                        $member->available_dalle_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
             
-                    } elseif (($member->available_images + $member->available_images_prepaid) == $images) {
+                    } elseif (($member->available_dalle_images + $member->available_dalle_images_prepaid) == $images) {
             
-                        $member->available_images = 0;
-                        $member->available_images_prepaid = 0;
+                        $member->available_dalle_images = 0;
+                        $member->available_dalle_images_prepaid = 0;
             
                     } else {
-                        $remaining = $images - $member->available_images;
-                        $member->available_images = 0;
+                        $remaining = $images - $member->available_dalle_images;
+                        $member->available_dalle_images = 0;
         
-                        $prepaid_left = $member->available_images_prepaid - $remaining;
-                        $member->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                        $prepaid_left = $member->available_dalle_images_prepaid - $remaining;
+                        $member->available_dalle_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
                     }
 
                     $member->update();
 
                 } else {
-                    $remaining = $images - Auth::user()->available_images;
-                    $user->available_images = 0;
+                    $remaining = $images - Auth::user()->available_dalle_images;
+                    $user->available_dalle_images = 0;
 
-                    $prepaid_left = Auth::user()->available_images_prepaid - $remaining;
-                    $user->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    $prepaid_left = Auth::user()->available_dalle_images_prepaid - $remaining;
+                    $user->available_dalle_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
                 }
             }
         }

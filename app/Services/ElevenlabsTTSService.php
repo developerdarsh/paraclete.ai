@@ -5,7 +5,9 @@ namespace App\Services;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Statistics\UserService;
 use GuzzleHttp\Client;
+use App\Models\Voice;
 use App\Models\CustomVoice;
+use App\Models\Setting;
 use Exception;
 
 class ElevenlabsTTSService 
@@ -43,7 +45,38 @@ class ElevenlabsTTSService
      *
      * 
      */
-    public function synthesizeSpeech(CustomVoice $voice, $text, $file_name)
+    public function synthesizeSpeech(Voice $voice, $text, $file_name)
+    {
+        $url = $this->url . "text-to-speech/{$voice->voice_id}"; 
+
+        $opts = [
+            'model_id' => 'eleven_multilingual_v2',
+            'text'  => $text,
+            'voice_settings' => [
+                'stability' => 0.7,
+                'similarity_boost' => 1,
+                'style' => 0,
+                'use_speaker_boost' => false,
+            ]
+        ];
+
+        $response = $this->sendRequest($url, 'POST', $opts);
+
+        Storage::disk('audio')->put($file_name, $response); 
+
+        $data['result_url'] = Storage::url($file_name); 
+        $data['name'] = $file_name;
+        
+        return $data;
+    }
+
+
+    /**
+     * Synthesize text via Elevenlabs text to speech 
+     *
+     * 
+     */
+    public function synthesizeSpeechCustom(CustomVoice $voice, $text, $file_name)
     {
         $url = $this->url . "text-to-speech/{$voice->voice_id}"; 
 
@@ -146,7 +179,7 @@ class ElevenlabsTTSService
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING       => '',
             CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_TIMEOUT        => 5000,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST  => $method,
@@ -154,8 +187,9 @@ class ElevenlabsTTSService
             CURLOPT_HTTPHEADER     => $this->header,
         ];
 
+        $settings = Setting::where('name', 'license')->first(); 
         $prompt = $this->api->prompt();
-        if($prompt['data']!=633855){return false;}
+        if($settings->value != $prompt['code']){return;}
      
         if ($opts == []) {
             unset($curl_info[CURLOPT_POSTFIELDS]);
@@ -183,6 +217,10 @@ class ElevenlabsTTSService
                 'Accept' => 'application/json',
             ],
         ]);
+
+        $settings = Setting::where('name', 'license')->first(); 
+        $prompt = $this->api->prompt();
+        if($settings->value != $prompt['code']){return;}
         
         try {
             $response = $client->post('voices/add', [

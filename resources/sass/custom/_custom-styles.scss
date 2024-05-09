@@ -3875,9 +3875,10 @@ input::-webkit-search-cancel-button {
 
 	label.gateway {
 		margin-bottom: 1rem;
-		width: 115px;
-		height: 40px;
-		box-shadow: $special-shadow;
+		width: 150px;
+		height: 100px;
+		line-height: 90px;
+		border: 1px solid #ebecf1;
 
 		&:hover, &:focus {
 			border: 1px solid $primaryTextActiveColor;

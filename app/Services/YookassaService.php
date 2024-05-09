@@ -20,6 +20,7 @@ use YooKassa\Client;
 use YooKassa\Model\Notification\NotificationSucceeded;
 use YooKassa\Model\Notification\NotificationWaitingForCapture;
 use YooKassa\Model\NotificationEventType;
+use App\Services\HelperService;
 
 class YookassaService 
 {
@@ -112,41 +113,9 @@ class YookassaService
             return redirect()->back();
         }
 
-        $duration = $id->payment_frequency;
-        $days = ($duration == 'monthly') ? 30 : 365;
-
-        $subscription = Subscriber::create([
-            'user_id' => auth()->user()->id,
-            'plan_id' => $id->id,
-            'status' => 'Pending',
-            'created_at' => now(),
-            'gateway' => 'Yookassa',
-            'frequency' => $id->payment_frequency,
-            'plan_name' => $id->plan_name,
-            'words' => $id->words,
-            'images' => $id->images,
-            'characters' => $id->characters,
-            'minutes' => $id->minutes,
-            'subscription_id' => $pay_key,
-            'active_until' => Carbon::now()->addDays($days),
-        ]);       
-
-
-        $record_payment = new Payment();
-        $record_payment->user_id = auth()->user()->id;
-        $record_payment->order_id = $pay_key;
-        $record_payment->plan_id = $id->id;
-        $record_payment->plan_name = $id->plan_name;
-        $record_payment->frequency = $id->payment_frequency;
-        $record_payment->price = $id->price;
-        $record_payment->currency = $id->currency;
-        $record_payment->gateway = 'Yookassa';
-        $record_payment->status = 'pending';
-        $record_payment->words = $id->words;
-        $record_payment->images = $id->images;
-        $record_payment->characters = $id->characters;
-        $record_payment->minutes = $id->minutes;
-        $record_payment->save();
+        HelperService::registerRecurringSubscriber($id, 'Yookassa', 'Pending', $pay_key);
+     
+        HelperService::registerRecurringPayment($id, $pay_key, 'Yookassa', 'pending');
 
         return redirect($confirmationUrl);
     }
@@ -224,38 +193,11 @@ class YookassaService
 
             $days = 18250;
 
-            $subscription = Subscriber::create([
-                'user_id' => auth()->user()->id,
-                'plan_id' => $id->id,
-                'status' => 'Pending',
-                'created_at' => now(),
-                'gateway' => 'Yookassa',
-                'frequency' => 'lifetime',
-                'plan_name' => $id->plan_name,
-                'words' => $id->words,
-                'images' => $id->images,
-                'characters' => $id->characters,
-                'minutes' => $id->minutes,
-                'subscription_id' => $pay_key,
-                'active_until' => Carbon::now()->addDays($days),
-            ]);  
+            HelperService::registerSubscriber($id, 'Yookassa', 'Pending', $pay_key, $days);
+
         }
 
-        $record_payment = new Payment();
-        $record_payment->user_id = auth()->user()->id;
-        $record_payment->order_id = $pay_key;
-        $record_payment->plan_id = $id->id;
-        $record_payment->plan_name = $id->plan_name;
-        $record_payment->frequency = $type;
-        $record_payment->price = $id->price;
-        $record_payment->currency = $id->currency;
-        $record_payment->gateway = 'Yookassa';
-        $record_payment->status = 'pending';
-        $record_payment->words = $id->words;
-        $record_payment->images = $id->images;
-        $record_payment->characters = $id->characters;
-        $record_payment->minutes = $id->minutes;
-        $record_payment->save();
+        HelperService::registerPayment($type, $id->id, $pay_key, $id->price, 'Yookassa', 'pending');
 
         return redirect($confirmationUrl);
     }
@@ -307,8 +249,16 @@ class YookassaService
           $record_payment->currency = $subscription->currency;
           $record_payment->gateway = 'Yookassa';
           $record_payment->status = 'pending';
-          $record_payment->words = $subscription->words;
-          $record_payment->images = $subscription->images;
+          $record_payment->gpt_3_turbo_credits = $subscription->gpt_3_turbo_credits;
+          $record_payment->gpt_4_turbo_credits = $subscription->gpt_4_turbo_credits;
+          $record_payment->gpt_4_credits = $subscription->gpt_4_credits;
+          $record_payment->claude_3_opus_credits = $subscription->claude_3_opus_credits;
+          $record_payment->claude_3_sonnet_credits = $subscription->claude_3_sonnet_credits;
+          $record_payment->claude_3_haiku_credits = $subscription->claude_3_haiku_credits;
+          $record_payment->gemini_pro_credits = $subscription->gemini_pro_credits;
+          $record_payment->fine_tune_credits = $subscription->fine_tune_credits;
+          $record_payment->dalle_images = $subscription->dalle_images;
+          $record_payment->sd_images = $subscription->sd_images;
           $record_payment->characters = $subscription->characters;
           $record_payment->minutes = $subscription->minutes;
           $record_payment->save();

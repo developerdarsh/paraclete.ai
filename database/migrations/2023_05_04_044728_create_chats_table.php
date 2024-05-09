@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('category')->nullable();
             $table->string('type')->default('original');
             $table->string('group')->nullable();
+            $table->string('model')->default('gpt-3.5-turbo');
+            $table->string('model_mode')->default('individual');
             $table->timestamps();
         });
     }

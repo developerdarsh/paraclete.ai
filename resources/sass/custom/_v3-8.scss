@@ -104,3 +104,18 @@
       opacity: 0.2;
   }
 }
+
+.btn-keywords {
+  transition: all .3s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(29, 39, 59, 0.25);
+  }
+}
+
+.file-drop-border {
+  border: 1px dashed #c5c5d2;
+  padding-top: 1rem;
+  border-radius: 0.5rem;
+}

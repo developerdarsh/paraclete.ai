@@ -50,7 +50,7 @@ class QueryEmbedding
         return $result['data'][0]['embedding'];
     }
 
-    public function askQuestionStreamed($context, $question)
+    public function askQuestionStreamed($context, $question, $model)
     {
         if (config('settings.personal_openai_api') == 'allow') {
             config(['openai.api_key' => auth()->user()->personal_openai_key]);         
@@ -87,16 +87,6 @@ class QueryEmbedding
         ";
 
         $system_prompt = str_replace("{context}", $context, $system_template);
-
-        # Apply proper model based on role and subsciption
-        if (auth()->user()->group == 'user') {
-            $model = config('settings.default_model_user');
-        } elseif (auth()->user()->group == 'admin') {
-            $model = config('settings.default_model_admin');
-        } else {
-            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-            $model = $plan->model_chat;
-        }
 
         return OpenAI::chat()->createStreamed([
             'model' => $model,

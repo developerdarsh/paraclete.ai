@@ -128,14 +128,6 @@ class FinanceSettingController extends Controller
 
             'enable-yookassa-subscription' => 'sometimes|required',
             'yookassa_http_uri' => 'required_if:enable-yookassa-subscription,on',
-
-            'enable-paddle' => 'sometimes|required',
-            'paddle_vendor_id' => 'required_if:enable-paddle,on',
-            'paddle_vendor_auth_code' => 'required_if:enable-paddle,on',
-
-            'enable-paddle-subscription' => 'sometimes|required',
-            'paddle_vendor_id' => 'required_if:enable-paddle-subscription,on',
-            'paddle_vendor_auth_code' => 'required_if:enable-paddle-subscription,on',
         ]);
        
 
@@ -229,6 +221,12 @@ class FinanceSettingController extends Controller
         $this->storeConfiguration('IYZICO_API_KEY', request('iyzico_api_key'));
         $this->storeConfiguration('IYZICO_SECRET_KEY', request('iyzico_secret_key'));
         $this->storeConfiguration('IYZICO_SANDBOX', request('iyzico_sandbox'));
+
+        $this->storeConfiguration('2CHECKOUT_ENABLED', request('enable-2checkout'));
+        $this->storeConfiguration('2CHECKOUT_SUBSCRIPTION_ENABLED', request('enable-2checkout-subscription'));
+        $this->storeConfiguration('2CHECKOUT_MERCHANT_CODE', request('2checkout_merchant_code'));
+        $this->storeConfiguration('2CHECKOUT_SECRET_KEY', request('2checkout_secret_key'));
+        $this->storeConfiguration('2CHECKOUT_SANDBOX', request('2checkout_sandbox'));
         
 
         $rows = ['bank_instructions', 'bank_requisites'];
@@ -378,6 +376,16 @@ class FinanceSettingController extends Controller
             $yookassa->save();
         }
 
+        if (request('enable-2checkout') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'TwoCheckout')->first();
+            $yookassa->enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'TwoCheckout')->first();
+            $yookassa->enabled = 0;
+            $yookassa->save();
+        }
+
         # Enable/Disable Payment Gateways Subscription
         if (request('enable-paypal-subscription') == 'on') {
             $paypal = PaymentPlatform::where('name', 'PayPal')->first();
@@ -482,6 +490,16 @@ class FinanceSettingController extends Controller
             $yookassa->save();
         } else {
             $yookassa = PaymentPlatform::where('name', 'Iyzico')->first();
+            $yookassa->subscriptions_enabled = 0;
+            $yookassa->save();
+        }
+
+        if (request('enable-2checkout-subscription') == 'on') {
+            $yookassa = PaymentPlatform::where('name', 'TwoCheckout')->first();
+            $yookassa->subscriptions_enabled = 1;
+            $yookassa->save();
+        } else {
+            $yookassa = PaymentPlatform::where('name', 'TwoCheckout')->first();
             $yookassa->subscriptions_enabled = 0;
             $yookassa->save();
         }

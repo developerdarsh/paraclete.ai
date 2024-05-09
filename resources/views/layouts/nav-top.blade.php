@@ -195,20 +195,16 @@
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow animated">
                         <div class="text-center pt-2">
                             <span class="text-center user fs-12 pb-0 font-weight-bold">{{ Auth::user()->name }}</span><br>
-                            <span class="text-center fs-12 text-muted">{{ Auth::user()->job_role }}</span>
+                            <span class="text-center fs-12 text-muted">{{ __(Auth::user()->job_role) }}</span>
                             <div class="dropdown-divider mt-3"></div>    
                         </div>
                         <a class="dropdown-item d-flex" href="{{ route('user.plans') }}">
                             <span class="profile-icon fa-solid fa-box-circle-check"></span>
-                            <div class="fs-12">{{ __('Pricing Plans') }}</div>
+                            <div class="fs-12">{{ __('Subscription Plans') }}</div>
                         </a>        
-                        <a class="dropdown-item d-flex" href="{{ route('user.templates') }}">
-                            <span class="profile-icon fa-solid fa-microchip-ai"></span>
-                            <div class="fs-12">{{ __('Templates') }}</div>
-                        </a>
                         <a class="dropdown-item d-flex" href="{{ route('user.workbooks') }}">
                             <span class="profile-icon fa-solid fa-folder-bookmark"></span>
-                            <div class="fs-12">{{ __('Workbooks') }}</div>
+                            <div class="fs-12">{{ __('My Workbooks') }}</div>
                         </a> 
                         @if (config('payment.referral.enabled') == 'on')
                             <a class="dropdown-item d-flex" href="{{ route('user.referral') }}">
@@ -218,11 +214,7 @@
                         @endif                        
                         <a class="dropdown-item d-flex" href="{{ route('user.purchases') }}">
                             <span class="profile-icon fa-solid fa-money-check-pen"></span>
-                            <span class="fs-12">{{ __('Transactions') }}</span></a>
-                        </a>
-                        <a class="dropdown-item d-flex" href="{{ route('user.purchases.subscriptions') }}">
-                            <span class="profile-icon fa-solid fa-box-check"></span>
-                            <span class="fs-12">{{ __('Subscriptions') }}</span></a>
+                            <span class="fs-12">{{ __('Orders') }}</span></a>
                         </a>
                         @role('user|subscriber')
                             @if (config('settings.user_support') == 'enabled')
@@ -256,11 +248,7 @@
                         @endrole
                         <a class="dropdown-item d-flex" href="{{ route('user.profile') }}">
                             <span class="profile-icon fa-solid fa-id-badge"></span>
-                            <span class="fs-12">{{ __('My Profile') }}</span></a>
-                        </a>
-                        <a class="dropdown-item d-flex" href="{{ route('user.security') }}">
-                            <span class="profile-icon fa-solid fa-lock-hashtag"></span>
-                            <div class="fs-12">{{ __('Change Password') }}</div>
+                            <span class="fs-12">{{ __('Profile Settings') }}</span></a>
                         </a>
                         <a class="dropdown-item d-flex" href="{{ route('logout') }}" onclick="event.preventDefault();
                             document.getElementById('logout-form').submit();"> 

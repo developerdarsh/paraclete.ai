@@ -170,17 +170,6 @@
 		}).done(function(data) {})
 	});
 
-     /*===========================================================================
-      *
-      *  RICH TEXT BOX in resume file
-      *
-      *============================================================================*/
-
-   
-// var editor1 = new RichTextEditor("#div_editor1");
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
 
 })(jQuery);
 

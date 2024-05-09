@@ -29,6 +29,26 @@ return new class extends Migration
             $table->integer('characters')->nullable()->default(0);
             $table->integer('minutes')->nullable()->default(0);
             $table->dateTime('valid_until')->nullable();
+            $table->integer('dalle_images')->nullable()->default(0);
+            $table->integer('sd_images')->nullable()->default(0);
+            $table->string('invoice')->nullable();
+            $table->string('billing_first_name')->nullable();
+            $table->string('billing_last_name')->nullable();
+            $table->string('billing_email')->nullable();
+            $table->string('billing_phone')->nullable();
+            $table->string('billing_city')->nullable();
+            $table->string('billing_postal_code')->nullable();
+            $table->string('billing_country')->nullable();
+            $table->string('billing_vat_number')->nullable();
+            $table->text('billing_address')->nullable();
+            $table->integer('gpt_3_turbo_credits')->default(0);
+            $table->integer('gpt_4_turbo_credits')->default(0);
+            $table->integer('gpt_4_credits')->default(0);
+            $table->integer('claude_3_opus_credits')->default(0);
+            $table->integer('claude_3_sonnet_credits')->default(0);
+            $table->integer('claude_3_haiku_credits')->default(0);
+            $table->integer('fine_tune_credits')->default(0);
+            $table->integer('gemini_pro_credits')->default(0);
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

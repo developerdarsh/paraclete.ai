@@ -122,13 +122,7 @@ class InstallController extends Controller
         $this->processDatabase();
 
         Artisan::call('migrate', ['--path' => '/database/migrations/session/2021_07_24_003854_create_sessions_table.php']);
-
-        try {
-            Artisan::call('storage:link');
-        } catch(\Exception $e) {
-            return redirect()->back()->with('error', 'Symlink() PHP function is disabled in your hosting enviroment, please enable it first before proceeding with actiovation');
-        } 
-        
+      
 
         $this->storeConfiguration('SESSION_DRIVER', 'database');    
 
@@ -164,8 +158,10 @@ class InstallController extends Controller
             $this->storeConfiguration('DB_HOST', request('hostname'));
             $this->storeConfiguration('DB_PORT', request('port'));
             $this->storeConfiguration('DB_DATABASE', request('database'));
-            $this->storeConfiguration('DB_USERNAME', request('user'));
-            $this->storeConfiguration('DB_PASSWORD', request('password'));            
+            $this->storeConfiguration('DB_USERNAME', request('user')); 
+            
+            $password = "'". request('password') . "'";
+            $this->storeWithQuotes('DB_PASSWORD', $password);
         }
         
         return redirect()->route('install.activation');
@@ -263,7 +259,7 @@ class InstallController extends Controller
     private function seedDatabase()
     {
         try {
-            Artisan::call('db:seed');
+            Artisan::call('db:seed', ['--force' => true]);
 			
 
             return true;
@@ -289,8 +285,16 @@ class InstallController extends Controller
             $user->status = 'active';
             $user->group = 'admin';
             $user->password = Hash::make('admin12345');
-            $user->available_words = 1000000;
-            $user->available_images = 10000;
+            $user->gpt_3_turbo_credits = 100000;
+            $user->gpt_4_turbo_credits = 100000;
+            $user->gpt_4_credits = 100000;
+            $user->fine_tune_credits =  100000;
+            $user->claude_3_opus_credits =  100000;
+            $user->claude_3_sonnet_credits =  100000;
+            $user->claude_3_haiku_credits =  100000;
+            $user->gemini_pro_credits =  100000;
+            $user->available_dalle_images = 1000;
+            $user->available_sd_images = 1000;
             $user->available_chars = 1000000;
             $user->available_minutes = 10000;
             $user->email_verified_at = now();
@@ -351,8 +355,22 @@ class InstallController extends Controller
             } catch (\Exception $e) {
                 return back()->with('error', 'PHP file_put_contents() function is disabled in your hosting, enable it first');
             }
-           
+        }
+    }
 
+    private function storeWithQuotes($key, $value)
+    {
+        $path = base_path('.env');
+
+        if (file_exists($path)) {
+
+            try {
+                file_put_contents($path, str_replace(
+                    $key . '=' . '\'' . env($key) . '\'', $key . '=' . $value, file_get_contents($path)
+                ));
+            } catch (\Exception $e) {
+                return back()->with('error', 'PHP file_put_contents() function is disabled in your hosting, enable it first');
+            }
         }
     }
 

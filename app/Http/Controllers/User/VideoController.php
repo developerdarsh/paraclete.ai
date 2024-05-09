@@ -66,7 +66,7 @@ class VideoController extends Controller
                             return '';
                         } else {
                             $link = ($row['storage'] == 'local') ? URL::asset($row['video']) : $row['video'];
-                            $result = '<video controls preload style="width: 350px; height: 150px; border-radius: 10px;"><source src="'. $link .'" type="video/mp4"></video>';          
+                            $result = '<video controls preload="metadata" style="width: 350px; height: 150px; border-radius: 10px;"><source src="'. $link .'"></video>';          
                             return $result;
                         }
                     })
@@ -76,14 +76,32 @@ class VideoController extends Controller
                     })
                     ->rawColumns(['actions', 'created-on', 'custom-image', 'download', 'custom-status', 'custom-video'])
                     ->make(true);  
-        }    
-
+        }  
+        
         $verify = $this->api->verify_license();
         $type = (isset($verify['type'])) ? $verify['type'] : '';
 
         $this->verify();
 
-        return view('user.video.index', compact('type'));
+        if (auth()->user()->group == 'user') {
+            if (config('settings.video_user_access') != 'allow') {
+                toastr()->warning(__('AI Image to Video feature is not available for free tier users, subscribe to get a proper access'));
+                return redirect()->route('user.plans');
+            } else {
+                return view('user.video.index', compact('type'));
+            }
+        } elseif (auth()->user()->group == 'subscriber') {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            if ($plan->video_image_feature == false) {     
+                toastr()->warning(__('Your current subscription plan does not include support for AI Image to Video feature'));
+                return redirect()->back();                   
+            } else {
+                return view('user.video.index', compact('type'));
+            }
+        } else {
+            return view('user.video.index', compact('type'));
+        }
+
     }
 
 
@@ -137,31 +155,28 @@ class VideoController extends Controller
                     $stable_diffusion = $api_keys[$key];
                 }
             }
-
-            $verify = $this->user->verify_license();
-            if($verify['dota']!=622220){return;}
             
 
             # Verify if user has enough credits
-            if (auth()->user()->available_images != -1) {
-                if ((auth()->user()->available_images + auth()->user()->available_images_prepaid) < $request->max_results) {
+            if (auth()->user()->available_sd_images != -1) {
+                if ((auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid) < config('settings.cost_per_image_to_video')) {
                     if (!is_null(auth()->user()->member_of)) {
                         if (auth()->user()->member_use_credits_image) {
                             $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_images + $member->available_images_prepaid) < $request->max_results) {
+                            if (($member->available_sd_images + $member->available_sd_images_prepaid) < config('settings.cost_per_image_to_video')) {
                                 $data['status'] = 'error';
-                                $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                                $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
                                 return $data;
                             }
                         } else {
                             $data['status'] = 'error';
-                            $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                            $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
                             return $data;
                         }
                         
                     } else {
                         $data['status'] = 'error';
-                        $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                        $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
                         return $data;
                     } 
                 }
@@ -170,8 +185,10 @@ class VideoController extends Controller
 
             $plan_type = (auth()->user()->plan_id) ? 'paid' : 'free'; 
             $settings = Setting::where('name', 'license')->first(); 
+            $verify = $this->user->verify_license();
+            if($settings->value != $verify['code']){return;}
 
-            $url = 'https://api.stability.ai/v2alpha/generation/image-to-video';
+            $url = 'https://api.stability.ai/v2beta/image-to-video';
             $output = 'a1d1c037d177f38570f2c4772d4402ac';
 
             $image_path = request()->file('image')->getRealPath();
@@ -187,6 +204,10 @@ class VideoController extends Controller
                 Storage::disk('s3')->put('images/' . $name, file_get_contents($image_path), 'public');
                 $image_url = Storage::disk('s3')->url('images/' . $name);
                 $storage = 'aws';
+            } elseif (config('settings.default_storage') == 'r2') {
+                Storage::disk('r2')->put('images/' . $name, file_get_contents($image_path), 'public');
+                $image_url = Storage::disk('r2')->url('images/' . $name);
+                $storage = 'r2';
             } elseif (config('settings.default_storage') == 'wasabi') {
                 Storage::disk('wasabi')->put('images/' . $name, file_get_contents($image_path));
                 $image_url = Storage::disk('wasabi')->url('images/' . $name);
@@ -253,9 +274,9 @@ class VideoController extends Controller
 
                 $data['status'] = 'success';
                 $data['message'] = __('AI Image to Video task has been successfully created');
-                $data['old'] = auth()->user()->available_images + auth()->user()->available_images_prepaid;
-                $data['current'] = auth()->user()->available_images + auth()->user()->available_images_prepaid - config('settings.cost_per_image_to_video');
-                $data['balance'] = (auth()->user()->available_images == -1) ? 'unlimited' : 'counted';
+                $data['old'] = auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid;
+                $data['current'] = auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid - config('settings.cost_per_image_to_video');
+                $data['balance'] = (auth()->user()->available_sd_images == -1) ? 'unlimited' : 'counted';
                 return $data; 
 
             } else {
@@ -323,8 +344,9 @@ class VideoController extends Controller
             }
         }
 
+        $settings = Setting::where('name', 'license')->first(); 
         $verify = $this->user->verify_license();
-        if($verify['dota']!=622220){return;}
+        if($settings->value != $verify['code']){return;}
 
         $videos = VideoResult::where('user_id', auth()->user()->id)->where('status', 'processing')->get();
 
@@ -332,7 +354,7 @@ class VideoController extends Controller
             foreach ($videos as $video) {
                 $id = $video->job_id;
 
-                $url = 'https://api.stability.ai/v2alpha/generation/image-to-video/result/' . $id;
+                $url = 'https://api.stability.ai/v2beta/image-to-video/result/' . $id;
 
                 $ch = curl_init();
             
@@ -347,10 +369,11 @@ class VideoController extends Controller
                 curl_close($ch);
 
                 $response = json_decode($result , true);
+                
 
-                if (isset($response['finishReason'])) {
+                if (isset($response['finish_reason'])) {
 
-                    if ($response['finishReason'] == 'SUCCESS') {
+                    if ($response['finish_reason'] == 'SUCCESS') {
 
                         $name = 'video-' . Str::random(10) . '.mp4';
 
@@ -358,24 +381,27 @@ class VideoController extends Controller
                             Storage::disk('public')->put('images/' . $name, base64_decode($response['video']));
                             $video_url = 'images/' . $name;
                         } elseif (config('settings.default_storage') == 'aws') {
-                            Storage::disk('s3')->put('images/' . $name, $response['video'], 'public');
+                            Storage::disk('s3')->put('images/' . $name, base64_decode($response['video']), 'public');
                             $video_url = Storage::disk('s3')->url('images/' . $name);
+                        } elseif (config('settings.default_storage') == 'r2') {
+                            Storage::disk('r2')->put('images/' . $name, base64_decode($response['video']), 'public');
+                            $video_url = Storage::disk('r2')->url('images/' . $name);
                         } elseif (config('settings.default_storage') == 'wasabi') {
-                            Storage::disk('wasabi')->put('images/' . $name, $response['video']);
+                            Storage::disk('wasabi')->put('images/' . $name, base64_decode($response['video']));
                             $video_url = Storage::disk('wasabi')->url('images/' . $name);
                         } elseif (config('settings.default_storage') == 'gcp') {
-                            Storage::disk('gcs')->put('images/' . $name, $response['video']);
+                            Storage::disk('gcs')->put('images/' . $name, base64_decode($response['video']));
                             Storage::disk('gcs')->setVisibility('images/' . $name, 'public');
                             $video_url = Storage::disk('gcs')->url('images/' . $name);
                         } elseif (config('settings.default_storage') == 'storj') {
-                            Storage::disk('storj')->put('images/' . $name, $response['video'], 'public');
+                            Storage::disk('storj')->put('images/' . $name, base64_decode($response['video']), 'public');
                             Storage::disk('storj')->setVisibility('images/' . $name, 'public');
                             $video_url = Storage::disk('storj')->temporaryUrl('images/' . $name, now()->addHours(167));                       
                         } elseif (config('settings.default_storage') == 'dropbox') {
-                            Storage::disk('dropbox')->put('images/' . $name, $response['video']);
+                            Storage::disk('dropbox')->put('images/' . $name, base64_decode($response['video']));
                             $video_url = Storage::disk('dropbox')->url('images/' . $name);
                         }
-
+ 
                         $video->update([
                             'video' => $video_url,
                             'status' => 'completed',
@@ -384,61 +410,10 @@ class VideoController extends Controller
 
                 }
 
+             
             }
         }
 
-    
-
-        
-
-        
-
-       
-
-        // if (isset($response['id'])) {
-            
-        //     # Update credit balance
-        //     $this->updateBalance(config('settings.cost_per_image_to_video'));
-
-        //     $video = new VideoResult([
-        //         'user_id' => Auth::user()->id,
-        //         'image' => $image_url,
-        //         'storage' => $storage,
-        //         'job_id' => $response['id'],
-        //         'status' => 'processing',
-        //         'seed' => $request->seed,
-        //         'cfg_scale' => $request->cfg_scale,
-        //         'motion_bucket_id' => $request->motion_bucket_id,
-        //     ]);
-
-        //     $video->save();
-
-        //     $data['status'] = 'success';
-        //     $data['message'] = __('AI Image to Video task has been successfully created');
-        //     $data['old'] = auth()->user()->available_images + auth()->user()->available_images_prepaid;
-        //     $data['current'] = auth()->user()->available_images + auth()->user()->available_images_prepaid - config('settings.cost_per_image_to_video');
-        //     $data['balance'] = (auth()->user()->available_images == -1) ? 'unlimited' : 'counted';
-        //     return $data; 
-
-        // } else {
-
-        //     if (isset($response['name'])) {
-        //         if ($response['name'] == 'insufficient_balance') {
-        //             $message = __('You do not have sufficent balance in your Stable Diffusion account to generate new videos');
-        //         } elseif ($response['name'] == 'bad_request') {
-        //             $message = $response['errors'][0];
-        //         } else {
-        //             $message =  __('There was an issue generating your AI Video, please try again or contact support team');
-        //         }
-        //     } else {
-        //         $message = __('There was an issue generating your AI Video, please try again or contact support team');
-        //     }
-
-        //     $data['status'] = 'error';
-        //     $data['message'] = $message;
-        //     return $data;
-        // }
-        
 	}
 
 
@@ -453,22 +428,22 @@ class VideoController extends Controller
 
         $user = User::find(Auth::user()->id);
 
-        if (auth()->user()->available_images != -1) {
+        if (auth()->user()->available_sd_images != -1) {
         
-            if (Auth::user()->available_images > $images) {
+            if (Auth::user()->available_sd_images > $images) {
 
-                $total_images = Auth::user()->available_images - $images;
-                $user->available_images = ($total_images < 0) ? 0 : $total_images;
+                $total_images = Auth::user()->available_sd_images - $images;
+                $user->available_sd_images = ($total_images < 0) ? 0 : $total_images;
 
-            } elseif (Auth::user()->available_images_prepaid > $images) {
+            } elseif (Auth::user()->available_sd_images_prepaid > $images) {
 
-                $total_images_prepaid = Auth::user()->available_images_prepaid - $images;
-                $user->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+                $total_images_prepaid = Auth::user()->available_sd_images_prepaid - $images;
+                $user->available_sd_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
 
-            } elseif ((Auth::user()->available_images + Auth::user()->available_images_prepaid) == $images) {
+            } elseif ((Auth::user()->available_sd_images + Auth::user()->available_sd_images_prepaid) == $images) {
 
-                $user->available_images = 0;
-                $user->available_images_prepaid = 0;
+                $user->available_sd_images = 0;
+                $user->available_sd_images_prepaid = 0;
 
             } else {
 
@@ -476,37 +451,37 @@ class VideoController extends Controller
 
                     $member = User::where('id', Auth::user()->member_of)->first();
 
-                    if ($member->available_images > $images) {
+                    if ($member->available_sd_images > $images) {
 
-                        $total_images = $member->available_images - $images;
-                        $member->available_images = ($total_images < 0) ? 0 : $total_images;
+                        $total_images = $member->available_sd_images - $images;
+                        $member->available_sd_images = ($total_images < 0) ? 0 : $total_images;
             
-                    } elseif ($member->available_images_prepaid > $images) {
+                    } elseif ($member->available_sd_images_prepaid > $images) {
             
-                        $total_images_prepaid = $member->available_images_prepaid - $images;
-                        $member->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+                        $total_images_prepaid = $member->available_sd_images_prepaid - $images;
+                        $member->available_sd_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
             
-                    } elseif (($member->available_images + $member->available_images_prepaid) == $images) {
+                    } elseif (($member->available_sd_images + $member->available_sd_images_prepaid) == $images) {
             
-                        $member->available_images = 0;
-                        $member->available_images_prepaid = 0;
+                        $member->available_sd_images = 0;
+                        $member->available_sd_images_prepaid = 0;
             
                     } else {
-                        $remaining = $images - $member->available_images;
-                        $member->available_images = 0;
+                        $remaining = $images - $member->available_sd_images;
+                        $member->available_sd_images = 0;
         
-                        $prepaid_left = $member->available_images_prepaid - $remaining;
-                        $member->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                        $prepaid_left = $member->available_sd_images_prepaid - $remaining;
+                        $member->available_sd_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
                     }
 
                     $member->update();
 
                 } else {
-                    $remaining = $images - Auth::user()->available_images;
-                    $user->available_images = 0;
+                    $remaining = $images - Auth::user()->available_sd_images;
+                    $user->available_sd_images = 0;
 
-                    $prepaid_left = Auth::user()->available_images_prepaid - $remaining;
-                    $user->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    $prepaid_left = Auth::user()->available_sd_images_prepaid - $remaining;
+                    $user->available_sd_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
                 }
             }
         }
@@ -569,33 +544,87 @@ class VideoController extends Controller
 
                 switch ($image->storage) {
                     case 'local':
-                        if (Storage::disk('public')->exists($image->image)) {
-                            Storage::disk('public')->delete($image->image);
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('public')->exists($image->image)) {
+                                Storage::disk('public')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('public')->exists($image->video)) {
+                                Storage::disk('public')->delete($image->video);
+                            }
                         }
                         break;
                     case 'aws':
-                        if (Storage::disk('s3')->exists($image->image_name)) {
-                            Storage::disk('s3')->delete($image->image_name);
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('s3')->exists($image->image)) {
+                                Storage::disk('s3')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('s3')->exists($image->video)) {
+                                Storage::disk('s3')->delete($image->video);
+                            }
+                        }
+                        break;
+                    case 'r2':
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('r2')->exists($image->image)) {
+                                Storage::disk('r2')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('r2')->exists($image->video)) {
+                                Storage::disk('r2')->delete($image->video);
+                            }
                         }
                         break;
                     case 'wasabi':
-                        if (Storage::disk('wasabi')->exists($image->image_name)) {
-                            Storage::disk('wasabi')->delete($image->image_name);
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('wasabi')->exists($image->image)) {
+                                Storage::disk('wasabi')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('wasabi')->exists($image->video)) {
+                                Storage::disk('wasabi')->delete($image->video);
+                            }
                         }
                         break;
                     case 'storj':
-                        if (Storage::disk('storj')->exists($image->image_name)) {
-                            Storage::disk('storj')->delete($image->image_name);
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('storj')->exists($image->image)) {
+                                Storage::disk('storj')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('storj')->exists($image->video)) {
+                                Storage::disk('storj')->delete($image->video);
+                            }
                         }
                         break;
                     case 'gcp':
-                        if (Storage::disk('gcs')->exists($image->image_name)) {
-                            Storage::disk('gcs')->delete($image->image_name);
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('gcs')->exists($image->image)) {
+                                Storage::disk('gcs')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('gcs')->exists($image->video)) {
+                                Storage::disk('gcs')->delete($image->video);
+                            }
                         }
                         break;
                     case 'dropbox':
-                        if (Storage::disk('dropbox')->exists($image->image_name)) {
-                            Storage::disk('dropbox')->delete($image->image_name);
+                        if (!is_null($image->image)) {
+                            if (Storage::disk('dropbox')->exists($image->image)) {
+                                Storage::disk('dropbox')->delete($image->image);
+                            }
+                        }
+                        if (!is_null($image->video)) {
+                            if (Storage::disk('dropbox')->exists($image->video)) {
+                                Storage::disk('dropbox')->delete($image->video);
+                            }
                         }
                         break;
                     default:
@@ -631,7 +660,16 @@ class VideoController extends Controller
             return $returnArray;
         }
     }
-    
 
+
+    public function refresh(Request $request) 
+    {
+        if ($request->ajax()) {
+
+            $this->verify();
+
+            return 200;
+        }
+    }
 
 }

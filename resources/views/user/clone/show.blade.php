@@ -105,7 +105,7 @@
 
 					<!-- SAVE CHANGES ACTION BUTTON -->
 					<div class="border-0 text-right mb-2 mt-8">
-						<a href="{{ route('user.voiceover') }}" class="btn btn-primary">{{ __('Return') }}</a>
+						<a href="{{ route('user.voiceover.clone') }}" class="btn btn-primary">{{ __('Return') }}</a>
 					</div>
 				</div>
 			</div>

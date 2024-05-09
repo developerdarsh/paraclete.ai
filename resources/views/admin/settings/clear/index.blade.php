@@ -39,28 +39,5 @@
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-xl-5 col-lg-5 col-sm-12">
-			<div class="card border-0">
-				<div class="card-header">
-					<h3 class="card-title">{{ __('Generate Symlink') }}</h3>
-				</div>
-				<div class="card-body">
-					<form id="clear-symlink" method="POST" action="{{ route('admin.settings.clear.symlink')}}" enctype="multipart/form-data">
-						@csrf
-						
-						<div class="row">
-							<div class="col-sm-12 col-md-12">
-								<h6 class="fs-14 mt-2">{{ __('Generate symlink file for image results in public folder') }}</h6>
-							</div>
-						</div>
-						<div class="card-footer text-center border-0 pb-2 pt-5">													
-							<button id="upgrade" type="submit" class="btn btn-primary">{{ __('Generate Symlink') }}</button>						
-						</div>		
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
 @endsection
 

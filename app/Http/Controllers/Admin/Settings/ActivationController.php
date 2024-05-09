@@ -77,30 +77,26 @@ class ActivationController extends Controller
 
 
     /**
-     * Show delete activation key confirmation
-     *
-     */
-    public function remove()
-    {
-        return view('admin.settings.activation.delete');  
-    }
-
-
-    /**
      * Remove activation key and deactivate it
      *
      */
-    public function destroy()
+    public function destroy(Request $request)
     {
-        $verify = $this->api->deactivate_license();
+        if ($request->ajax()) {
+            $verify = $this->api->deactivate_license(request('license'), request('username'));
 
-        if ($verify['status']) {
-            $this->storeSettings('GENERAL_SETTINGS_ENVATO_ACTIVATION', ''); 
-            $this->storeSettings('GENERAL_SETTINGS_ENVATO_USERNAME', ''); 
 
-            $notification = false;
-            toastr()->success(__('Application license was successfully deactivated'));
-            return redirect()->back();
+            if ($verify['status']) {
+
+                $rows = ['license', 'username'];        
+                foreach ($rows as $row) {
+                    Setting::where('name', $row)->update(['value' => '']);
+                }
+
+                return response()->json('success'); 
+            } else {
+                return response()->json('error'); 
+            }
         }
     }
 

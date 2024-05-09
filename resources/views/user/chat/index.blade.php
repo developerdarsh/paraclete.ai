@@ -10,9 +10,15 @@
 	<div class="row mt-24">
 		<div class="col-lg-12 col-md-12 col-sm-12 p-4">
 			<div id="chat-search-panel">
-				<div class="text-center"><a class="info-btn-alt" data-bs-toggle="modal" data-bs-target="#info-alert-model" href="javascript:void(0)">How It works ?</a></div>
 				<h3 class="card-title mb-3 ml-2 fs-20 super-strong"><i class="fa-solid fa-message-captions mr-2 text-primary"></i>{{ __('AI Chat Assistants') }}</h3>
 				<h6 class="text-muted mb-3 ml-2">{{ __('Find your AI assistant quickly! Get ready to explore our fantastic lineup of AI chat assistants') }}</h6>
+				@if (config('settings.custom_chats') == 'anyone')
+					<a href="{{ route('user.chat.custom') }}" class="btn btn-primary ripple" id="create-ai-button" style="text-transform: none;">{{ __('Custom Chat Assistants') }}</a>
+				@else
+					@if ($check)
+						<a href="{{ route('user.chat.custom') }}" class="btn btn-primary ripple" id="create-ai-button" style="text-transform: none;">{{ __('Custom Chat Assistants') }}</a>
+					@endif	
+				@endif	
 				<div class="search-template">
 					<div class="input-box">								
 						<div class="form-group">							    
@@ -107,6 +113,44 @@
 								</div>							
 							</div>
 						@endforeach
+
+						@foreach ($custom_chats as $chat)
+							<div class="col-lg-3 col-md-6 col-sm-12" id="{{ $chat->chat_code }}">
+								<div class="chat-boxes text-center">
+									<a id="{{ $chat->chat_code }}" @if($chat->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatus(this.id)"><i id="{{ $chat->chat_code }}-icon" class="@if($chat->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+									<div class="card @if($chat->favorite) favorite @else border-0 @endif" id="{{ $chat->chat_code }}-card" onclick="window.location.href='{{ url('user/chats/custom') }}/{{ $chat->chat_code }}'">
+										<div class="card-body pt-3">
+											<div class="widget-user-image overflow-hidden mx-auto mt-3 mb-4"><img alt="User Avatar" class="rounded-circle" src="{{ URL::asset($chat->logo) }}"></div>
+											<div class="template-title">
+												<h6 class="mb-2 fs-15 number-font">{{ __($chat->name) }}</h6>
+											</div>
+											<div class="template-info">
+												<p class="fs-13 text-muted mb-2">{{ __($chat->sub_name) }}</p>
+											</div>							
+										</div>
+									</div>
+								</div>							
+							</div>
+						@endforeach
+
+						@foreach ($public_custom_chats as $chat)
+							<div class="col-lg-3 col-md-6 col-sm-12" id="{{ $chat->chat_code }}">
+								<div class="chat-boxes text-center">
+									<a id="{{ $chat->chat_code }}" @if($chat->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatus(this.id)"><i id="{{ $chat->chat_code }}-icon" class="@if($chat->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+									<div class="card @if($chat->favorite) favorite @else border-0 @endif" id="{{ $chat->chat_code }}-card" onclick="window.location.href='{{ url('user/chats/custom') }}/{{ $chat->chat_code }}'">
+										<div class="card-body pt-3">
+											<div class="widget-user-image overflow-hidden mx-auto mt-3 mb-4"><img alt="User Avatar" class="rounded-circle" src="{{ URL::asset($chat->logo) }}"></div>
+											<div class="template-title">
+												<h6 class="mb-2 fs-15 number-font">{{ __($chat->name) }}</h6>
+											</div>
+											<div class="template-info">
+												<p class="fs-13 text-muted mb-2">{{ __($chat->sub_name) }}</p>
+											</div>							
+										</div>
+									</div>
+								</div>							
+							</div>
+						@endforeach
 					</div>
 				</div>
 
@@ -168,29 +212,53 @@
 									</div>
 								@endif
 							@endforeach
+
+							@foreach ($custom_chats as $chat)
+								@if ($chat->group == $category->code)
+									<div class="col-lg-3 col-md-6 col-sm-12" id="{{ $chat->chat_code }}">
+										<div class="chat-boxes text-center">
+											<a id="{{ $chat->chat_code }}" @if($chat->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatus(this.id)"><i id="{{ $chat->chat_code }}-icon" class="@if($chat->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+											<div class="card @if($chat->favorite) favorite @else border-0 @endif" id="{{ $chat->chat_code }}-card" onclick="window.location.href='{{ url('user/chats/custom') }}/{{ $chat->chat_code }}'">
+												<div class="card-body pt-3">
+													<div class="widget-user-image overflow-hidden mx-auto mt-3 mb-4"><img alt="User Avatar" class="rounded-circle" src="{{ URL::asset($chat->logo) }}"></div>
+													<div class="template-title">
+														<h6 class="mb-2 fs-15 number-font">{{ __($chat->name) }}</h6>
+													</div>
+													<div class="template-info">
+														<p class="fs-13 text-muted mb-2">{{ __($chat->sub_name) }}</p>
+													</div>							
+												</div>
+											</div>
+										</div>							
+									</div>
+								@endif
+
+								@foreach ($public_custom_chats as $chat)
+									<div class="col-lg-3 col-md-6 col-sm-12" id="{{ $chat->chat_code }}">
+										<div class="chat-boxes text-center">
+											<a id="{{ $chat->chat_code }}" @if($chat->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatus(this.id)"><i id="{{ $chat->chat_code }}-icon" class="@if($chat->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+											<div class="card @if($chat->favorite) favorite @else border-0 @endif" id="{{ $chat->chat_code }}-card" onclick="window.location.href='{{ url('user/chats/custom') }}/{{ $chat->chat_code }}'">
+												<div class="card-body pt-3">
+													<div class="widget-user-image overflow-hidden mx-auto mt-3 mb-4"><img alt="User Avatar" class="rounded-circle" src="{{ URL::asset($chat->logo) }}"></div>
+													<div class="template-title">
+														<h6 class="mb-2 fs-15 number-font">{{ __($chat->name) }}</h6>
+													</div>
+													<div class="template-info">
+														<p class="fs-13 text-muted mb-2">{{ __($chat->sub_name) }}</p>
+													</div>							
+												</div>
+											</div>
+										</div>							
+									</div>
+								@endforeach
+							@endforeach
 						</div>
 					</div>
 				@endforeach
 			</div>
 		</div>
 	</div>
-<div class="modal fade" id="info-alert-model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-		<div class="modal-header">
-		<h2></h2>
-		 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-		</div>
-      <div class="modal-body">
-        <div class="row">
-          	<div style="position: relative; padding-bottom: calc(46.925329428989755% + 41px); height: 0; width: 100%"><iframe src="https://demo.arcade.software/pKW6lSdfLVsENFCLPlow?embed" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;color-scheme: light;" title="Paraclete AI templates"></iframe></div>
-          </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 @endsection
 
 @section('js')

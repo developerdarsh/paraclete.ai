@@ -7,7 +7,7 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
+	<div class="page-header justify-content-center mt-5-7">
 		<div class="page-leftheader">
 			<h4 class="page-title mb-0">{{ __('Affiliate Program') }}</h4>
 			<ol class="breadcrumb mb-2">

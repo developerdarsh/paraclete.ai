@@ -11,10 +11,12 @@ use App\Services\Statistics\SupportService;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
 use App\Models\User;
-use App\Mailers\AppMailer;
 use Carbon\Carbon;
 use DataTables;
 use DateTime;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SupportStatusUpdate;
+use Exception;
 
 
 class SupportController extends Controller
@@ -64,7 +66,7 @@ class SupportController extends Controller
                         return $username;
                     })
                     ->addColumn('custom-category', function($row){
-                        $custom_priority = '<span class="font-weight-bold">'.$row["category"].'</span>';
+                        $custom_priority = '<span class="font-weight-bold">'.__($row["category"]).'</span>';
                         return $custom_priority;
                     })
                     ->addColumn('custom-ticket', function($row){
@@ -113,7 +115,7 @@ class SupportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function response(AppMailer $mailer)
+    public function response()
     {   
         request()->validate([
             'message' => 'required|string',
@@ -122,10 +124,8 @@ class SupportController extends Controller
 
         if (request('response-status') == 'Closed' || request('response-status') == 'Resolved') {
             $resolved_on = now();
-            $notify = true;
         } else {
             $resolved_on = null;
-            $notify = false;
         }
 
         $ticket = SupportTicket::where('ticket_id', request('ticket_id'))->firstOrFail();
@@ -170,13 +170,16 @@ class SupportController extends Controller
             $message->save();
         }
 
-        if ($notify) {
-            $user = User::find($ticket->user_id);
-            $mailer->sendSupportTicketStatusNotification($user, $ticket);
-        } 
         
         if (config('settings.support_email') == 'enabled') {
-			$mailer->sendSupportTicketInformation(Auth::user(), $ticket);
+            $user = User::where('id', $ticket->user_id)->first();
+
+            try {
+                Mail::to($user)->send(new SupportStatusUpdate($ticket));
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not setup to send payment notifications via email');
+            }
+	
 		}       
 
         return redirect()->route('admin.support.show', request('ticket_id'));

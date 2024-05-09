@@ -9,12 +9,12 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Chat Prompt Manager') }}</h4>
 			<ol class="breadcrumb mb-2">
-				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
-				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-brain-circuit mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Chat Settings') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Chat Prompt Manager') }}</a></li>
 			</ol>
 		</div>
@@ -23,12 +23,12 @@
 @endsection
 
 @section('content')	
-	<div class="row">
-		<div class="col-md-12 col-sm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-10 col-md-12 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('All Chat Prompts') }}</h3>
-					<a href="{{ route('admin.davinci.chat.prompt.create') }}" id="createButton" class="btn btn-primary text-right right">{{ __('Create New Prompt') }}</a>
+					<a href="{{ route('admin.davinci.chat.prompt.create') }}" id="createButton" class="btn btn-primary ripple text-right right">{{ __('Create New Prompt') }}</a>
 				</div>
 				<div class="card-body pt-2">
 					<!-- BOX CONTENT -->
@@ -39,10 +39,10 @@
 									<tr>									
 										<th width="3%">{{ __('Prompt Group') }}</th> 					
 										<th width="5%">{{ __('Title') }}</th> 										
-										<th width="20%">{{ __('Prompt') }}</th> 										
-										<th width="3%">{{ __('Status') }}</th> 										
-										<th width="3%">{{ __('Updated On') }}</th>	    										 						           	
-										<th width="3%">{{ __('Actions') }}</th>
+										<th width="18%">{{ __('Prompt') }}</th> 										
+										<th width="2%">{{ __('Status') }}</th> 										
+										<th width="2%">{{ __('Updated On') }}</th>	    										 						           	
+										<th width="5%">{{ __('Actions') }}</th>
 									</tr>
 								</thead>
 						</table> <!-- END SET DATATABLE -->

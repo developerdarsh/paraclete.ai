@@ -3,50 +3,6 @@
 @section('css')
 	<!-- Sweet Alert CSS -->
 	<link href="{{URL::asset('plugins/sweetalert/sweetalert2.min.css')}}" rel="stylesheet" />
-	<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
-	<style>
-		.slide-arrow{
-			position: absolute;
-			top: 50%;
-			margin-top: -15px;
-		}
-		.prev-arrow{
-			left: -30px;
-			width: 0;
-			height: 0;
-			border-left: 0 solid transparent;
-			border-right: 15px solid #113463;
-			border-top: 10px solid transparent;
-			border-bottom: 10px solid transparent;
-			background: none;
-		}
-		.next-arrow{
-			right: -30px;
-			width: 0;
-			height: 0;
-			border-right: 0 solid transparent;
-			border-left: 15px solid #113463;
-			border-top: 10px solid transparent;
-			border-bottom: 10px solid transparent;
-			background: none;
-		}
-		/** Dev. Slider CSS **/
-		.slick-slide img {
-			display: block;
-			height: auto;
-			width: 100%;
-		}  
-		/* Styles for the media controller */
-		#media-container iframe,
-		#media-container video {
-			width: 100%;
-			height: 300px;
-		}
-		#videoModal .modalbody {
-				padding: 1rem;
-		}
-		/** End Dev. Slider CSS **/
-	</style>
 @endsection
 
 @section('page-header')
@@ -66,35 +22,10 @@
 @section('content')
 	<!-- USER PROFILE PAGE -->
 	<div class="row">
+
 		<div class="col-lg-12 col-md-12">
 			<div class="card border-0">
 				<div class="card-body pt-5 pb-5">
-					<div class="col-lg-12 col-md-12">
-						<div class="card border-0">
-							<div class="card-body pt-5 pb-5">
-								<div class="slider lazy">
-									@foreach($BannerModel as $value)
-										<div>
-											<div class="image">
-												<img data-lazy="{{asset('banner/'.$value['image'])}}" data-type="{{ $value['type'] }}" data-url="{{ $value['url'] }}" />
-											</div>
-										</div>
-									@endforeach
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- Bootstrap modal structure -->
-				<div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
-					<div class="modal-dialog modal-xs modal-dialog-centered" role="document">
-						<div class="modal-content">
-							<div class="modal-body">
-								<div id="media-container"></div>
-							</div>
-						</div>
-					</div>
-				</div>	
 					<div class="row mb-6" id="user-dashboard-background">
 						<div class="col-lg-4 col-md-4 col-sm-12">
 							<h4 class="mb-2 mt-2 font-weight-800 fs-24">{{ __('Welcome') }}, {{ auth()->user()->name }}</h4>
@@ -109,14 +40,14 @@
 						<div class="col-lg-8 col-md-8 col-sm-12">
 							<div class="row text-center">
 								<div class="col-lg col-md-6 col-sm-6">
-									<h6 class="fs-12 mt-3 font-weight-bold">{{ __('Words Left') }}</h6>
-									<h4 class="mb-3 font-weight-800 text-primary fs-20">@if(auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }} @endif</h4>										
+									<h6 class="fs-12 mt-3 font-weight-bold">{{ __('GPT 3.5 Turbo ') }} {{ __('Words Left') }}</h6>
+									<h4 class="mb-3 font-weight-800 text-primary fs-20">@if(auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->gpt_3_turbo_credits + auth()->user()->gpt_3_turbo_credits_prepaid) }} @endif</h4>										
 								</div>
 								@role('user|subscriber|admin')
                     				@if (config('settings.image_feature_user') == 'allow')
 										<div class="col-lg col-md-6 col-sm-6">
-											<h6 class="fs-12 mt-3 font-weight-bold">{{ __('Images Left') }}</h6>
-											<h4 class="mb-3 font-weight-800 text-primary fs-20">@if(auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid) }} @endif</h4>										
+											<h6 class="fs-12 mt-3 font-weight-bold">{{ __('DE/SD Images Left') }}</h6>
+											<h4 class="mb-3 font-weight-800 text-primary fs-20">@if(auth()->user()->available_dalle_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid + auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid) }} @endif</h4>										
 										</div>	
 									@endif
 								@endrole	
@@ -241,12 +172,12 @@
 		</div>
 
 		@if (config('settings.chat_feature_user') == 'allow')
-			<div class="mt-5">
+			<div class="col-lg col-md-12 col-sm-12 mt-5">
 				<div class="card border-0" id="user-dashboard-panels">
 					<div class="card-header pt-4 pb-4 border-0">
 						<div class="mt-3">
 							<h3 class="card-title mb-2"><i class="fa-solid fa-stars mr-2 text-yellow"></i>{{ __('Favorite AI Chat Assistants') }}</h3>
-							<h6 class="text-muted">{{ __('Have your favorite AI chat assitants handy anytime you need them') }}</h6>
+							<h6 class="text-muted">{{ __('Have your favorite AI chat assistants handy anytime you need them') }}</h6>
 						</div>
 					</div>
 					<div class="card-body pt-2 favorite-templates-panel">
@@ -284,7 +215,7 @@
 						@else
 							<div class="row text-center mt-8">
 								<div class="col-sm-12">
-									<h6 class="text-muted">{{ __('To add AI chat assitant as your favorite ones, simply click on the start icon on desired') }} <a href="{{ route('user.chat') }}" class="text-primary internal-special-links font-weight-bold">{{ __('AI Chat Assitants') }}</a></h6>
+									<h6 class="text-muted">{{ __('To add AI chat assitant as your favorite ones, simply click on the start icon on desired') }} <a href="{{ route('user.chat') }}" class="text-primary internal-special-links font-weight-bold">{{ __('AI Chat Assistants') }}</a></h6>
 								</div>
 							</div>
 						@endif
@@ -295,7 +226,7 @@
 		@endif
 
 
-		<div class="mt-5">
+		<div class="col-lg col-md-12 col-sm-12 mt-5">
 			<div class="card border-0" id="user-dashboard-panels">
 				<div class="card-header pt-4 pb-4 border-0">
 					<div class="mt-3">
@@ -379,7 +310,7 @@
 			</div>
 		</div>
 
-		<div class="mt-5">
+		<div class="col-lg-12 col-md-12 col-xm-12 mt-5">
 			<div class="card border-0">
 				<div class="card-header pt-4 border-0">
 					<div class="mt-3">
@@ -407,7 +338,6 @@
 	<!-- Chart JS -->
 	<script src="{{URL::asset('plugins/chart/chart.min.js')}}"></script>
 	<script src="{{URL::asset('plugins/sweetalert/sweetalert2.all.min.js')}}"></script>
-	<script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 	<script>
 		$(function() {
 	
@@ -633,41 +563,6 @@
 				}
 			})
 		}
-		$('.lazy').slick({
-			lazyLoad: 'ondemand',
-			// slidesToShow: 3,
-			slidesToScroll: 1,
-			prevArrow: '<button class="slide-arrow prev-arrow"></button>',
-			nextArrow: '<button class="slide-arrow next-arrow"></button>',
-			autoplay: true,
-    		autoplaySpeed: 3000, 
-		});
-	
-		$('.slider').on('click', '.image img', function () {
-			var bannerType = $(this).data('type');
-			var bannerUrl = $(this).data('url');
-			if (bannerType === 'video') {
-				if (isYouTubeUrl(bannerUrl)) {
-					$('#media-container').html('<iframe width="560" height="450" src="' + convertToEmbeddedUrl(bannerUrl) + '" frameborder="0" allowfullscreen></iframe>');
-				} else {
-					$('#media-container').html('<video width="560" height="450" controls autoplay><source src="' + bannerUrl + '" type="video/mp4"></video>');
-				}
-				$('#videoModal').modal('show');
-			} else if (bannerType === 'website') {
-				window.open(bannerUrl, '_blank');
-			}
-		});
-        function isYouTubeUrl(url) {
-            return url.includes('youtube.com') || url.includes('youtu.be');
-        }
-        function convertToEmbeddedUrl(url) {
-            var videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\d\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (videoId && videoId[1]) {
-                return 'https://www.youtube.com/embed/' + videoId[1];
-            } else {
-                return url;
-            }
-        }
 
 	</script>
 @endsection

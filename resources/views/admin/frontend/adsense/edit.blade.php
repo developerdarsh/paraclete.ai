@@ -2,8 +2,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Google Adsense Code') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa fa-globe mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -18,8 +18,8 @@
 
 @section('content')						
 	<!-- SUPPORT REQUEST -->
-	<div class="row">
-		<div class="col-lg-8 col-md-8 col-xm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-6 col-md-8 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Edit Google Adsense Code') }}: <span class="font-weight-bold text-primary">{{ $id->type }}</span></h3>
@@ -54,9 +54,9 @@
 						</div>
 
 						<!-- ACTION BUTTON -->
-						<div class="border-0 text-right mb-2 mt-1">
-							<a href="{{ route('admin.settings.adsense') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Save') }}</button>							
+						<div class="border-0 text-center mb-2 mt-1">
+							<a href="{{ route('admin.settings.adsense') }}" class="btn btn-cancel mr-2 pl-7 pr-7">{{ __('Return') }}</a>
+							<button type="submit" class="btn btn-primary pl-7 pr-7">{{ __('Save') }}</button>							
 						</div>				
 
 					</form>					

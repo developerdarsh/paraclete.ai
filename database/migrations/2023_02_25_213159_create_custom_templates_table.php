@@ -30,6 +30,8 @@ return new class extends Migration
             $table->boolean('tone')->default(false); 
             $table->longText('fields')->nullable(); 
             $table->string('package')->nullable()->default('all');
+            $table->string('model')->nullable()->default('gpt-3.5-turbo-0125');
+            $table->string('model_mode')->nullable()->default('individual');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

@@ -155,7 +155,11 @@
 
   .smart-article-editor {
     height: 100vh!important;
-    margin-top: 60px;
+    margin-top: 56px;
+
+    .tox:not(.tox-tinymce-inline) .tox-editor-header {
+      box-shadow: none;
+    }
   }
 
   #meta-container-editor {
@@ -294,8 +298,6 @@
     border: none!important;
     border-radius: 0!important;
     height: 100%!important;
-    margin-left: -20px;
-    margin-right: -20px;
     position: fixed;
   }
   
@@ -433,9 +435,6 @@
   }
 
   #single-template-view {
-    .input-box h6 {
-      font-size: 13px!important;
-    }
 
     input, 
     textarea {

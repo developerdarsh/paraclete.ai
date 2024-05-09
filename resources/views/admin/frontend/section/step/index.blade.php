@@ -19,7 +19,7 @@
 			</ol>
 		</div>
 		<div class="page-rightheader">
-			<a href="{{ route('admin.settings.step.create') }}" class="btn btn-primary mt-1">{{ __('Create New Step') }}</a>
+			<a href="{{ route('admin.settings.step.create') }}" class="btn ripple btn-primary mt-1">{{ __('Create New Step') }}</a>
 		</div>
 	</div>
 	<!-- END PAGE HEADER -->

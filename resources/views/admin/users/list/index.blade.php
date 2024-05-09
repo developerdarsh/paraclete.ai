@@ -42,15 +42,12 @@
 						<table id='listUsersTable' class='table listUsersTable' width='100%'>
 								<thead>
 									<tr>	
-										<th width="15%">{{ __('User') }}</th> 		
-										<th width="7%">{{ __('Group') }}</th>								
-										<th width="7%">{{ __('Words Left') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Images Left') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Chars Left') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Minutes Left') }}</th>         	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
-										<th width="7%">{{ __('Country') }}</th>    
-										<th width="5%">{{ __('Status') }}</th> 						           	
-										<th width="7%">{{ __('Created On') }}</th> 							    						           								    						           	
+										<th width="10%">{{ __('User') }}</th> 		
+										<th width="5%">{{ __('Group') }}</th>								
+										<th width="22%">{{ __('GPT 4 / GPT 4T / GPT 3.5T') }} / {{ __('DE Images') }} / {{ __('SD Images') }} / {{ __('Characters') }} / {{ __('Minutes') }}</th>       	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	       	        	       	    						           	     	       	    						           	        	       	    						           	     	       	    						           	
+										<th width="2%">{{ __('Country') }}</th>    
+										<th width="2%">{{ __('Status') }}</th> 						           	
+										<th width="5%">{{ __('Created On') }}</th> 							    						           								    						           	
 										<th width="7%">{{ __('Actions') }}</th>        	      	
 									</tr>
 								</thead>
@@ -91,7 +88,7 @@
 				buttons: [
 					'copy', 'csv', 'excel', 'pdf', 'print'
 				],
-				"order": [[ 9, "desc" ]],
+				"order": [[ 5, "desc" ]],
 				language: {
 					search: "<i class='fa fa-search search-icon'></i>",
 					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
@@ -121,26 +118,8 @@
 						searchable: true
 					},
 					{
-						data: 'words-left',
-						name: 'words-left',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'images-left',
-						name: 'images-left',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'chars-left',
-						name: 'chars-left',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'minutes-left',
-						name: 'minutes-left',
+						data: 'custom-credits',
+						name: 'custom-credits',
 						orderable: true,
 						searchable: true
 					},

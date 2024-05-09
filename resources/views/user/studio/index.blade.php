@@ -15,7 +15,9 @@
 @section('content')	
 	<div class="row mt-24">
 		@if ($type == 'Regular License' || $type == '')
-			<p class="fs-14" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem;">{{ __('Extended License is required in order to have access to these features') }}</p>
+			<div class="row text-center justify-content-center">
+				<p class="fs-14" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem; max-width: 1200px;">{{ __('Extended License is required in order to have access to these features') }}</p>
+			</div>	
 		@else
 			<div class="col-lg-12 col-md-12 col-sm-12">
 				<div class="card border-0">	
@@ -487,13 +489,13 @@
 								$('#merge-button').prop('disabled', true);
 								let btn = document.getElementById('merge-button');					
 								btn.innerHTML = loading;  
-								document.querySelector('#loader-line')?.classList?.remove('opacity-on');          
+								document.querySelector('#loader-line')?.classList?.remove('hidden');       
 							},
 							complete: function() {
 								$('#merge-button').prop('disabled', false);
 								let btn = document.getElementById('merge-button');					
 								btn.innerHTML = '{{ __('Merge Audio Files') }}';
-								document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+								document.querySelector('#loader-line')?.classList?.add('hidden'); 
 							},
 							success: function(data) {
 								$("html, body").animate({scrollTop: $("#sound-studio-header").offset().top}, 200);
@@ -508,7 +510,7 @@
 								$('#merge-button').prop('disabled', false);
 								let btn = document.getElementById('merge-button');					
 								btn.innerHTML = '{{ __('Merge Audio Files') }}';
-								document.querySelector('#loader-line')?.classList?.add('opacity-on');    
+								document.querySelector('#loader-line')?.classList?.add('hidden');    
 			
 							}
 						}).done(function(data) {
@@ -699,13 +701,13 @@
 						$('#upload-music').prop('disabled', true);
 						let btn = document.getElementById('upload-music');					
 						btn.innerHTML = loading;  
-						document.querySelector('#loader-line')?.classList?.remove('opacity-on');            
+						document.querySelector('#loader-line')?.classList?.remove('hidden');         
 					},
 					complete: function() {
 						$('#upload-music').prop('disabled', false);
 						let btn = document.getElementById('upload-music');					
 						btn.innerHTML = '{{ __('Upload Audio') }}';
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');            
+						document.querySelector('#loader-line')?.classList?.add('hidden');            
 					},
 					success: function(data) {
 					if (!data) {
@@ -723,7 +725,7 @@
 						$('#upload-music').prop('disabled', false);
 						let btn = document.getElementById('upload-music');					
 						btn.innerHTML = '{{ __('Upload Audio') }}';
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+						document.querySelector('#loader-line')?.classList?.add('hidden');  
 						
 						if (pond.getFiles().length != 0) {
 							for (var j = 0; j <= pond.getFiles().length - 1; j++) {

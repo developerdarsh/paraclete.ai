@@ -10,7 +10,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Str;
 use App\Models\Setting;
-use Http;
+use App\Models\SubscriptionPlan;
+use App\Models\PaymentPlatform;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailVerification;
+use Illuminate\Auth\Events\Verified;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Support\Facades\Auth;
+use App\Mail\WelcomeMessage;
+use Exception;
 
 use Spatie\Permission\Traits\HasRoles;
 
@@ -36,9 +44,64 @@ class RegisteredUserController extends Controller
                 }
             }
 
-            return view('auth.register', compact('information'));
+            if (config('settings.subscribe') == 'disabled') {
+                return view('auth.register', compact('information'));
+            } else {
+
+                return view('auth.subscribe-one', compact('information'));
+            }
         }
     }
+
+
+    public function stepTwo(Request $request)
+    {
+        $monthly = SubscriptionPlan::where('status', 'active')->where('payment_frequency', 'monthly')->count();
+        $yearly = SubscriptionPlan::where('status', 'active')->where('payment_frequency', 'yearly')->count();
+        $lifetime = SubscriptionPlan::where('status', 'active')->where('payment_frequency', 'lifetime')->count();
+
+        $monthly_subscriptions = SubscriptionPlan::where('status', 'active')->where('payment_frequency', 'monthly')->get();
+        $yearly_subscriptions = SubscriptionPlan::where('status', 'active')->where('payment_frequency', 'yearly')->get();
+        $lifetime_subscriptions = SubscriptionPlan::where('status', 'active')->where('payment_frequency', 'lifetime')->get();
+
+        return view('auth.subscribe-two', compact('monthly', 'yearly', 'lifetime', 'monthly_subscriptions', 'yearly_subscriptions', 'lifetime_subscriptions'));
+    }
+
+
+    public function stepThree(Request $request)
+    {
+        $id = SubscriptionPlan::where('id', $request->id)->first();
+        $payment_platforms = PaymentPlatform::where('subscriptions_enabled', 1)->get();
+
+        $tax_value = (config('payment.payment_tax') > 0) ? $tax = $id->price * config('payment.payment_tax') / 100 : 0;
+
+        $total_value = $tax_value + $id->price;
+        $currency = $id->currency;
+        $gateway_plan_id = $id->gateway_plan_id;
+
+        $bank_information = ['bank_instructions', 'bank_requisites'];
+        $bank = [];
+        $settings = Setting::all();
+
+        foreach ($settings as $row) {
+            if (in_array($row['name'], $bank_information)) {
+                $bank[$row['name']] = $row['value'];
+            }
+        }
+
+        $bank_order_id = 'BT-' . strtoupper(Str::random(10));
+        session()->put('bank_order_id', $bank_order_id);
+
+        return view('auth.subscribe-three', compact('id', 'payment_platforms', 'tax_value', 'total_value', 'currency', 'gateway_plan_id', 'bank', 'bank_order_id'));
+    }
+
+
+    public function stepTwoStore(Request $request)
+    {
+      
+        return redirect()->route('register.subscriber.payment', ['id' => $request->id]);
+    }
+
 
     /**
      * Handle an incoming registration request.
@@ -72,10 +135,8 @@ class RegisteredUserController extends Controller
                 $this->createNewUser($request);
 
                 if (config('settings.email_verification') == 'enabled') {
-                    toastr()->success(__('Final step! Email verification link has been sent to you'));
                     return redirect()->route('login');
                 } else {
-                    toastr()->success(__('Congratulation! You can now proceed to login with your email'));
                     return redirect()->route('login');
                 }
 
@@ -89,15 +150,14 @@ class RegisteredUserController extends Controller
             $this->createNewUser($request);
 
             if (config('settings.email_verification') == 'enabled') {
-                toastr()->success(__('Final step! Email verification link has been sent to you'));
                 return redirect()->route('login');
             } else {
-                toastr()->success(__('Congratulation! You can now proceed to login with your email'));
                 return redirect()->route('login');
             }
         }               
 
     }
+
 
     /**
      * Create new user
@@ -114,6 +174,7 @@ class RegisteredUserController extends Controller
         
         event(new Registered($user));
 
+        $email_opt_in = (request('newsletter') == 'on') ? true : false;
         $referral_code = ($request->hasCookie('referral')) ? $request->cookie('referral') : ''; 
         $referrer = ($referral_code != '') ? User::where('referral_id', $referral_code)->firstOrFail() : '';
         $referrer_id = ($referrer != '') ? $referrer->id : '';
@@ -123,36 +184,71 @@ class RegisteredUserController extends Controller
         $user->assignRole(config('settings.default_user'));
         $user->status = $status;
         $user->group = config('settings.default_user');
-        $user->available_words = config('settings.free_tier_words');
-        $user->available_images = config('settings.free_tier_images');
+        $user->gpt_3_turbo_credits = config('settings.free_gpt_3_turbo_credits');
+        $user->gpt_4_turbo_credits = config('settings.free_gpt_4_turbo_credits');
+        $user->gpt_4_credits = config('settings.free_gpt_4_credits');
+        $user->fine_tune_credits = config('settings.free_fine_tune_credits');
+        $user->claude_3_opus_credits = config('settings.free_claude_3_opus_credits');
+        $user->claude_3_sonnet_credits = config('settings.free_claude_3_sonnet_credits');
+        $user->claude_3_haiku_credits = config('settings.free_claude_3_haiku_credits');
+        $user->gemini_pro_credits = config('settings.free_gemini_pro_credits');
+        $user->available_dalle_images = config('settings.free_tier_dalle_images');
+        $user->available_sd_images = config('settings.free_tier_sd_images');
         $user->available_chars = config('settings.voiceover_welcome_chars');
         $user->available_minutes = config('settings.whisper_welcome_minutes');
         $user->default_voiceover_language = config('settings.voiceover_default_language');
         $user->default_voiceover_voice = config('settings.voiceover_default_voice');
         $user->default_template_language = config('settings.default_language');
+        $user->default_model_template = config('settings.default_model_user_template');
+        $user->default_model_chat = config('settings.default_model_user_bot');
         $user->job_role = 'Happy Person';
         $user->referral_id = strtoupper(Str::random(15));
         $user->referred_by = $referrer_id;
-		$this->addToGetResponse($request->name, $request->email);
-        $user->save();      
+        $user->email_opt_in = $email_opt_in;
+        $user->save();     
+
+        Auth::login($user, true);
+        
+        if (config('settings.email_verification') == 'enabled') {
+
+            $digits = '0123456789';
+            $digitsLength = strlen($digits);
+            $code = '';
+            for ($i = 0; $i < 6; $i++) {
+                $code .= $digits[rand(0, $digitsLength - 1)];
+            }
+            $user->verification_code = $code;
+            $user->save();
+
+            try {
+                Mail::to($user->email)->send(new EmailVerification($code));
+                toastr()->success(__('Email verification code has been successfully sent'));
+            } catch (Exception $e) {
+                toastr()->error(__('SMTP settings are not setup yet, please contact support team'));
+            }
+            
+            return view('auth.verify-email');
+        } else {
+
+            $request->user()->markEmailAsVerified();
+                
+            event(new Verified($request->user()));
+
+            $user->status = 'active';
+            $user->save();
+
+            try {
+                Mail::to($request->user())->send(new WelcomeMessage());
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not configured yet');
+            }
+            
+            toastr()->success(__('Congratulations! Your account is fully active now'));
+            return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
+        }
      
     }
 
-	protected function addToGetResponse($name, $email)
-    {
-        $apiKey = config('services.getResponse.key');
-        $listId = config('services.getResponse.list_id');
-        $response = Http::withHeaders([
-            "X-Auth-Token" => "api-key " . $apiKey,
-            "Content-Type" => "application/json", 
-        ])->post('https://api.getresponse.com/v3/contacts', [
-            "name" => $name,
-            "email" => $email,
-            "campaign" => [
-                "campaignId" => $listId
-            ]
-        ]);
-    }
 
     /**
      * Validate reCaptcha (if enabled)
@@ -182,6 +278,75 @@ class RegisteredUserController extends Controller
         $resultJson = json_decode($result);
 
         return $resultJson;
+    }
+
+
+    /**
+     * Handle an incoming registration request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function storeSubscriber(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::min(8)],
+            'agreement' => 'required',
+        ]);
+
+
+        $user = User::create([
+            'name' => $request->name . ' ' . $request->lastname,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'country' => $request->country
+        ]);
+        
+        event(new Registered($user));
+
+        $email_opt_in = (request('newsletter') == 'on') ? true : false;
+        $referral_code = ($request->hasCookie('referral')) ? $request->cookie('referral') : ''; 
+        $referrer = ($referral_code != '') ? User::where('referral_id', $referral_code)->firstOrFail() : '';
+        $referrer_id = ($referrer != '') ? $referrer->id : '';
+
+        //$status = (config('settings.email_verification') == 'disabled') ? 'active' : 'pending';
+        
+        $user->assignRole(config('settings.default_user'));
+        $user->status = 'active';
+        $user->group = config('settings.default_user');
+        $user->gpt_3_turbo_credits = config('settings.free_gpt_3_turbo_credits');
+        $user->gpt_4_turbo_credits = config('settings.free_gpt_4_turbo_credits');
+        $user->gpt_4_credits = config('settings.free_gpt_4_credits');
+        $user->fine_tune_credits = config('settings.free_fine_tune_credits');
+        $user->claude_3_opus_credits = config('settings.free_claude_3_opus_credits');
+        $user->claude_3_sonnet_credits = config('settings.free_claude_3_sonnet_credits');
+        $user->claude_3_haiku_credits = config('settings.free_claude_3_haiku_credits');
+        $user->gemini_pro_credits = config('settings.free_gemini_pro_credits');
+        $user->available_dalle_images = config('settings.free_tier_dalle_images');
+        $user->available_sd_images = config('settings.free_tier_sd_images');
+        $user->available_chars = config('settings.voiceover_welcome_chars');
+        $user->available_minutes = config('settings.whisper_welcome_minutes');
+        $user->default_voiceover_language = config('settings.voiceover_default_language');
+        $user->default_voiceover_voice = config('settings.voiceover_default_voice');
+        $user->default_template_language = config('settings.default_language');
+        $user->default_model_template = config('settings.default_model_user_template');
+        $user->default_model_chat = config('settings.default_model_user_bot');
+        $user->job_role = 'Happy Person';
+        $user->referral_id = strtoupper(Str::random(15));
+        $user->referred_by = $referrer_id;
+        $user->subscription_required = true;
+        $user->email_opt_in = $email_opt_in;
+        $user->save();  
+
+        Auth::login($user, true);
+
+        toastr()->success(__('Account successfully created, select your plan to subscribe'));
+        return redirect()->route('register.subscriber.plans');
+
     }
 
 }

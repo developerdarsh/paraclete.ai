@@ -41,42 +41,6 @@ return [
         'key' => env('OPENAI_SECRET_KEY'),
     ],
 
-	/*
-    |--------------------------------------------------------------------------
-    | GETRESPONSE
-    |--------------------------------------------------------------------------
-    */
-    'getResponse' => [
-        'key' => env('GETRESPONSE_API_KEY'),
-        'list_id' => env('GETRESPONSE_LIST_ID'),
-    ],
-    /*
-    |--------------------------------------------------------------------------
-    | ADOBE EDITOR
-    |--------------------------------------------------------------------------
-    */
-    'adobe' => [
-        'client_id' => env('ADOBE_CLIENT_ID'),
-        'appName' => env('ADOBE_APP_NAME'),
-    ],
-    /*
-    |--------------------------------------------------------------------------
-    | VIRAL RSS FEED
-    |--------------------------------------------------------------------------
-    */
-    'feed' => [
-        'key' => env('RSS_API_KEY'),
-        'secret' => env('RSS_API_SECRET'),
-    ],
-    /*
-    |--------------------------------------------------------------------------
-    | Social media 
-    |--------------------------------------------------------------------------
-    */
-    'youtube' => [
-        'key' => env('YOUTUBE_API_KEY'),
-    ],
-
     'stable_diffusion' => [
         'key' => env('STABLE_DIFFUSION_API_KEY'),
     ],
@@ -121,6 +85,14 @@ return [
         'key' => env('SERPER_API_KEY'),
     ],
 
+    'plagiarism' => [
+        'key' => env('PLAGIARISM_API_TOKEN'),
+    ],
+
+    'copyleaks' => [
+        'key' => env('COPYLEAKS_API_KEY'),
+    ],
+
     'storj' => [
         'key' => env('STORJ_ACCESS_KEY_ID'),
         'secret' => env('STORJ_SECRET_ACCESS_KEY'),
@@ -131,6 +103,14 @@ return [
         'key' => env('DROPBOX_APP_KEY'),
         'secret' => env('DROPBOX_APP_SECRET'),
         'token' => env('DROPBOX_ACCESS_TOKEN'),
+    ],
+
+    'r2' => [
+        'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+        'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+        'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+        'url' => env('CLOUDFLARE_R2_URL'),
+        'bucket' => env('CLOUDFLARE_R2_BUCKET'),
     ],
 
     /*

@@ -84,7 +84,7 @@
 				}
 
 				.plan-title {
-					color: #007bff;
+					color: #728096;
 				}
 			}
 		}
@@ -126,7 +126,7 @@
 		}
 
 		.plan-cost {
-			font-size: 40px;
+			font-size: 35px;
 			font-weight: 800;
 			color: $primaryTextColor;
 			font-family: 'Open Sans', sans-serif;
@@ -151,11 +151,11 @@
 		}
 
 		.plan-title {
-			font-size: 18px;
-			font-weight: 800;
+			font-size: 16px;
+			font-weight: 700;
 			font-family: 'Poppins', sans-serif;
 			margin-bottom: 1rem;
-			color: #007bff;
+			color: #728096;
 		}
 
 		ul li {
@@ -212,6 +212,7 @@
 
 			.plan-cost-wrapper {
 				background: #f5f9fc;
+				border-radius: 1rem;
 			}
 
 			.plan-note {

@@ -2,8 +2,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('User Support Request') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{route('admin.dashboard')}}"><i class="fa-solid fa-message-question mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -17,8 +17,8 @@
 
 @section('content')						
 	<!-- SUPPORT REQUEST -->
-	<div class="row">
-		<div class="col-lg-9 col-md-9 col-xm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-8 col-md-10 col-xm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-header p-4 pl-5 block">
 					<p class="card-title mb-4">{{ __('Ticket Subject') }}: <span class="text-info">{{ $ticket->subject }}</span></p>
@@ -98,8 +98,8 @@
 							<div class="col-12 text-center">
 								<!-- SAVE CHANGES ACTION BUTTON -->
 								<div class="border-0 mb-2">
-									<a href="{{ route('admin.support') }}" class="btn btn-cancel mr-2">{{ __('Return') }}</a>
-									<button type="submit" class="btn btn-primary">{{ __('Reply') }}</button>	
+									<a href="{{ route('admin.support') }}" class="btn btn-cancel mr-2 pl-7 pr-7">{{ __('Return') }}</a>
+									<button type="submit" class="btn btn-primary  pl-7 pr-7">{{ __('Reply') }}</button>	
 								</div>
 							</div>							
 						</div>	

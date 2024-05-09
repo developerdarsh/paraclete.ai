@@ -25,6 +25,23 @@
 	}
 }
 
+.chat-sidebar-search-small {
+	max-height: 79px;
+    font-size: 16px;
+    margin: 0;
+    padding: 1.2rem 1.5rem;
+    color: #333;
+    display: block;
+    position: relative;
+	min-height: 3.5rem;
+
+	.chat-search-icon {
+		position: absolute;
+		right: 1rem;
+		top: 35%;
+	}
+}
+
 #chat-search {
 	border-radius: 1rem;
 }
@@ -37,7 +54,6 @@
 	#message {
 		background-color: transparent;
 		border: none;
-		resize: none;
 	}
 
 	.chat-button {

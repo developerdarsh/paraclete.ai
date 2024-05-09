@@ -33,6 +33,16 @@ class Subscriber extends Model
         'paystack_customer_code',
         'paystack_authorization_code',
         'paystack_email_token',
+        'dalle_images',
+        'sd_images',
+        'gpt_3_turbo_credits',
+        'gpt_4_turbo_credits',
+        'gpt_4_credits',
+        'claude_3_opus_credits',
+        'claude_3_sonnet_credits',
+        'claude_3_haiku_credits',
+        'fine_tune_credits',
+        'gemini_pro_credits',
     ];
 
 

@@ -11,11 +11,11 @@
 	<!-- PAGE HEADER -->
 	<div class="page-header mt-5-7">
 		<div class="page-leftheader">
-			<h4 class="page-title mb-0">{{ __('Davinci Templates') }}</h4>
+			<h4 class="page-title mb-0">{{ __('Original Templates') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
 				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
-				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Davinci Templates') }}</a></li>
+				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Original Templates') }}</a></li>
 			</ol>
 		</div>
 		<div class="page-rightheader">			
@@ -31,7 +31,7 @@
 		<div class="col-lg-12 col-md-12 col-xm-12">
 			<div class="card border-0">
 				<div class="card-header">
-					<h3 class="card-title">{{ __('All Templates') }}</h3>
+					<h3 class="card-title">{{ __('All Original Templates') }}</h3>
 				</div>
 				<div class="card-body pt-2">
 					<!-- BOX CONTENT -->

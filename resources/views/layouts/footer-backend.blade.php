@@ -30,10 +30,6 @@
 <!-- Toastr JS -->
 <script src="{{URL::asset('plugins/toastr/toastr.min.js')}}"></script>
 
-<!-- multiselect select  -->
-
-<script src="{{URL::asset('plugins/bootstrap-5.0.2/js/bootstrap-multiselect.min.js')}}"></script>
-
 <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
 <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
@@ -122,13 +118,14 @@
     toastr.options.hideMethod = 'slideUp';
     toastr.options.progressBar = true;
 
+
     document.querySelector(".btn-theme-toggle > span").classList.add("fa-moon-stars");
     var myCookie = (document.cookie.match(/^(?:.*;)?\s*theme\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1];
     if (myCookie == 'dark') {
             document.querySelector(".btn-theme-toggle > span").classList.remove("fa-moon-stars");
             document.querySelector(".btn-theme-toggle > span").classList.add("fa-sun-bright");  
-            //var logo = document.querySelector(".desktop-lgo");
-           // logo.src = '../img/brand/logo-white.png'
+            var logo = document.querySelector(".desktop-lgo");
+            logo.src = '/img/brand/logo-white.png'
     }
 
     const btn = document.querySelector(".btn-theme-toggle");
@@ -138,27 +135,40 @@
             document.body.classList.add('dark-mode');
             document.querySelector(".btn-theme-toggle > span").classList.remove("fa-moon-stars");
             document.querySelector(".btn-theme-toggle > span").classList.add("fa-sun-bright");
-            //var logo = document.querySelector(".desktop-lgo");
-            //logo.src = '../img/brand/logo.png';
+            var logo = document.querySelector(".desktop-lgo");
+            logo.src = '/img/brand/logo.png';
             var theme = "dark";
         } else if(document.body.classList.contains('dark-theme')) {
             document.body.classList.remove('dark-mode');
             document.body.classList.add('light-mode');
             document.querySelector(".btn-theme-toggle > span").classList.remove("fa-sun-bright");
             document.querySelector(".btn-theme-toggle > span").classList.add("fa-moon-stars");
-            //var logo = document.querySelector(".desktop-lgo");
-            //logo.src = '../img/brand/logo-white.png';
+            var logo = document.querySelector(".desktop-lgo");
+            logo.src = '/img/brand/logo-white.png';
             var theme = "light";
         } else {
             document.querySelector(".btn-theme-toggle > span").classList.remove("fa-moon-stars");
             document.querySelector(".btn-theme-toggle > span").classList.add("fa-sun-bright");
             document.body.classList.add('dark-mode');
-            //var logo = document.querySelector(".desktop-lgo");
-            //logo.src = '../img/brand/logo-white.png';
+            var logo = document.querySelector(".desktop-lgo");
+            logo.src = '/img/brand/logo-white.png';
             var theme = "dark";
         }
     
         document.cookie = "theme=" + theme + ";path=/";
+
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            type: "POST",
+            url: '/user/profile/theme',
+            data: {'theme': theme},
+            success: function(data) {
+            },
+            error: function(data) {        
+            }
+        }).done(function(data) {})
 
         location.reload();
     });

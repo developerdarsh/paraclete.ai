@@ -7,11 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
-use App\Mailers\AppMailer;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
+use App\Models\User;
 use DataTables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SupportStatusAdmin;
+use App\Mail\SupportStatusUser;
+use App\Mail\SupportStatusUpdateAdmin;
+use Exception;
 
 
 class UserSupportController extends Controller
@@ -48,15 +53,15 @@ class UserSupportController extends Controller
                         
                     })
                     ->addColumn('custom-status', function($row){
-                        $custom_status = '<span class="cell-box support-'.strtolower($row["status"]).'">'.$row["status"].'</span>';
+                        $custom_status = '<span class="cell-box support-'.strtolower($row["status"]).'">'.__($row["status"]).'</span>';
                         return $custom_status;
                     })
                     ->addColumn('custom-priority', function($row){
-                        $custom_priority = '<span class="cell-box priority-'.strtolower($row["priority"]).'">'.$row["priority"].'</span>';
+                        $custom_priority = '<span class="cell-box priority-'.strtolower($row["priority"]).'">'.__($row["priority"]).'</span>';
                         return $custom_priority;
                     })
                     ->addColumn('custom-category', function($row){
-                        $custom_priority = '<span class="font-weight-bold">'.$row["category"].'</span>';
+                        $custom_priority = '<span class="font-weight-bold">'.__($row["category"]).'</span>';
                         return $custom_priority;
                     })
                     ->addColumn('custom-ticket', function($row){
@@ -93,7 +98,7 @@ class UserSupportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(AppMailer $mailer)
+    public function store()
     {   
         request()->validate([
             'subject' => 'required|string',
@@ -154,7 +159,15 @@ class UserSupportController extends Controller
         }
         
         if (config('settings.support_email') == 'enabled') {
-			$mailer->sendSupportTicketInformation(Auth::user(), $ticket);
+            $admin = User::where('group', 'admin')->first();
+
+            try {
+                Mail::to(Auth::user())->send(new SupportStatusUser($ticket));
+                Mail::to($admin)->send(new SupportStatusAdmin($ticket));
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not setup to send payment notifications via email');
+            }
+	
 		}
         
         toastr()->success("Support ticket has been created successfully");
@@ -168,7 +181,7 @@ class UserSupportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function response(AppMailer $mailer)
+    public function response()
     {   
         request()->validate([
             'message' => 'required|string',
@@ -216,7 +229,13 @@ class UserSupportController extends Controller
         }
         
         if (config('settings.support_email') == 'enabled') {
-			$mailer->sendSupportTicketInformation(Auth::user(), $ticket);
+			$admin = User::where('group', 'admin')->first();
+
+            try {
+                Mail::to($admin)->send(new SupportStatusUpdateAdmin($ticket));
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not setup to send payment notifications via email');
+            }
 		}       
 
         return redirect()->route('user.support.show', request('ticket_id'));

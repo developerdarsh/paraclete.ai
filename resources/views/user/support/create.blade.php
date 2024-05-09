@@ -2,8 +2,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('New Support Request') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{route('user.dashboard')}}"><i class="fa-solid fa-messages-question mr-2 fs-12"></i>{{ __('User') }}</a></li>
@@ -17,8 +17,8 @@
 
 @section('content')						
 	<!-- SUPPORT REQUEST -->
-	<div class="row">
-		<div class="col-lg-9 col-md-9 col-sm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-8 col-md-10 col-sm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Create Support Request') }}</h3>
@@ -81,7 +81,7 @@
 								<div class="input-box">
 									<div class="input-group file-browser">	
 										<h6>{{ __('Attach File') }} <span class="text-muted fs-12">({{ __('JPG | JPEG | PNG') }})</h6>								
-										<input type="text" class="form-control border-right-0 browse-file" placeholder="Include attachment file..." style="margin-right: 80px;" readonly>
+										<input type="text" class="form-control border-right-0 browse-file" placeholder="{{ __('Include attachment file...') }}" style="margin-right: 80px;" readonly>
 										<label class="input-group-btn mt-4">
 											<span class="btn btn-primary special-btn">
 												{{ __('Browse') }} <input type="file" name="attachment" style="display: none;">
@@ -108,9 +108,9 @@
 						</div>
 
 						<!-- ACTION BUTTON -->
-						<div class="border-0 text-right mb-2 mt-1">
-							<a href="{{ route('user.support') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Send') }}</button>							
+						<div class="border-0 text-center mb-2 mt-1">
+							<a href="{{ route('user.support') }}" class="btn btn-cancel mr-2 pl-7 pr-7">{{ __('Return') }}</a>
+							<button type="submit" class="btn btn-primary pl-7 pr-7">{{ __('Send') }}</button>							
 						</div>				
 
 					</form>					

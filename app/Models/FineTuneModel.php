@@ -15,6 +15,7 @@ class FineTuneModel extends Model
      * @var array
      */
     protected $fillable = [
+        'name',
         'model',
         'description',
     ];

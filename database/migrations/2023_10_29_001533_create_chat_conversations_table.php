@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('messages')->nullable();
             $table->integer('words')->nullable();
             $table->boolean('favorite')->default(false);  
+            $table->string('vector_store')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

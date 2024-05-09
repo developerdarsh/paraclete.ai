@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\SubscriptionPlan;
 use App\Models\Subscriber;
 use App\Models\User;
 use Carbon\Carbon;
@@ -61,20 +62,38 @@ class RenewCreditsTaskCommand extends Command
 
                     if ($subscription_day == $current_day) {
                         $user = User::where('id', $row->user_id)->firstOrFail();
+                        $plan = SubscriptionPlan::where('id', $row->plan_id)->firstOrFail();
                         if ($user) {
-                            $user->available_words = $user->total_words;
-                            $user->available_images = $user->total_images;
-                            $user->available_chars = $user->total_chars;
-                            $user->available_minutes = $user->total_minutes;
+                            $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                            $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                            $user->gpt_4_credits = $plan->gpt_4_credits;
+                            $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                            $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                            $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                            $user->gemini_pro_credits = $plan->gemini_pro_credits;
+                            $user->fine_tune_credits = $plan->fine_tune_credits;
+                            $user->available_chars = $plan->characters;
+                            $user->available_minutes = $plan->minutes;
+                            $user->available_dalle_images = $plan->dalle_images;
+                            $user->available_sd_images = $plan->sd_images;
                             $user->save();
                         }
                     } elseif ($subscription_day > $days_in_month) {
                         $user = User::where('id', $row->user_id)->firstOrFail();
+                        $plan = SubscriptionPlan::where('id', $row->plan_id)->firstOrFail();
                         if ($user) {
-                            $user->available_words = $user->total_words;
-                            $user->available_images = $user->total_images;
-                            $user->available_chars = $user->total_chars;
-                            $user->available_minutes = $user->total_minutes;
+                            $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                            $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                            $user->gpt_4_credits = $plan->gpt_4_credits;
+                            $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                            $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                            $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                            $user->gemini_pro_credits = $plan->gemini_pro_credits;
+                            $user->fine_tune_credits = $plan->fine_tune_credits;
+                            $user->available_chars = $plan->characters;
+                            $user->available_minutes = $plan->minutes;
+                            $user->available_dalle_images = $plan->dalle_images;
+                            $user->available_sd_images = $plan->sd_images;
                             $user->save();
                         }
                     }
@@ -97,20 +116,39 @@ class RenewCreditsTaskCommand extends Command
 
                     if ($subscription_day == $current_day) {
                         $user = User::where('id', $row->user_id)->firstOrFail();
+                        $plan = SubscriptionPlan::where('id', $row->plan_id)->firstOrFail();
+
                         if ($user) {
-                            $user->available_words = $user->total_words;
-                            $user->available_images = $user->total_images;
-                            $user->available_chars = $user->total_chars;
-                            $user->available_minutes = $user->total_minutes;
+                            $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                            $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                            $user->gpt_4_credits = $plan->gpt_4_credits;
+                            $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                            $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                            $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                            $user->gemini_pro_credits = $plan->gemini_pro_credits;
+                            $user->fine_tune_credits = $plan->fine_tune_credits;
+                            $user->available_chars = $plan->characters;
+                            $user->available_minutes = $plan->minutes;
+                            $user->available_dalle_images = $plan->dalle_images;
+                            $user->available_sd_images = $plan->sd_images;
                             $user->save();
                         }
                     } elseif ($subscription_day > $days_in_month) {
                         $user = User::where('id', $row->user_id)->firstOrFail();
+                        $plan = SubscriptionPlan::where('id', $row->plan_id)->firstOrFail();
                         if ($user) {
-                            $user->available_words = $user->total_words;
-                            $user->available_images = $user->total_images;
-                            $user->available_chars = $user->total_chars;
-                            $user->available_minutes = $user->total_minutes;
+                            $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                            $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                            $user->gpt_4_credits = $plan->gpt_4_credits;
+                            $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                            $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                            $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                            $user->gemini_pro_credits = $plan->gemini_pro_credits;
+                            $user->fine_tune_credits = $plan->fine_tune_credits;
+                            $user->available_chars = $plan->characters;
+                            $user->available_minutes = $plan->minutes;
+                            $user->available_dalle_images = $plan->dalle_images;
+                            $user->available_sd_images = $plan->sd_images;
                             $user->save();
                         }
                     }

@@ -14,8 +14,8 @@
 		<div class="col-sm-12 text-center">
 			<h3 class="card-title fs-20 mb-0 super-strong"><i class="fa-solid fa-sharp fa-sparkles mr-2 text-primary"></i>{{ __('AI Article Wizard') }}</h3>
 			<div class="mb-4" id="balance-status">
-				<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_words + auth()->user()->available_words_prepaid) }}@endif</span> {{ __('Words') }}</span>
-			</div>	
+				<span class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->gpt_3_turbo_credits + auth()->user()->gpt_3_turbo_credits_prepaid) }} {{ __('GPT 3.5 Turbo') }} {{ __('Words') }} @endif</span></span>
+			</div>
 		</div>
 
 		<div class="col-lg-7 col-md-10 col-sm-12 mb-7">
@@ -246,7 +246,32 @@
 							</div>
 
 							<div id="wizard-advanced-wrapper" class="no-gutters">
-								<div class="col-md-12 col-sm-12">
+								<div class="col-sm-12">
+									<div class="form-group">	
+										<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('AI Model') }}</h6>								
+										<select id="model" name="model" class="form-select">
+											<option value="gpt-3.5-turbo-0125">{{ __('GPT 3.5 Turbo') }}</option>		
+											@foreach ($models as $model)
+												@if (trim($model) == 'gpt-4')
+													<option value="{{ trim($model) }}">{{ __('GPT 4') }}</option>
+												@elseif (trim($model) == 'gpt-4-0125-preview')
+													<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo') }}</option>
+												@elseif (trim($model) == 'gpt-4-turbo-2024-04-09')
+													<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo with Vision') }}</option>
+												@else
+													@foreach ($fine_tunes as $fine_tune)
+														@if (trim($model) == $fine_tune->model)
+															<option value="{{ trim($model) }}">{{ $fine_tune->description }} ({{ __('Fine Tune') }})</option>
+														@endif
+													@endforeach
+												@endif
+												
+											@endforeach									
+										</select>	
+									</div>
+								</div>
+
+								<div class="col-md-12 col-sm-12 mt-5">
 									<div id="form-group">
 										<h6 class="fs-11 mb-2 font-weight-semibold">{{ __('Writing Tone') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Set result tone of the text as needed') }}"></i></h6>
 										<select id="tone" name="tone" class="form-select" >
@@ -588,7 +613,7 @@
 							$('#generate-keywords').html('{{ __('Generate Keywords') }}'); 
 
 							if (data['balance']['type'] == 'counted') {
-								animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
+								//animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
 							}
 
 						}
@@ -653,7 +678,7 @@
 							$('#generate-ideas').html('{{ __('Generate Ideas') }}'); 
 
 							if (data['balance']['type'] == 'counted') {
-								animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
+								//animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
 							}
 						}
 					},
@@ -723,7 +748,7 @@
 								$('#generate-outlines').html('{{ __('Generate Outlines') }}'); 
 								
 								if (data['balance']['type'] == 'counted') {
-									animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
+									//animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
 								}
 							
 							} else {
@@ -834,7 +859,7 @@
 							$('#generate-points').html('{{ __('Generate Talking Points') }}'); 
 
 							if (data['balance']['type'] == 'counted') {
-								animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
+								//animateValue("balance-number", data['balance']['old'], data['balance']['current'], 300);
 							}
 						} else {
 							toastr.warning('{{ __('Talking points generation is taking longer than expected, please try again') }}');

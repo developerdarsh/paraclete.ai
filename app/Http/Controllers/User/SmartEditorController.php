@@ -18,7 +18,10 @@ use App\Models\Workbook;
 use App\Models\Language;
 use App\Models\ApiKey;
 use App\Models\User;
-
+use App\Models\Setting;
+use App\Models\FineTuneModel;
+use GuzzleHttp\Client;
+use App\Services\HelperService;
 
 class SmartEditorController extends Controller
 {
@@ -52,7 +55,19 @@ class SmartEditorController extends Controller
         $other_templates = Template::whereNotIn('template_code', $user_templates)->where('status', true)->orderBy('group', 'asc')->get();   
         $custom_templates = CustomTemplate::whereNotIn('template_code', $user_templates)->where('status', true)->orderBy('group', 'asc')->get(); 
 
-        return view('user.smart_editor.index', compact('languages', 'favorite_templates', 'other_templates', 'custom_templates', 'favorite_custom_templates', 'workbooks'));
+        # Apply proper model based on role and subsciption
+        if (auth()->user()->group == 'user') {
+            $models = explode(',', config('settings.free_tier_models'));
+        } elseif (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $models = explode(',', $plan->model);
+        } else {            
+            $models = explode(',', config('settings.free_tier_models'));
+        }
+
+        $fine_tunes = FineTuneModel::all();
+
+        return view('user.smart_editor.index', compact('languages', 'favorite_templates', 'other_templates', 'custom_templates', 'favorite_custom_templates', 'workbooks', 'models', 'fine_tunes'));
     }
 
 
@@ -185,7 +200,7 @@ class SmartEditorController extends Controller
 
             foreach ($fields as $value) {
 
-                $temp .= '<h6 class="fs-14 mb-2 font-weight-bold">' . __($value['name']);
+                $temp .= '<h6 class="fs-11 mb-2 text-muted font-weight-semibold">' . __($value['name']);
                 
                 if (isset($value['required'])) {
                     if ($value['required']) {
@@ -287,32 +302,6 @@ class SmartEditorController extends Controller
             $input_keywords = '';
             $input_description = '';
 
-            # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
-                }
-            }
-
-
             # Check personal API keys
             if (config('settings.personal_openai_api') == 'allow') {
                 if (is_null(auth()->user()->personal_openai_key)) {
@@ -330,11 +319,20 @@ class SmartEditorController extends Controller
                     } 
                 }    
             } 
+
+            # Verify if user has enough credits
+            $verify = HelperService::creditCheck($request->model, 100);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
+                }
+            }
             
             $flag = Language::where('language_code', $request->language)->first();
             $uploading = new UserService();
-            $upload = $uploading->prompt();
-            if($upload['data']!=633855){return;} 
+            $settings = Setting::where('name', 'license')->first(); 
+            $verify = $uploading->prompt();
+            if($settings->value != $verify['code']){return;}
 
             if ($request->title) {
                 $input_title = $request->title;
@@ -668,6 +666,7 @@ class SmartEditorController extends Controller
             $content->group = $template->group;
             $content->tokens = 0;
             $content->plan_type = $plan_type;
+            $content->model = $request->model;
             $content->save();
 
             $data['status'] = 'success';     
@@ -723,16 +722,7 @@ class SmartEditorController extends Controller
         $language = $request->language;
         $content = Content::where('id', $content_id)->first();
         $prompt = $content->input_text;  
-
-        # Apply proper model based on role and subsciption
-        if (auth()->user()->group == 'user') {
-            $model = config('settings.default_model_user');
-        } elseif (auth()->user()->group == 'admin') {
-            $model = config('settings.default_model_admin');
-        } else {
-            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-            $model = $plan->model;
-        }
+        $model = $content->model;  
 
         return response()->stream(function () use($model, $prompt, $content_id, $temperature, $language) {
 
@@ -784,16 +774,17 @@ class SmartEditorController extends Controller
            
 
             # Update credit balance
-            if ($language != 'cmn-CN' && $language != 'ja-JP') {
-                $words = count(explode(' ', ($text)));
-                $this->updateBalance($words); 
-            } else {
-                $words = $this->updateBalanceKanji($text);
-            }
+            $words = count(explode(' ', ($text)));
+            HelperService::updateBalance($words, $model); 
+            // if ($language != 'cmn-CN' && $language != 'ja-JP') {
+            //     $words = count(explode(' ', ($text)));
+            //     $this->updateBalance($words); 
+            // } else {
+            //     $words = $this->updateBalanceKanji($text);
+            // }
              
 
             $content = Content::where('id', $content_id)->first();
-            $content->model = $model;
             $content->tokens = $words;
             $content->words = $words;
             $content->save();
@@ -853,22 +844,13 @@ class SmartEditorController extends Controller
             }
         }
 
+        $model = 'gpt-3.5-turbo-0125';
 
         # Verify if user has enough credits
-        if (auth()->user()->available_words != -1) {
-            if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < 100) {
-                if (!is_null(auth()->user()->member_of)) {
-                    if (auth()->user()->member_use_credits_template) {
-                        $member = User::where('id', auth()->user()->member_of)->first();
-                        if (($member->available_words + $member->available_words_prepaid) < 100) {
-                            return response()->json(["status" => "error", 'message' => __('Not enough word balance to proceed, subscribe or top up your word balance and try again')]);
-                        }
-                    } else {
-                        return response()->json(["status" => "error", 'message' => __('Not enough word balance to proceed, subscribe or top up your word balance and try again')]);
-                    }
-                } else {
-                    return response()->json(["status" => "error", 'message' => __('Not enough word balance to proceed, subscribe or top up your word balance and try again')]);
-                } 
+        $verify = HelperService::creditCheck($model, 100);
+        if (isset($verify['status'])) {
+            if ($verify['status'] == 'error') {
+                return $verify;
             }
         }
 
@@ -884,15 +866,6 @@ class SmartEditorController extends Controller
         }
         
 
-        if (auth()->user()->group == 'user') {
-            $model = config('settings.default_model_user');
-        } elseif (auth()->user()->group == 'admin') {
-            $model = config('settings.default_model_admin');
-        } else {
-            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-            $model = $plan->model;
-        }
-
         $completion = OpenAI::chat()->create([
             'model' => $model,
             'temperature' => 0.9,
@@ -904,166 +877,10 @@ class SmartEditorController extends Controller
 
 
         $words = count(explode(' ', ($completion->choices[0]->message->content)));
-        $this->updateBalance($words); 
+        HelperService::updateBalance($words, $model); 
 
         return response()->json(["status" => "success", "message" => $completion->choices[0]->message->content]);
     }
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalance($words) {
-
-        $user = User::find(Auth::user()->id);
-
-        if (auth()->user()->available_words != -1) {
-
-            if (Auth::user()->available_words > $words) {
-
-                $total_words = Auth::user()->available_words - $words;
-                $user->available_words = ($total_words < 0) ? 0 : $total_words;
-                $user->update();
-    
-            } elseif (Auth::user()->available_words_prepaid > $words) {
-    
-                $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-                $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-                $user->update();
-    
-            } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-    
-                $user->available_words = 0;
-                $user->available_words_prepaid = 0;
-                $user->update();
-    
-            } else {
-    
-                if (!is_null(Auth::user()->member_of)) {
-    
-                    $member = User::where('id', Auth::user()->member_of)->first();
-    
-                    if ($member->available_words > $words) {
-    
-                        $total_words = $member->available_words - $words;
-                        $member->available_words = ($total_words < 0) ? 0 : $total_words;
-            
-                    } elseif ($member->available_words_prepaid > $words) {
-            
-                        $total_words_prepaid = $member->available_words_prepaid - $words;
-                        $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            
-                    } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-            
-                        $member->available_words = 0;
-                        $member->available_words_prepaid = 0;
-            
-                    } else {
-                        $remaining = $words - $member->available_words;
-                        $member->available_words = 0;
-        
-                        $prepaid_left = $member->available_words_prepaid - $remaining;
-                        $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-    
-                    $member->update();
-    
-                } else {
-                    $remaining = $words - Auth::user()->available_words;
-                    $user->available_words = 0;
-    
-                    $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                    $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    $user->update();
-                }
-            }
-        } 
-
-        return true;
-    }
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalanceKanji($text) {
-
-        $user = User::find(Auth::user()->id);
-  
-        $words = mb_strlen($text,'utf8');
-
-        if (Auth::user()->available_words > $words) {
-
-            $total_words = Auth::user()->available_words - $words;
-            $user->available_words = ($total_words < 0) ? 0 : $total_words;
-            $user->update();
-
-        } elseif (Auth::user()->available_words_prepaid > $words) {
-
-            $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-            $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            $user->update();
-
-        } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-
-            $user->available_words = 0;
-            $user->available_words_prepaid = 0;
-            $user->update();
-
-        } else {
-
-            if (!is_null(Auth::user()->member_of)) {
-
-                $member = User::where('id', Auth::user()->member_of)->first();
-
-                if ($member->available_words > $words) {
-
-                    $total_words = $member->available_words - $words;
-                    $member->available_words = ($total_words < 0) ? 0 : $total_words;
-        
-                } elseif ($member->available_words_prepaid > $words) {
-        
-                    $total_words_prepaid = $member->available_words_prepaid - $words;
-                    $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-        
-                } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-        
-                    $member->available_words = 0;
-                    $member->available_words_prepaid = 0;
-        
-                } else {
-                    $remaining = $words - $member->available_words;
-                    $member->available_words = 0;
-    
-                    $prepaid_left = $member->available_words_prepaid - $remaining;
-                    $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                }
-
-                $member->update();
-
-            } else {
-                $remaining = $words - Auth::user()->available_words;
-                $user->available_words = 0;
-
-                $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                $user->update();
-            }
-            
-
-        }
-
-        return $words;
-    }
-
 
 
     /**
@@ -2905,8 +2722,38 @@ class SmartEditorController extends Controller
     public function wordpress(Request $request)
     {
        
+$username = 'admin';
+$password = 'admin';
+        $client = new Client([                
+            'base_uri' => 'http://localhost:81/berkine/wp-json/wp/v2/',
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode($username.":".$password),                
+                'Accept' => 'application/json',
+                'Content-type' => 'application/json'
+            ]
+        ]);
 
-        // removed on production version, to be released soon. 
+        $response = $client->post('posts', [
+            'form_params' => [
+                'title' => 'oppo',
+                'content' => 'pop'
+            ],
+        ]);
+
+        // WordPress::setServer('http://localhost:81/berkine')
+        //             ->setUsername('admin')
+        //             ->setApplicationPassword('admin');
+        
+        //             $data = [
+        //                 'title' => 'title joker',
+        //                 'parent' => 0,
+        //                 'slug' => 'oph0se-se', //Str::slug('title', '-'),
+        //                 'content' => 'content text',
+        //             ];
+        //             $post = WordPress::post()->create($data);
+
+        // $response = json_decode($post->getBody(), true);
+        \Log::info($response); 
 
         
     }

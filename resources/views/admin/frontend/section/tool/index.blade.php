@@ -18,6 +18,9 @@
 				<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('AI Tools Section') }}</a></li>
 			</ol>
 		</div>
+		<div class="page-rightheader">
+			<a href="{{ route('admin.settings.tool.create') }}" class="btn ripple btn-primary mt-1">{{ __('Create New Tool') }}</a>
+		</div>
 	</div>
 	<!-- END PAGE HEADER -->
 @endsection
@@ -117,6 +120,46 @@
 						searchable: false
 					},
 				]
+			});
+
+
+			// DELETE FAQ
+			$(document).on('click', '.deleteButton', function(e) {
+
+				e.preventDefault();
+
+				Swal.fire({
+					title: '{{ __('Confirm Tool Deletion') }}',
+					text: '{{ __('It will permanently delete this tool') }}',
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: '{{ __('Delete') }}',
+					reverseButtons: true,
+				}).then((result) => {
+					if (result.isConfirmed) {
+						var formData = new FormData();
+						formData.append("id", $(this).attr('id'));
+						$.ajax({
+							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+							method: 'post',
+							url: 'tools/delete',
+							data: formData,
+							processData: false,
+							contentType: false,
+							success: function (data) {
+								if (data == 'success') {
+									Swal.fire('{{ __('Tool Deleted') }}', '{{ __('Tool has been successfully deleted') }}', 'success');	
+									$("#dataTable").DataTable().ajax.reload();								
+								} else {
+									Swal.fire('{{ __('Delete Failed') }}', '{{ __('There was an error while deleting this tool') }}', 'error');
+								}      
+							},
+							error: function(data) {
+								Swal.fire('Oops...','Something went wrong!', 'error')
+							}
+						})
+					} 
+				})
 			});
 
 		});

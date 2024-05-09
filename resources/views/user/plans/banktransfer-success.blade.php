@@ -2,12 +2,12 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Bank Transfer Checkout') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('user.dashboard') }}"><i class="fa-solid fa-box-circle-check mr-2 fs-12"></i>{{ __('User') }}</a></li>
-				<li class="breadcrumb-item active" aria-current="page"><a href="{{ route('user.plans') }}"> {{ __('Pricing Plans') }}</a></li>
+				<li class="breadcrumb-item" aria-current="page"><a href="{{ route('user.plans') }}"> {{ __('Pricing Plans') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="{{url('#')}}"> {{ __('Bank Transfer Checkout') }}</a></li>
 			</ol>
 		</div>
@@ -16,7 +16,7 @@
 @endsection
 
 @section('content')	
-	<div class="row">
+	<div class="row justify-content-center">
 		<div class="col-md-6">
 			<div class="card border-0 pt-2">
 				<div class="card-body">			

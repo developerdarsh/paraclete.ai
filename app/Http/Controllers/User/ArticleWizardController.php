@@ -20,6 +20,8 @@ use App\Models\Language;
 use App\Models\ApiKey;
 use App\Models\User;
 use App\Models\ArticleWizard;
+use App\Models\FineTuneModel;
+use App\Services\HelperService;
 use Exception;
 
 
@@ -41,6 +43,19 @@ class ArticleWizardController extends Controller
      */
     public function index(Request $request)
     {   
+        # Apply proper model based on role and subsciption
+        if (auth()->user()->group == 'user') {
+            $models = explode(',', config('settings.free_tier_models'));
+        } elseif (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $models = explode(',', $plan->model);
+        } else {            
+            $models = explode(',', config('settings.free_tier_models'));
+        }
+
+        $fine_tunes = FineTuneModel::all();
+        $default_model = auth()->user()->default_model_template;
+
         # Check user permission to use the feature
         if (auth()->user()->group == 'user') {
             if (config('settings.wizard_access_user') != 'allow') {
@@ -61,7 +76,7 @@ class ArticleWizardController extends Controller
 
                 $wizard = ArticleWizard::find($wizard->id)->toArray();
 
-                return view('user.templates.wizard.index', compact('languages', 'workbooks', 'wizard'));
+                return view('user.templates.wizard.index', compact('languages', 'workbooks', 'wizard', 'models', 'fine_tunes', 'default_model'));
             }
         } elseif (auth()->user()->group == 'subscriber') {
             $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
@@ -83,7 +98,7 @@ class ArticleWizardController extends Controller
 
                 $wizard = ArticleWizard::find($wizard->id)->toArray();
 
-                return view('user.templates.wizard.index', compact('languages', 'workbooks', 'wizard'));
+                return view('user.templates.wizard.index', compact('languages', 'workbooks', 'wizard', 'models', 'fine_tunes', 'default_model'));
             }
         } else {
             $languages = Language::orderBy('languages.language', 'asc')->get();
@@ -100,7 +115,7 @@ class ArticleWizardController extends Controller
 
             $wizard = ArticleWizard::find($wizard->id)->toArray();
 
-            return view('user.templates.wizard.index', compact('languages', 'workbooks', 'wizard'));
+            return view('user.templates.wizard.index', compact('languages', 'workbooks', 'wizard', 'models', 'fine_tunes', 'default_model'));
         }
         
     }
@@ -116,7 +131,7 @@ class ArticleWizardController extends Controller
 	public function keywords(Request $request) 
     {
         if ($request->ajax()) {
-            $max_tokens = 100;
+            $max_tokens = 50;
 
            
             # Check Openai APIs
@@ -128,44 +143,16 @@ class ArticleWizardController extends Controller
             }
 
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
             }
-            $identify = $this->api->verify_license();
-            if($identify['dota']!=622220){return false;}
-
-            # Apply proper model based on role and subsciption
-            if (auth()->user()->group == 'user') {
-                $model = config('settings.default_model_user');
-            } elseif (auth()->user()->group == 'admin') {
-                $model = config('settings.default_model_admin');
-            } else {
-                $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-                $model = $plan->model;
-            }
-
+  
             try {
                 $response = OpenAI::chat()->create([
-                    'model' => $model,
+                    'model' => $request->model,
                     'messages' => [[
                         'role' => 'user',
                         'content' => "Generate $request->keywords_numbers keywords (simple words or 2 words, not phrase, not person name) about '$request->topic'. Must resut as a comma separated string without any extra details. Result format is: keyword1, keyword2, ..., keywordN. Must not write ```json."
@@ -174,7 +161,7 @@ class ArticleWizardController extends Controller
 
                 # Update credit balance
                 $words = count(explode(' ', ($response['choices'][0]['message']['content'])));
-                $this->updateBalance($words); 
+                HelperService::updateBalance($words, $request->model); 
 
                 $flag = Language::where('language_code', $request->language)->first();
 
@@ -216,7 +203,7 @@ class ArticleWizardController extends Controller
 	public function ideas(Request $request) 
     {
         if ($request->ajax()) {
-            $max_tokens = '';
+            $max_tokens = 50;
 
            
             # Check Openai APIs
@@ -228,39 +215,11 @@ class ArticleWizardController extends Controller
             }
 
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
-            }
-            $identify = $this->api->verify_license();
-            if($identify['dota']!=622220){return false;}
-
-            # Apply proper model based on role and subsciption
-            if (auth()->user()->group == 'user') {
-                $model = config('settings.default_model_user');
-            } elseif (auth()->user()->group == 'admin') {
-                $model = config('settings.default_model_admin');
-            } else {
-                $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-                $model = $plan->model;
             }
 
             try {
@@ -272,7 +231,7 @@ class ArticleWizardController extends Controller
                 }
 
                 $response = OpenAI::chat()->create([
-                    'model' => $model,
+                    'model' => $request->model,
                     'messages' => [[
                         'role' => 'user',
                         'content' => $prompt,
@@ -294,7 +253,7 @@ class ArticleWizardController extends Controller
 
                 # Update credit balance
                 $words = count(explode(' ', ($response['choices'][0]['message']['content'])));
-                $this->updateBalance($words); 
+                HelperService::updateBalance($words, $request->model); 
 
                 $wizard = ArticleWizard::where('id', $request->wizard)->first();
                 if (is_null($wizard->titles)) {
@@ -336,7 +295,7 @@ class ArticleWizardController extends Controller
 	public function outlines(Request $request) 
     {
         if ($request->ajax()) {
-            $max_tokens = '';
+            $max_tokens = 50;
 
            
             # Check Openai APIs
@@ -348,37 +307,11 @@ class ArticleWizardController extends Controller
             }
 
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
-            }
-
-            # Apply proper model based on role and subsciption
-            if (auth()->user()->group == 'user') {
-                $model = config('settings.default_model_user');
-            } elseif (auth()->user()->group == 'admin') {
-                $model = config('settings.default_model_admin');
-            } else {
-                $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-                $model = $plan->model;
             }
 
             try {
@@ -390,7 +323,7 @@ class ArticleWizardController extends Controller
                 }
 
                 $response = OpenAI::chat()->create([
-                    'model' => $model,
+                    'model' => $request->model,
                     'messages' => [[
                         'role' => 'user',
                         'content' => $prompt,
@@ -403,7 +336,7 @@ class ArticleWizardController extends Controller
                 
                 # Update credit balance
                 $words = count(explode(' ', ($response['choices'][0]['message']['content'])));
-                $this->updateBalance($words); 
+                HelperService::updateBalance($words, $request->model); 
 
                 $flag = Language::where('language_code', $request->language)->first();
 
@@ -443,7 +376,7 @@ class ArticleWizardController extends Controller
 	public function talkingPoints(Request $request) 
     {
         if ($request->ajax()) {
-            $max_tokens = '';
+            $max_tokens = 50;
 
            
             # Check Openai APIs
@@ -455,39 +388,11 @@ class ArticleWizardController extends Controller
             }
 
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
-            }
-            $identify = $this->api->verify_license();
-            if($identify['data']!=633855){return false;}
-
-            # Apply proper model based on role and subsciption
-            if (auth()->user()->group == 'user') {
-                $model = config('settings.default_model_user');
-            } elseif (auth()->user()->group == 'admin') {
-                $model = config('settings.default_model_admin');
-            } else {
-                $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-                $model = $plan->model;
             }
 
             try {
@@ -508,7 +413,7 @@ class ArticleWizardController extends Controller
                         }
     
                         $response = OpenAI::chat()->create([
-                            'model' => $model,
+                            'model' => $request->model,
                             'messages' => [[
                                 'role' => 'user',
                                 'content' => $prompt,
@@ -528,7 +433,7 @@ class ArticleWizardController extends Controller
                     }                    
                 }
 
-                $this->updateBalance($total_words);
+                HelperService::updateBalance($total_words, $request->model);
 
                 $flag = Language::where('language_code', $request->language)->first();
 
@@ -583,31 +488,61 @@ class ArticleWizardController extends Controller
                 $data['message'] = __('You must include your personal Openai API key in your profile settings first');
                 return $data; 
             }
-
+            
+            $vendor = '';
             # Verify if user has enough credits
-            if (auth()->user()->available_images != -1) {
-                if ((auth()->user()->available_images + auth()->user()->available_images_prepaid) < 1) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_image) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_images + $member->available_images_prepaid) < 1) {
+            if (config('settings.wizard_image_vendor') == 'dall-e-2' || config('settings.wizard_image_vendor') == 'dall-e-3' || config('settings.wizard_image_vendor') == 'dall-e-3-hd') {
+                $vendor = 'dalle';
+                if (auth()->user()->available_dalle_images != -1) {
+                    if ((auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid) < 1) {
+                        if (!is_null(auth()->user()->member_of)) {
+                            if (auth()->user()->member_use_credits_image) {
+                                $member = User::where('id', auth()->user()->member_of)->first();
+                                if (($member->available_dalle_images + $member->available_dalle_images_prepaid) < 1) {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
+                                    return $data;
+                                }
+                            } else {
                                 $data['status'] = 'error';
-                                $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                                $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                                 return $data;
                             }
+                            
                         } else {
                             $data['status'] = 'error';
-                            $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                            $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                             return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
-                        return $data;
-                    } 
+                        } 
+                    }
+                }
+            } else {
+                $vendor = 'sd';
+                if (auth()->user()->available_sd_images != -1) {
+                    if ((auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid) < 1) {
+                        if (!is_null(auth()->user()->member_of)) {
+                            if (auth()->user()->member_use_credits_image) {
+                                $member = User::where('id', auth()->user()->member_of)->first();
+                                if (($member->available_sd_images + $member->available_sd_images_prepaid) < 1) {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
+                                    return $data;
+                                }
+                            } else {
+                                $data['status'] = 'error';
+                                $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
+                                return $data;
+                            }
+                            
+                        } else {
+                            $data['status'] = 'error';
+                            $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
+                            return $data;
+                        } 
+                    }
                 }
             }
+            
 
             $response = '';
             $storage = '';
@@ -686,6 +621,10 @@ class ArticleWizardController extends Controller
                                 Storage::disk('s3')->put('images/' . $name, $image, 'public');
                                 $image_url = Storage::disk('s3')->url('images/' . $name);
                                 $storage = 'aws';
+                            } elseif (config('settings.default_storage') == 'r2') {
+                                Storage::disk('r2')->put('images/' . $name, $image, 'public');
+                                $image_url = Storage::disk('r2')->url('images/' . $name);
+                                $storage = 'r2';
                             } elseif (config('settings.default_storage') == 'wasabi') {
                                 Storage::disk('wasabi')->put('images/' . $name, $image);
                                 $image_url = Storage::disk('wasabi')->url('images/' . $name);
@@ -734,6 +673,10 @@ class ArticleWizardController extends Controller
                                     Storage::disk('s3')->put('images/' . $name, $contents, 'public');
                                     $image_url = Storage::disk('s3')->url('images/' . $name);
                                     $storage = 'aws';
+                                } elseif (config('settings.default_storage') == 'r2') {
+                                    Storage::disk('r2')->put('images/' . $name, $contents, 'public');
+                                    $image_url = Storage::disk('r2')->url('images/' . $name);
+                                    $storage = 'r2';
                                 } elseif (config('settings.default_storage') == 'wasabi') {
                                     Storage::disk('wasabi')->put('images/' . $name, $contents);
                                     $image_url = Storage::disk('wasabi')->url('images/' . $name);
@@ -761,7 +704,7 @@ class ArticleWizardController extends Controller
             }
 
             # Update image credit balance
-            $this->updateImageBalance(1);
+            $this->updateImageBalance(1, $vendor);
 
             $flag = Language::where('language_code', $request->language)->first();
 
@@ -797,30 +740,13 @@ class ArticleWizardController extends Controller
     {
         if ($request->ajax()) {
             $prompt = '';
-            $max_tokens = '';
+            $max_tokens = 50;
 
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < $max_tokens) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_template) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < $max_tokens) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, $max_tokens);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
             }
 
@@ -855,6 +781,7 @@ class ArticleWizardController extends Controller
             $content->tokens = 0;
             $content->image = $request->image_url;
             $content->plan_type = $plan_type;
+            $content->model = $request->model;
             $content->save();
 
             $data['status'] = 'success';       
@@ -890,16 +817,9 @@ class ArticleWizardController extends Controller
         $wizard = $request->wizard;
         $content = $request->content;
         $max_words = $request->max_words;
+        $current_content = Content::where('id', $content)->first();
+        $model = $current_content->model;
 
-        # Apply proper model based on role and subsciption
-        if (auth()->user()->group == 'user') {
-            $model = config('settings.default_model_user');
-        } elseif (auth()->user()->group == 'admin') {
-            $model = config('settings.default_model_admin');
-        } else {
-            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
-            $model = $plan->model;
-        }
 
         return response()->stream(function () use($model, $wizard, $content) {
 
@@ -975,16 +895,17 @@ class ArticleWizardController extends Controller
             }
 
             # Update credit balance
-            if ($input->language != 'Chinese (Mandarin)' && $input->language != 'Japanese (Japan)') {
-                $words = count(explode(' ', ($text)));
-                $this->updateBalance($words); 
-            } else {
-                $words = $this->updateBalanceKanji($text);
-            }
+            $words = count(explode(' ', ($text)));
+            HelperService::updateBalance($words, $model); 
+            // if ($input->language != 'Chinese (Mandarin)' && $input->language != 'Japanese (Japan)') {
+            //     $words = count(explode(' ', ($text)));
+            //     $this->updateBalance($words); 
+            // } else {
+            //     $words = $this->updateBalanceKanji($text);
+            // }
              
 
             $content = Content::where('id', $content)->first();
-            $content->model = $model;
             $content->tokens = $words;
             $content->words = $words;
             $content->input_text = $prompt;
@@ -1011,230 +932,135 @@ class ArticleWizardController extends Controller
 
     /**
 	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalance($words) {
-
-        $user = User::where('id', auth()->user()->id)->first();
-
-        if (auth()->user()->available_words != -1) {
-
-            if (Auth::user()->available_words > $words) {
-
-                $total_words = Auth::user()->available_words - $words;
-                $user->available_words = ($total_words < 0) ? 0 : $total_words;
-                $user->update();
-    
-            } elseif (Auth::user()->available_words_prepaid > $words) {
-    
-                $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-                $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-                $user->update();
-    
-            } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-    
-                $user->available_words = 0;
-                $user->available_words_prepaid = 0;
-                $user->update();
-    
-            } else {
-    
-                if (!is_null(Auth::user()->member_of)) {
-    
-                    $member = User::where('id', Auth::user()->member_of)->first();
-    
-                    if ($member->available_words > $words) {
-    
-                        $total_words = $member->available_words - $words;
-                        $member->available_words = ($total_words < 0) ? 0 : $total_words;
-            
-                    } elseif ($member->available_words_prepaid > $words) {
-            
-                        $total_words_prepaid = $member->available_words_prepaid - $words;
-                        $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            
-                    } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-            
-                        $member->available_words = 0;
-                        $member->available_words_prepaid = 0;
-            
-                    } else {
-                        $remaining = $words - $member->available_words;
-                        $member->available_words = 0;
-        
-                        $prepaid_left = $member->available_words_prepaid - $remaining;
-                        $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-    
-                    $member->update();
-    
-                } else {
-                    $remaining = $words - Auth::user()->available_words;
-                    $user->available_words = 0;
-    
-                    $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                    $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    $user->update();
-                }
-            }
-        } 
-
-        return true;
-    }
-
-
-    /**
-	*
 	* Update user image balance
 	* @param - total words generated
 	* @return - confirmation
 	*
 	*/
-    public function updateImageBalance($images) {
+    public function updateImageBalance($images, $vendor) {
 
         $user = User::find(Auth::user()->id);
 
-        if (auth()->user()->available_images != -1) {
+        if ($vendor == 'dalle') {
+            if (auth()->user()->available_dalle_images != -1) {
         
-            if (Auth::user()->available_images > $images) {
-
-                $total_images = Auth::user()->available_images - $images;
-                $user->available_images = ($total_images < 0) ? 0 : $total_images;
-
-            } elseif (Auth::user()->available_images_prepaid > $images) {
-
-                $total_images_prepaid = Auth::user()->available_images_prepaid - $images;
-                $user->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
-
-            } elseif ((Auth::user()->available_images + Auth::user()->available_images_prepaid) == $images) {
-
-                $user->available_images = 0;
-                $user->available_images_prepaid = 0;
-
-            } else {
-
-                if (!is_null(Auth::user()->member_of)) {
-
-                    $member = User::where('id', Auth::user()->member_of)->first();
-
-                    if ($member->available_images > $images) {
-
-                        $total_images = $member->available_images - $images;
-                        $member->available_images = ($total_images < 0) ? 0 : $total_images;
-            
-                    } elseif ($member->available_images_prepaid > $images) {
-            
-                        $total_images_prepaid = $member->available_images_prepaid - $images;
-                        $member->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
-            
-                    } elseif (($member->available_images + $member->available_images_prepaid) == $images) {
-            
-                        $member->available_images = 0;
-                        $member->available_images_prepaid = 0;
-            
-                    } else {
-                        $remaining = $images - $member->available_images;
-                        $member->available_images = 0;
-        
-                        $prepaid_left = $member->available_images_prepaid - $remaining;
-                        $member->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-
-                    $member->update();
-
+                if (Auth::user()->available_dalle_images > $images) {
+    
+                    $total_images = Auth::user()->available_dalle_images - $images;
+                    $user->available_dalle_images = ($total_images < 0) ? 0 : $total_images;
+    
+                } elseif (Auth::user()->available_dalle_images_prepaid > $images) {
+    
+                    $total_images_prepaid = Auth::user()->available_dalle_images_prepaid - $images;
+                    $user->available_dalle_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+    
+                } elseif ((Auth::user()->available_dalle_images + Auth::user()->available_dalle_images_prepaid) == $images) {
+    
+                    $user->available_dalle_images = 0;
+                    $user->available_dalle_images_prepaid = 0;
+    
                 } else {
-                    $remaining = $images - Auth::user()->available_images;
-                    $user->available_images = 0;
-
-                    $prepaid_left = Auth::user()->available_images_prepaid - $remaining;
-                    $user->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+    
+                    if (!is_null(Auth::user()->member_of)) {
+    
+                        $member = User::where('id', Auth::user()->member_of)->first();
+    
+                        if ($member->available_dalle_images > $images) {
+    
+                            $total_images = $member->available_dalle_images - $images;
+                            $member->available_dalle_images = ($total_images < 0) ? 0 : $total_images;
+                
+                        } elseif ($member->available_dalle_images_prepaid > $images) {
+                
+                            $total_images_prepaid = $member->available_dalle_images_prepaid - $images;
+                            $member->available_dalle_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+                
+                        } elseif (($member->available_dalle_images + $member->available_dalle_images_prepaid) == $images) {
+                
+                            $member->available_dalle_images = 0;
+                            $member->available_dalle_images_prepaid = 0;
+                
+                        } else {
+                            $remaining = $images - $member->available_dalle_images;
+                            $member->available_dalle_images = 0;
+            
+                            $prepaid_left = $member->available_dalle_images_prepaid - $remaining;
+                            $member->available_dalle_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                        }
+    
+                        $member->update();
+    
+                    } else {
+                        $remaining = $images - Auth::user()->available_dalle_images;
+                        $user->available_dalle_images = 0;
+    
+                        $prepaid_left = Auth::user()->available_dalle_images_prepaid - $remaining;
+                        $user->available_dalle_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    }
+                }
+            }
+        } else {
+            if (auth()->user()->available_sd_images != -1) {
+        
+                if (Auth::user()->available_sd_images > $images) {
+    
+                    $total_images = Auth::user()->available_sd_images - $images;
+                    $user->available_sd_images = ($total_images < 0) ? 0 : $total_images;
+    
+                } elseif (Auth::user()->available_sd_images_prepaid > $images) {
+    
+                    $total_images_prepaid = Auth::user()->available_sd_images_prepaid - $images;
+                    $user->available_sd_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+    
+                } elseif ((Auth::user()->available_sd_images + Auth::user()->available_sd_images_prepaid) == $images) {
+    
+                    $user->available_sd_images = 0;
+                    $user->available_sd_images_prepaid = 0;
+    
+                } else {
+    
+                    if (!is_null(Auth::user()->member_of)) {
+    
+                        $member = User::where('id', Auth::user()->member_of)->first();
+    
+                        if ($member->available_sd_images > $images) {
+    
+                            $total_images = $member->available_sd_images - $images;
+                            $member->available_sd_images = ($total_images < 0) ? 0 : $total_images;
+                
+                        } elseif ($member->available_sd_images_prepaid > $images) {
+                
+                            $total_images_prepaid = $member->available_sd_images_prepaid - $images;
+                            $member->available_sd_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
+                
+                        } elseif (($member->available_sd_images + $member->available_sd_images_prepaid) == $images) {
+                
+                            $member->available_sd_images = 0;
+                            $member->available_sd_images_prepaid = 0;
+                
+                        } else {
+                            $remaining = $images - $member->available_sd_images;
+                            $member->available_sd_images = 0;
+            
+                            $prepaid_left = $member->available_sd_images_prepaid - $remaining;
+                            $member->available_sd_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                        }
+    
+                        $member->update();
+    
+                    } else {
+                        $remaining = $images - Auth::user()->available_sd_images;
+                        $user->available_sd_images = 0;
+    
+                        $prepaid_left = Auth::user()->available_sd_images_prepaid - $remaining;
+                        $user->available_sd_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    }
                 }
             }
         }
 
         $user->update();
 
-    }
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalanceKanji($text) {
-
-        $user = User::find(Auth::user()->id);
-  
-        $words = mb_strlen($text,'utf8');
-
-        if (Auth::user()->available_words > $words) {
-
-            $total_words = Auth::user()->available_words - $words;
-            $user->available_words = ($total_words < 0) ? 0 : $total_words;
-            $user->update();
-
-        } elseif (Auth::user()->available_words_prepaid > $words) {
-
-            $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-            $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            $user->update();
-
-        } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-
-            $user->available_words = 0;
-            $user->available_words_prepaid = 0;
-            $user->update();
-
-        } else {
-
-            if (!is_null(Auth::user()->member_of)) {
-
-                $member = User::where('id', Auth::user()->member_of)->first();
-
-                if ($member->available_words > $words) {
-
-                    $total_words = $member->available_words - $words;
-                    $member->available_words = ($total_words < 0) ? 0 : $total_words;
-        
-                } elseif ($member->available_words_prepaid > $words) {
-        
-                    $total_words_prepaid = $member->available_words_prepaid - $words;
-                    $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-        
-                } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-        
-                    $member->available_words = 0;
-                    $member->available_words_prepaid = 0;
-        
-                } else {
-                    $remaining = $words - $member->available_words;
-                    $member->available_words = 0;
-    
-                    $prepaid_left = $member->available_words_prepaid - $remaining;
-                    $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                }
-
-                $member->update();
-
-            } else {
-                $remaining = $words - Auth::user()->available_words;
-                $user->available_words = 0;
-
-                $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                $user->update();
-            }
-            
-
-        }
-
-        return $words;
     }
 
 

@@ -4,17 +4,12 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use Spatie\Backup\Listeners\Listener;
-use Illuminate\Support\Str;
 use App\Services\Statistics\UserService;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\BadResponseException;
-use App\Events\PaymentProcessed;
-use App\Models\Payment;
-use App\Models\Subscriber;
 use App\Models\PrepaidPlan;
 use App\Models\SubscriptionPlan;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Services\HelperService;
 
 
 class CoinbaseService 
@@ -111,38 +106,11 @@ class CoinbaseService
 
             $days = 18250;
 
-            $subscription = Subscriber::create([
-                'user_id' => auth()->user()->id,
-                'plan_id' => $plan->id,
-                'status' => 'Pending',
-                'created_at' => now(),
-                'gateway' => 'Coinbase',
-                'frequency' => 'lifetime',
-                'plan_name' => $plan->plan_name,
-                'words' => $plan->words,
-                'images' => $plan->images,
-                'characters' => $plan->characters,
-                'minutes' => $plan->minutes,
-                'subscription_id' => $payment_id,
-                'active_until' => Carbon::now()->addDays($days),
-            ]);  
+            HelperService::registerSubscriber($plan, 'Coinbase', 'Pending', $payment_id, $days);
+ 
         }
 
-        $record_payment = new Payment();
-        $record_payment->user_id = auth()->user()->id;
-        $record_payment->order_id = $payment_id;
-        $record_payment->plan_id = $plan->id;
-        $record_payment->plan_name = $plan->plan_name;
-        $record_payment->frequency = $type;
-        $record_payment->price = $amount;
-        $record_payment->currency = $currency;
-        $record_payment->gateway = 'Coinbase';
-        $record_payment->status = 'pending';
-        $record_payment->words = $plan->words;
-        $record_payment->images = $plan->images;
-        $record_payment->characters = $plan->characters;
-        $record_payment->minutes = $plan->minutes;
-        $record_payment->save();
+        $payment = HelperService::registerPayment($type, $plan->id, $payment_id, $amount, 'Coinbase', 'pending');
     }
 
 

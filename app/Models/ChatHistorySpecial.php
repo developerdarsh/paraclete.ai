@@ -16,6 +16,10 @@ class ChatHistorySpecial extends Model
         'user_id',
         'chat_id', 
         'role', 
-        'content'
+        'content',
+        "model",
+        'input_tokens',
+        'output_tokens',
+        'words',
     ];
 }

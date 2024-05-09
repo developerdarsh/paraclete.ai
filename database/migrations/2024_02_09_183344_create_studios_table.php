@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('format');
             $table->string('characters');
             $table->string('files');
-            $table->string('url');
+            $table->longText('url');
             $table->string('storage');
             $table->longText('text')->nullable();
             $table->longText('text_raw')->nullable();

@@ -5,7 +5,7 @@
             <div class="input-box">								
                 <h6>{{__('First Name')}} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
                 <div class="form-group">							    
-                    <input type="text" class="form-control @error('name') is-danger @enderror" id="name" name="name" autocomplete="off" required>
+                    <input type="text" class="form-control @error('name') is-danger @enderror" id="name" name="name" autocomplete="off">
                 </div>
                     @error('name')
                     <p class="text-danger">{{ $errors->first('name') }}</p>
@@ -16,7 +16,7 @@
             <div class="input-box">								
                 <h6>{{__('Last Name')}} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
                 <div class="form-group">							    
-                    <input type="text" class="form-control @error('lastname') is-danger @enderror" id="lastname" name="lastname" autocomplete="off" required>
+                    <input type="text" class="form-control @error('lastname') is-danger @enderror" id="lastname" name="lastname" autocomplete="off">
                 </div>
                     @error('lastname')
                     <p class="text-danger">{{ $errors->first('lastname') }}</p>
@@ -27,7 +27,7 @@
             <div class="input-box">								
                 <h6>{{__('Identity Number')}} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
                 <div class="form-group">							    
-                    <input type="text" class="form-control @error('identity') is-danger @enderror" id="identity" name="identity" autocomplete="off" required>
+                    <input type="text" class="form-control @error('identity') is-danger @enderror" id="identity" name="identity" autocomplete="off">
                 </div>
                     @error('identity')
                     <p class="text-danger">{{ $errors->first('identity') }}</p>
@@ -38,7 +38,7 @@
             <div class="input-box">								
                 <h6>{{__('Mobile Number')}} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
                 <div class="form-group">							    
-                    <input type="text" class="form-control @error('phone') is-danger @enderror" id="phone" name="phone" autocomplete="off" required>
+                    <input type="text" class="form-control @error('phone') is-danger @enderror" id="phone" name="phone" autocomplete="off">
                 </div>
                     @error('phone')
                     <p class="text-danger">{{ $errors->first('phone') }}</p>
@@ -49,7 +49,7 @@
             <div class="input-box">								
                 <h6>{{__('Email Address')}} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
                 <div class="form-group">							    
-                    <input type="email" class="form-control @error('email') is-danger @enderror" id="email" name="email" autocomplete="off" required>
+                    <input type="email" class="form-control @error('email') is-danger @enderror" id="email" name="email" autocomplete="off">
                 </div>
                     @error('email')
                     <p class="text-danger">{{ $errors->first('email') }}</p>

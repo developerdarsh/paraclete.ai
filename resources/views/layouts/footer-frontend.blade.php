@@ -8,6 +8,9 @@
 <script src="{{URL::asset('plugins/tippy/popper.min.js')}}"></script>
 <script src="{{URL::asset('plugins/tippy/tippy-bundle.umd.min.js')}}"></script>
 
+<!-- Toastr JS -->
+<script src="{{URL::asset('plugins/toastr/toastr.min.js')}}"></script>
+
 @yield('js')
 
 <!-- Custom-->

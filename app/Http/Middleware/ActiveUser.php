@@ -36,7 +36,8 @@ class ActiveUser
             return redirect()->route('login')->with('error', 'Your account was deactivated. Please contact administrator.');
 
         } 
-
+        
         return $next($request);
+       
     }
 }

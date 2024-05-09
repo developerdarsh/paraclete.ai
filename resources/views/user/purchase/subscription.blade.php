@@ -63,7 +63,7 @@
 				"lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
 				responsive: true,
 				colReorder: true,
-				"order": [[ 0, "desc" ]],
+				"order": [[ 1, "asc" ]],
 				language: {
 					"emptyTable": "<div><br>{{ __('You do not have any subscriptions yet') }}</div>",
 					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",

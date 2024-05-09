@@ -285,6 +285,11 @@
         display: block;
     }
 
+    #chat-internet-button,
+    #chat-export-button {
+        display: none;
+    }
+
 }
 
 
@@ -585,6 +590,15 @@
 
     #templates-wrapper .template-nav-menu-inner {
         width: auto;
+    }
+
+    .registration-nav .registration-nav-inner .wizard-nav-text {
+        justify-content: left;
+        margin-top: 5px;
+    }
+
+    .current-sign {
+        display: none;
     }
 }
 

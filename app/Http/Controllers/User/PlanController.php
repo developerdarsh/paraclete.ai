@@ -47,7 +47,23 @@ class PlanController extends Controller
         
         $prepaids = PrepaidPlan::where('status', 'active')->get();
 
-        return view('user.plans.index', compact('monthly', 'yearly', 'monthly_subscriptions', 'yearly_subscriptions', 'prepaids', 'prepaid', 'lifetime', 'lifetime_subscriptions'));
+        if (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+        } else {
+            $plan = null;
+        }
+
+        $subscriber = Subscriber::where('user_id', auth()->user()->id)->where('status', 'Active')->first();
+        if ($subscriber) {
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $subscriber->active_until)->format('M d');
+            $time = Carbon::createFromFormat('Y-m-d H:i:s', $subscriber->active_until)->format('H:i A');
+        } else {
+            $date = null;
+            $time = null;
+        }
+        
+
+        return view('user.plans.index', compact('monthly', 'yearly', 'monthly_subscriptions', 'yearly_subscriptions', 'prepaids', 'prepaid', 'lifetime', 'lifetime_subscriptions', 'plan', 'date', 'time', 'subscriber'));
     }
 
 
@@ -182,7 +198,14 @@ class PlanController extends Controller
         $record_payment->currency = $plan->currency;
         $record_payment->gateway = 'FREE';
         $record_payment->status = 'completed';
-        $record_payment->words = $plan->words;
+        $record_payment->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+        $record_payment->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+        $record_payment->gpt_4_credits = $plan->gpt_4_credits;
+        $record_payment->claude_3_opus_credits = $plan->claude_3_opus_credits;
+        $record_payment->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+        $record_payment->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+        $record_payment->gemini_pro_credits = $plan->gemini_pro_credits;
+        $record_payment->fine_tune_credits = $plan->fine_tune_credits;
         $record_payment->characters = $plan->characters;
         $record_payment->minutes = $plan->minutes;
         $record_payment->save();
@@ -194,7 +217,14 @@ class PlanController extends Controller
             'created_at' => now(),
             'gateway' => 'FREE',
             'frequency' => $plan->payment_frequency,
-            'words' => $plan->words,
+            'gpt_3_turbo_credits' => $plan->gpt_3_turbo_credits,
+            'gpt_4_turbo_credits' => $plan->gpt_4_turbo_credits,
+            'gpt_4_credits' => $plan->gpt_4_credits,
+            'claude_3_opus_credits' => $plan->claude_3_opus_credits,
+            'claude_3_sonnet_credits' => $plan->claude_3_sonnet_credits,
+            'claude_3_haiku_credits' => $plan->claude_3_haiku_credits,
+            'gemini_pro_credits' => $plan->gemini_pro_credits,
+            'fine_tune_credits' => $plan->fine_tune_credits,
             'characters' => $plan->characters,
             'minutes' => $plan->minutes,
             'subscription_id' => $subscription,
@@ -207,15 +237,19 @@ class PlanController extends Controller
         $user->syncRoles($group);    
         $user->group = $group;
         $user->plan_id = $plan->id;
-        $user->total_words = $plan->words;
-        $user->total_images = $plan->images;
-        $user->total_chars = $plan->characters;
-        $user->total_minutes = $plan->minutes;
-        $user->available_words = $plan->words;
-        $user->available_images = $plan->images;
+        $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+        $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+        $user->gpt_4_credits = $plan->gpt_4_credits;
+        $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+        $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+        $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+        $user->gemini_pro_credits = $plan->gemini_pro_credits;
+        $user->fine_tune_credits = $plan->fine_tune_credits;
         $user->available_chars = $plan->characters;
         $user->available_minutes = $plan->minutes;
         $user->member_limit = $plan->team_members;
+        $user->available_dalle_images = $plan->dalle_images;
+        $user->available_sd_images = $plan->sd_images;
         $user->save();       
         
         return $order_id;

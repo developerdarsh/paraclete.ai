@@ -25,6 +25,7 @@ class Chat extends Model
         'type',
         'prompt',
         'group', 
-        'voice_code',
+        'model',
+        'model_mode'
     ];
 }

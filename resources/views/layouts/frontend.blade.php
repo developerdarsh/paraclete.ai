@@ -59,65 +59,9 @@
 					
 							<div class="relative flex items-top justify-center min-h-screen">
 				
-								<div class="container-fluid fixed-top" id="navbar-container">
-				
-									<div class="container">
-										<div class="row">
-				
-											<nav class="navbar navbar-expand-lg navbar-light w-100" id="navbar-responsive">
-												<a class="navbar-brand" href="{{ url('/') }}"><img id="brand-img"  src="{{ URL::asset('img/brand/logo.png') }}" alt=""></a>
-												<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-													<span class="navbar-toggler-icon"></span>
-												</button>
-												<div class="collapse navbar-collapse section-links" id="navbarNav">
-													<ul class="navbar-nav">
-														<li class="nav-item">
-															<a class="nav-link scroll active" href="#main-wrapper">{{ __('Home') }} <span class="sr-only">(current)</span></a>
-														</li>		
-														@if (config('frontend.pricing_section') == 'on')
-															<li class="nav-item">
-																<a class="nav-link scroll" href="#prices-wrapper">{{ __('Prices') }}</a>
-															</li>
-														@endif							
-														@if (config('frontend.blogs_section') == 'on')
-															<li class="nav-item">
-																<a class="nav-link scroll" href="#blog-wrapper">{{ __('Blogs') }}</a>
-															</li>
-														@endif
-														@if (config('frontend.faq_section') == 'on')
-															<li class="nav-item">
-																<a class="nav-link scroll" href="#faq-wrapper">{{ __('FAQs') }}</a>
-															</li>
-														@endif
-														@if (config('frontend.contact_section') == 'on')
-															<li class="nav-item">
-																<a class="nav-link scroll" href="#contact-wrapper">{{ __('Contact Us') }}</a>
-															</li>
-														@endif
-														
-														<li class="nav-item text-center frontend-buttons">
-															@if (Route::has('login'))
-																<div>
-																	@auth
-																		<a href="{{ route('user.templates') }}" class="action-button dashboard-button pl-5 pr-5">{{ __('Dashboard') }}</a>
-																	@else
-																		<a href="{{ route('login') }}" class="btn btn-primary special-action-button" id="login-button">{{ __('Login') }}</a>
-				
-																		@if (config('settings.registration') == 'enabled')
-																			@if (Route::has('register'))
-																				<a href="{{ route('register') }}" class="ml-2 action-button register-button pl-5 pr-5">{{ __('Sign Up') }}</a>
-																			@endif
-																		@endif
-																	@endauth
-																</div>
-															@endif
-														</li>
-													</ul>
-												</div>
-											</nav>
-				
-										</div>
-									</div>
+								<div class="container-fluid fixed-top pl-0 pr-0" id="navbar-container">
+									
+									@yield('menu')
 				
 									@include('layouts.flash')
 				
@@ -128,12 +72,13 @@
 
 						<!-- App-Content -->			
 						<div class="main-content">
-							<div class="side-app">
+							<div class="side-app frontend-background">
 
 								@yield('content')
 
 							</div>                   
 						</div>
+					</div>
 				
 				</div><!-- End Page -->
 			
@@ -141,21 +86,63 @@
 				========================================================-->
 				<footer id="welcome-footer" >
 
+					@yield('curve')
+
 					<!-- FOOTER MAIN CONTENT -->
 					<div id="footer" class="container text-center">
+
+						<div class="row">
+							<div class="col-sm-12 mb-6 mt-6">
+								<h1>{{ __('Save time. Get Started Now.') }}</h1>
+								<h3>{{ __('Unleash the most advanced AI creator') }}</h3>
+								<h3>{{ __('and boost your productivity') }}</h3>
+							</div>
+						</div>
 								
-						<div class="row">    
+						<div class="row"> 
+							<div class="col-sm-12">	
+								<div>
+									<img src="{{ URL::asset('img/brand/logo-white.png') }}" alt="Brand Logo">									
+								</div>
 
-							<!-- FOOTER TITLE -->
-							<div class="col-md-4 col-sm-12" id="footer-logo">
+								<div class="mb-7">
+									<span class="notification fs-12 mr-2">{{ __('Try for free') }}.</span><span class="notification fs-12">{{ __('No credit card required') }}</span>
+								</div>
+									
+																							
+							</div>							
+						</div>
+
+						<div class="row"> 
+							<div class="col-sm-12 d-flex justify-content-center">	
+								<div class="flex mr-6">
+									<a class="footer-link" href="{{ route('about') }}" target="_blank">{{ __('About Us') }}</a>
+								</div>	
+								<div class="flex mr-6">
+									<a class="footer-link" href="{{ route('privacy') }}" target="_blank">{{ __('Privacy Policy') }}</a>
+								</div>							
+								<div class="flex mr-6">
+									<a class="footer-link" href="{{ route('terms') }}" target="_blank">{{ __('Terms of Service') }}</a>
+								</div>	
+								@if (config('frontend.contact_section') == 'on')													
+									<div class="flex">
+										<a class="footer-link" href="{{ route('contact') }}" target="_blank">{{ __('Contact Us') }}</a>
+									</div>
+								@endif
 								
-								<img src="{{ URL::asset('img/brand/logo-white.png') }}" alt="Brand Logo">
+							</div>
+						</div>
 
-								<p class="mb-0">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi ut culpa maiores maxime illo nostrum aut totam, porro dolore minima</p>		
+					</div> <!-- END CONTAINER-->
 
+					<!-- COPYRIGHT INFORMATION -->
+					<div id="copyright" class="container pl-0 pr-0">	
+						
+						<div class="row no-gutters">
+							<div class="col-lg-4 col-md-4 col-sm-12">
 								<div class="dropdown header-locale" id="frontend-local">
 									<a class="nav-link icon" data-bs-toggle="dropdown">
-										<span class="fs-17 fa fa-globe pr-2"></span><span class="fs-12" style="vertical-align:middle">{{ Config::get('locale')[App::getLocale()]['code'] }}</span>
+										<span class="fs-12">{{ Config::get('locale')[App::getLocale()]['display'] }}</span>
 									</a>
 									<div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow animated">
 										<div class="local-menu">
@@ -172,103 +159,37 @@
 										</div>
 									</div>
 								</div>
+							</div>
 
-							</div> <!-- END FOOTER TITLE & SOCIAL ICONS -->
+							<div class="col-lg-4 col-md-4 col-sm-12 d-flex justify-content-center">
+								<ul id="footer-icons" class="list-inline">
+									@if (config('frontend.social_linkedin'))
+										<a href="{{ config('frontend.social_linkedin') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-linkedin"></i></li></a>
+									@endif
+									@if (config('frontend.social_twitter'))
+										<a href="{{ config('frontend.social_twitter') }}" target="_blank"><li class="list-inline-item">
+											<svg class="twitter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+												<path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865l8.875 11.633Z"/>
+											</svg></li>
+										</a>
+									@endif
+									@if (config('frontend.social_instagram'))
+										<a href="{{ config('frontend.social_instagram') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-instagram"></i></li></a>
+									@endif
+									@if (config('frontend.social_facebook'))
+										<a href="{{ config('frontend.social_facebook') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-facebook"></i></li></a>
+									@endif	
+									@if (config('frontend.social_youtube'))
+										<a href="{{ config('frontend.social_youtube') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-youtube"></i></li></a>
+									@endif										
+								</ul>
+							</div>
 
-
-							<!-- FOOTER LINKS -->
-							<div class="col-md-8 col-sm-12" id="footer-links">
-								
-								<div class="row w-100">
-
-									<!-- INFORMATION LINKS -->
-									<div class="col-md-3 col-sm-12">
-									
-										<h5>{{ __('Information') }}</h5>
-
-										<ul class="list-unstyled">
-											<li><a href="#" target="_blank">{{ __('AI World') }}</a></li>                             
-										</ul>
-
-									</div> <!-- END INFORMATION LINKS -->
-
-
-									<!-- SOLUTIONS LINKS -->
-									<div class="col-md-3 col-sm-12">				
-											
-										<h5>{{ __('Site Pages') }}</h5>
-
-										<ul class="list-unstyled">
-											<li><a href="{{ route('login') }}">{{ __('Login') }}</a></li>							
-											<li><a href="{{ route('register') }}">{{ __('Register') }}</a></li>							
-										</ul>				
-
-									</div> <!-- END SOLUTIONS LINKS -->
-
-
-									<!-- COMPANY LINKS -->
-									<div class="col-md-3 col-sm-12">
-										
-										<h5>{{ __('Company') }}</h5>
-										
-										<ul class="list-unstyled">
-											<li><a href="{{ route('terms') }}">{{ __('Terms & Conditions') }}</a></li>
-											<li><a href="{{ route('privacy') }}">{{ __('Privacy Policy') }}</a></li>							
-										</ul>		         
-
-									</div> <!-- COMPANY LINKS -->
-
-									
-									<!-- CONNECTION & NEWS LINKS -->
-									<div class="col-md-3 col-sm-12 footer-connect pr-0">
-																
-										<h5>{{ __('Social Media') }}</h5>
-
-										<h6>{{ __('Follow up on social media to find out the latest updates') }}.</h6>
-
-										<ul id="footer-icons" class="list-inline">
-											@if (config('frontend.social_linkedin'))
-												<a href="{{ config('frontend.social_linkedin') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-linkedin"></i></li></a>
-											@endif
-											@if (config('frontend.social_twitter'))
-												<a href="{{ config('frontend.social_twitter') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-twitter"></i></li></a>
-											@endif
-											@if (config('frontend.social_instagram'))
-												<a href="{{ config('frontend.social_instagram') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-instagram"></i></li></a>
-											@endif
-											@if (config('frontend.social_facebook'))
-												<a href="{{ config('frontend.social_facebook') }}" target="_blank"><li class="list-inline-item"><i class="footer-icon fa-brands fa-facebook"></i></li></a>
-											@endif											
-											
-										</ul>
-
-										<h5 class="mt-6 mb-4">{{ __('Get Started Today') }}</h5>
-
-										<a href="{{ route('register') }}" class="btn btn-primary pl-5 pr-5">{{ __('Sign Up Now') }}</a>
-
-									</div> <!-- END CONNECTION & NEWS LINKS -->
-								
-								</div>
-
-
-							</div> <!-- END FOOTER LINKS -->
-							
-
-						</div> <!-- END ROW -->
-
-					</div> <!-- END CONTAINER-->
-
-
-
-					<!-- COPYRIGHT INFORMATION -->
-					<div id="copyright" class="container">
-						
-						<p class="copyright-left">{{ __('Copyright') }} © {{ date("Y") }} <a href="{{ config('app.url') }}">{{ config('app.name') }}</a> {{ __('All rights reserved') }}</p>
-						
-						<div>
-							<p class="copyright-right"><a href="{{ route('terms') }}" target="_blank">{{ __('Terms & Conditions') }}</a></p>
-							<p class="copyright-right"><a href="{{ route('privacy') }}" target="_blank">{{ __('Privacy Policy') }}</a><span>|</span></p>
+							<div class="col-lg-4 col-md-4 col-sm-12">
+								<p class="text-right" id="frontend-copyright">© {{ date("Y") }} <a href="{{ config('app.url') }}">{{ config('app.name') }}</a>. {{ __('All rights reserved') }}.</p>
+							</div>
 						</div>
+					
 
 						<!-- SCROLL TO TOP -->
 						<a href="#top" id="back-to-top"><i class="fa fa-angle-double-up"></i></a>

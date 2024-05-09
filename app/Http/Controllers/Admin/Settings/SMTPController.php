@@ -40,9 +40,11 @@ class SMTPController extends Controller
         $this->storeSettings('MAIL_HOST', request('smtp-host'));
         $this->storeSettings('MAIL_PORT', request('smtp-port'));
         $this->storeSettings('MAIL_USERNAME', request('smtp-username'));
-        $this->storeSettings('MAIL_PASSWORD', request('smtp-password'));
         $this->storeSettings('MAIL_FROM_ADDRESS', request('smtp-from'));
         $this->storeSettings('MAIL_ENCRYPTION', request('smtp-encryption'));  
+
+        $password = "'". request('smtp-password') . "'";
+        $this->storeWithQuotes('MAIL_PASSWORD', $password);
 
         if (config('mail.from.name') == '') {
             $newName = "'". request('smtp-name') . "'";

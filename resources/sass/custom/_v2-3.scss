@@ -10,9 +10,10 @@
 }
 
 #dashboard-background {
-	background-color: #E7F8FF;
+	background-color: #FFF;
 	background-image: url(/img/files/waves.png);
 	background-size: cover;
+	background-position: top;
 }
 
 .richText-toolbar:has(.richText-undo) {

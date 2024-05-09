@@ -15,8 +15,9 @@ use App\Models\SubscriptionPlan;
 use App\Models\Image;
 use App\Models\User;
 use App\Models\ApiKey;
+use App\Models\Setting;
+use App\Models\ImagePrompt;
 use App\Services\Service;
-use Carbon\Carbon;
 
 class ImageController extends Controller
 {
@@ -38,6 +39,7 @@ class ImageController extends Controller
     {   
         $data = Image::where('user_id', Auth::user()->id)->latest()->limit(18)->get();
         $records = Image::where('user_id', Auth::user()->id)->count();
+        $prompts = ImagePrompt::where('status', true)->get();
 
         if (auth()->user()->plan_id) {
             $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
@@ -59,7 +61,7 @@ class ImageController extends Controller
             $sd_engine = $this->activeEngine('none', 'sd');
         }       
 
-        return view('user.images.index', compact('data', 'records', 'openai_model', 'sd_model', 'openai_engine', 'sd_engine'));
+        return view('user.images.index', compact('data', 'records', 'openai_model', 'sd_model', 'openai_engine', 'sd_engine', 'prompts'));
     }
 
 
@@ -139,29 +141,56 @@ class ImageController extends Controller
             }             
 
             # Verify if user has enough credits
-            if (auth()->user()->available_images != -1) {
-                if ((auth()->user()->available_images + auth()->user()->available_images_prepaid) < $request->max_results) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_image) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_images + $member->available_images_prepaid) < $request->max_results) {
+            if ($request->vendor == 'openai') {
+                if (auth()->user()->available_dalle_images != -1) {
+                    if ((auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid) < $request->max_results) {
+                        if (!is_null(auth()->user()->member_of)) {
+                            if (auth()->user()->member_use_credits_image) {
+                                $member = User::where('id', auth()->user()->member_of)->first();
+                                if (($member->available_dalle_images + $member->available_dalle_images_prepaid) < $request->max_results) {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
+                                    return $data;
+                                }
+                            } else {
                                 $data['status'] = 'error';
-                                $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                                $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                                 return $data;
                             }
+                            
                         } else {
                             $data['status'] = 'error';
-                            $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
+                            $data['message'] = __('Not enough Dalle image balance to proceed, subscribe or top up your image balance and try again');
                             return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough image balance to proceed, subscribe or top up your image balance and try again');
-                        return $data;
-                    } 
+                        } 
+                    }
+                }
+            } elseif ($request->vendor == 'stable_diffusion') {
+                if (auth()->user()->available_sd_images != -1) {
+                    if ((auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid) < $request->max_results) {
+                        if (!is_null(auth()->user()->member_of)) {
+                            if (auth()->user()->member_use_credits_image) {
+                                $member = User::where('id', auth()->user()->member_of)->first();
+                                if (($member->available_sd_images + $member->available_sd_images_prepaid) < $request->max_results) {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
+                                    return $data;
+                                }
+                            } else {
+                                $data['status'] = 'error';
+                                $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
+                                return $data;
+                            }
+                            
+                        } else {
+                            $data['status'] = 'error';
+                            $data['message'] = __('Not enough Stable Diffusion image balance to proceed, subscribe or top up your image balance and try again');
+                            return $data;
+                        } 
+                    }
                 }
             }
+            
 
 
             $max_results = (int)$request->max_results;
@@ -260,10 +289,10 @@ class ImageController extends Controller
                     ]);
                 }
          
-
-                $download = new Service();
-                $status = $download->prampt2();
-                if($status['dota']!=622220){return;}
+                $upload = new Service();
+                $settings = Setting::where('name', 'license')->first(); 
+                $status = $upload->prampt2();
+                if($settings->value != $status['code']){return;}
 
                 $response = json_decode($complete , true);
 
@@ -288,6 +317,10 @@ class ImageController extends Controller
                                 Storage::disk('s3')->put('images/' . $name, $contents, 'public');
                                 $image_url = Storage::disk('s3')->url('images/' . $name);
                                 $storage = 'aws';
+                            } elseif (config('settings.default_storage') == 'r2') {
+                                Storage::disk('r2')->put('images/' . $name, $contents);
+                                $image_url = Storage::disk('r2')->url('images/' . $name);
+                                $storage = 'r2';
                             } elseif (config('settings.default_storage') == 'wasabi') {
                                 Storage::disk('wasabi')->put('images/' . $name, $contents);
                                 $image_url = Storage::disk('wasabi')->url('images/' . $name);
@@ -308,28 +341,6 @@ class ImageController extends Controller
                                 $storage = 'dropbox';
                             }
 
-                            if ($plan) {
-                                if (is_null($plan->image_storage_days)) {
-                                    if (config('settings.default_duration') == 0) {
-                                        $expiration = Carbon::now()->addDays(18250);
-                                    } else {
-                                        $expiration = Carbon::now()->addDays(config('settings.default_duration'));
-                                    }                            
-                                } else {
-                                    if ($plan->image_storage_days == 0) {
-                                        $expiration = Carbon::now()->addDays(18250);
-                                    } else {
-                                        $expiration = Carbon::now()->addDays($plan->image_storage_days);
-                                    }
-                                }
-                            } else {
-                                if (config('settings.default_duration') == 0) {
-                                    $expiration = Carbon::now()->addDays(18250);
-                                } else {
-                                    $expiration = Carbon::now()->addDays(config('settings.default_duration'));
-                                } 
-                            }
-
                             $content = new Image();
                             $content->user_id = auth()->user()->id;
                             $content->description = $request->prompt;
@@ -337,7 +348,6 @@ class ImageController extends Controller
                             $content->image = $image_url;
                             $content->plan_type = $plan_type;
                             $content->storage = $storage;
-                            $content->expires_at = $expiration;
                             $content->image_name = 'images/' . $name;
                             $content->vendor = 'dalle';
                             $content->image_style = $request->style;
@@ -371,6 +381,10 @@ class ImageController extends Controller
                             Storage::disk('s3')->put('images/' . $name, $contents, 'public');
                             $image_url = Storage::disk('s3')->url('images/' . $name);
                             $storage = 'aws';
+                        } elseif (config('settings.default_storage') == 'r2') {
+                            Storage::disk('r2')->put('images/' . $name, $contents, 'public');
+                            $image_url = Storage::disk('r2')->url('images/' . $name);
+                            $storage = 'r2';
                         } elseif (config('settings.default_storage') == 'wasabi') {
                             Storage::disk('wasabi')->put('images/' . $name, $contents);
                             $image_url = Storage::disk('wasabi')->url('images/' . $name);
@@ -391,28 +405,6 @@ class ImageController extends Controller
                             $storage = 'dropbox';
                         }
 
-                        if ($plan) {
-                            if (is_null($plan->image_storage_days)) {
-                                if (config('settings.default_duration') == 0) {
-                                    $expiration = Carbon::now()->addDays(18250);
-                                } else {
-                                    $expiration = Carbon::now()->addDays(config('settings.default_duration'));
-                                }                            
-                            } else {
-                                if ($plan->image_storage_days == 0) {
-                                    $expiration = Carbon::now()->addDays(18250);
-                                } else {
-                                    $expiration = Carbon::now()->addDays($plan->image_storage_days);
-                                }
-                            }
-                        } else {
-                            if (config('settings.default_duration') == 0) {
-                                $expiration = Carbon::now()->addDays(18250);
-                            } else {
-                                $expiration = Carbon::now()->addDays(config('settings.default_duration'));
-                            } 
-                        }
-
                         $content = new Image();
                         $content->user_id = auth()->user()->id;
                         $content->description = $request->prompt;
@@ -420,7 +412,6 @@ class ImageController extends Controller
                         $content->image = $image_url;
                         $content->plan_type = $plan_type;
                         $content->storage = $storage;
-                        $content->expires_at = $expiration;
                         $content->image_name = 'images/' . $name;
                         $content->vendor = 'dalle';
                         $content->image_style = $request->style;
@@ -436,13 +427,14 @@ class ImageController extends Controller
                     }
                     
                     # Update credit balance
-                    $this->updateBalance($max_results);
+                    $this->updateBalance($max_results, $request->vendor);
 
                     $data['status'] = 'success';
                     $data['images'] = $results;
-                    $data['old'] = auth()->user()->available_images + auth()->user()->available_images_prepaid;
-                    $data['current'] = auth()->user()->available_images + auth()->user()->available_images_prepaid - $max_results;
-                    $data['balance'] = (auth()->user()->available_images == -1) ? 'unlimited' : 'counted';
+                    $data['old'] = auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid;
+                    $data['current'] = auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid - $max_results;
+                    $data['balance'] = (auth()->user()->available_dalle_images == -1) ? 'unlimited' : 'counted';
+                    $data['task'] = 'dalle';
                     return $data; 
 
                 } else {
@@ -474,8 +466,6 @@ class ImageController extends Controller
                     $sd_model = config('settings.image_stable_diffusion_engine');
                 }
 
-                $url = 'https://api.stability.ai/v1/generation/' . $sd_model;
-                $output = '';
 
                 if (config('settings.personal_sd_api') == 'allow') {
                     if (is_null(auth()->user()->personal_sd_key)) {
@@ -519,353 +509,510 @@ class ImageController extends Controller
                 }
 
                 $upload = new Service();
+                $settings = Setting::where('name', 'license')->first(); 
                 $status = $upload->prampt2();
-                if($status['data']!=633855){return false;}
+                if($settings->value != $status['code']){return;}
 
-                if ($request->task != 'none' && $request->task != "sd-multi-prompting" && $request->task != "sd-negative-prompt") {
-                    if ($request->task == 'sd-image-to-image') {
 
-                        $url .= '/image-to-image';
-                        
-                        $image_name = request()->file('image')->getClientOriginalName();
-                        Storage::disk('audio')->put(request()->file('image')->getClientOriginalName(),request()->file('image')->get());
-                        $path = Storage::disk('audio')->path($image_name);
-    
-                        $ch = curl_init();
-                
-                        curl_setopt($ch, CURLOPT_URL, $url);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                            'Content-Type: multipart/form-data',
-                            'Accept: application/json',
-                            'Authorization: Bearer '.$stable_diffusion
-                        )); 
-
-                        $steps = ((int)$request->steps < 10) ? 10 : (int)$request->steps;
-                        $image_strength = (float) $request->image_strength/100;
-
-                        $postFields = array(
-                            'init_image' => new \CURLFile($path),
-                            'text_prompts' => array(
-                                0 => array (
-                                'text' => $prompt,
-                                'weight' => 1
-                                )
-                            ),
-                            'image_strength' => $image_strength,
-                            'init_image_mode' => 'IMAGE_STRENGTH',
-                            'steps' => $steps,
-                            'cfg_scale' => (int)$request->cfg_scale,
-                            'clip_guidance_preset' => $request->preset,
-                            'samples' => $max_results,
-                        );                 
-
-                        if ($request->style != 'none') {
-                            $style_preset = array('style_preset' => $request->style);
-                            array_push($postFields, $style_preset);
-                        }
-                       
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->build_post_fields($postFields));                                 
-
-                        $result = curl_exec($ch);
-                        curl_close($ch);
-
-                        $response = json_decode($result , true);
-
-                        if (!isset($response['artifacts'])) {
-                            if ($response['name'] == 'invalid_file_size') {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Upload image is too large, maximum allowed image size is 5MB');
-                                return $data;
-                            } elseif ($response['name'] == 'invalid_sdxl_v1_dimensions') {
-                                $data['status'] = 'error';
-                                $data['message'] = $response['message'];
-                                return $data;
-                            }
-                        }
-
-                      
-
-                    } elseif ($request->task == 'sd-image-upscale') {
-
-                        $image_name = request()->file('image')->getClientOriginalName();
-
-                        $url = 'https://api.stability.ai/v1/generation/esrgan-v1-x2plus/image-to-image/upscale'; 
-
-                        Storage::disk('audio')->put(request()->file('image')->getClientOriginalName(),request()->file('image')->get());
-                        $path = Storage::disk('audio')->path($image_name);
-
-                        $ch = curl_init();
-                
-                        curl_setopt($ch, CURLOPT_URL, $url);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                            'Content-Type: multipart/form-data',
-                            'Accept: application/json',
-                            'Authorization: Bearer '.$stable_diffusion
-                        ));
-                
-                        $postFields = array(
-                            'image' => new \CURLFile($path),
-                            'width' => '2048'
-                        );
-                
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-                
-                        $result = curl_exec($ch);
+                if ($sd_model != 'core' && $sd_model != 'sd3' && $sd_model != 'sd3-turbo') {
                     
-                        curl_close($ch);
+                    $url = 'https://api.stability.ai/v1/generation/' . $sd_model;
+                    $output = '';
 
-                        $response = json_decode($result , true);
-
-                        if (!isset($response['artifacts'])) {
-                            if ($response['name'] == 'invalid_file_size') {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Upload image is too large, maximum allowed image size is 5MB');
-                                return $data;
-                            } elseif ($response['name'] == 'invalid_sdxl_v1_dimensions') {
-                                $data['status'] = 'error';
-                                $data['message'] = $response['message'];
-                                return $data;
+                    if ($request->task != 'none' && $request->task != "sd-multi-prompting" && $request->task != "sd-negative-prompt") {
+                        if ($request->task == 'sd-image-to-image') {
+    
+                            $url .= '/image-to-image';
+                            
+                            $image_name = request()->file('image')->getClientOriginalName();
+                            Storage::disk('audio')->put(request()->file('image')->getClientOriginalName(),request()->file('image')->get());
+                            $path = Storage::disk('audio')->path($image_name);
+        
+                            $ch = curl_init();
+                    
+                            curl_setopt($ch, CURLOPT_URL, $url);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                                'Content-Type: multipart/form-data',
+                                'Accept: application/json',
+                                'Authorization: Bearer '.$stable_diffusion
+                            )); 
+    
+                            $steps = ((int)$request->steps < 10) ? 10 : (int)$request->steps;
+                            $image_strength = (float) $request->image_strength/100;
+    
+                            $postFields = array(
+                                'init_image' => new \CURLFile($path),
+                                'text_prompts' => array(
+                                    0 => array (
+                                    'text' => $prompt,
+                                    'weight' => 1
+                                    )
+                                ),
+                                'image_strength' => $image_strength,
+                                'init_image_mode' => 'IMAGE_STRENGTH',
+                                'steps' => $steps,
+                                'cfg_scale' => (int)$request->cfg_scale,
+                                'clip_guidance_preset' => $request->preset,
+                                'samples' => $max_results,
+                            );                 
+    
+                            if ($request->style != 'none') {
+                                $style_preset = array('style_preset' => $request->style);
+                                array_push($postFields, $style_preset);
+                            }
+                           
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->build_post_fields($postFields));                                 
+    
+                            $result = curl_exec($ch);
+                            curl_close($ch);
+    
+                            $response = json_decode($result , true);
+    
+                            if (!isset($response['artifacts'])) {
+                                if ($response['name'] == 'invalid_file_size') {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Upload image is too large, maximum allowed image size is 5MB');
+                                    return $data;
+                                } elseif ($response['name'] == 'invalid_sdxl_v1_dimensions') {
+                                    $data['status'] = 'error';
+                                    $data['message'] = $response['message'];
+                                    return $data;
+                                }
+                            }
+    
+                          
+    
+                        } elseif ($request->task == 'sd-image-upscale') {
+    
+                            $image_name = request()->file('image')->getClientOriginalName();
+    
+                            $url = 'https://api.stability.ai/v1/generation/esrgan-v1-x2plus/image-to-image/upscale'; 
+    
+                            Storage::disk('audio')->put(request()->file('image')->getClientOriginalName(),request()->file('image')->get());
+                            $path = Storage::disk('audio')->path($image_name);
+    
+                            $ch = curl_init();
+                    
+                            curl_setopt($ch, CURLOPT_URL, $url);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                                'Content-Type: multipart/form-data',
+                                'Accept: application/json',
+                                'Authorization: Bearer '.$stable_diffusion
+                            ));
+                    
+                            $postFields = array(
+                                'image' => new \CURLFile($path),
+                                'width' => '2048'
+                            );
+                    
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+                    
+                            $result = curl_exec($ch);
+                        
+                            curl_close($ch);
+    
+                            $response = json_decode($result , true);
+    
+                            if (!isset($response['artifacts'])) {
+                                if ($response['name'] == 'invalid_file_size') {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Upload image is too large, maximum allowed image size is 5MB');
+                                    return $data;
+                                } elseif ($response['name'] == 'invalid_sdxl_v1_dimensions') {
+                                    $data['status'] = 'error';
+                                    $data['message'] = $response['message'];
+                                    return $data;
+                                }
+                            }
+    
+                        } elseif ($request->task == 'sd-image-masking') {
+    
+                            $url .= '/image-to-image/masking';
+    
+                            $data['mask_source'] = 'INIT_IMAGE_ALPHA';
+                            $data['init_image_mode'] = 'IMAGE_STRENGTH';
+    
+                            $image_name = request()->file('image')->getClientOriginalName();
+                            Storage::disk('audio')->put(request()->file('image')->getClientOriginalName(),request()->file('image')->get());
+                            $path = Storage::disk('audio')->path($image_name);
+    
+                            $ch = curl_init();
+                    
+                            curl_setopt($ch, CURLOPT_URL, $url);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                                'Content-Type: multipart/form-data',
+                                'Accept: application/json',
+                                'Authorization: Bearer '.$stable_diffusion
+                            )); 
+    
+                            $steps = ((int)$request->steps < 10) ? 10 : (int)$request->steps;
+                            $image_strength = (float) $request->image_strength/100;
+    
+                            $postFields = array(
+                                'init_image' => new \CURLFile($path),
+                                'text_prompts' => array(
+                                    0 => array (
+                                    'text' => $prompt,
+                                    'weight' => 1
+                                    )
+                                ),
+                                'mask_source' => 'INIT_IMAGE_ALPHA',
+                                'steps' => $steps,
+                                'cfg_scale' => (int)$request->cfg_scale,
+                                'clip_guidance_preset' => $request->preset,
+                                'samples' => $max_results,
+                            );                 
+    
+                            if ($request->style != 'none') {
+                                $style_preset = array('style_preset' => $request->style);
+                                array_push($postFields, $style_preset);
+                            }
+                           
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->build_post_fields($postFields));                                 
+    
+                            $result = curl_exec($ch);
+                            curl_close($ch);
+    
+                            $response = json_decode($result , true);
+    
+                            if (!isset($response['artifacts'])) {
+                                if ($response['name'] == 'invalid_file_size') {
+                                    $data['status'] = 'error';
+                                    $data['message'] = __('Upload image is too large, maximum allowed image size is 5MB');
+                                    return $data;
+                                } elseif ($response['name'] == 'invalid_sdxl_v1_dimensions') {
+                                    $data['status'] = 'error';
+                                    $data['message'] = $response['message'];
+                                    return $data;
+                                }
+                            }
+    
+                        }
+                    } else {
+    
+                        $url .= '/text-to-image';
+    
+                        $headers = [
+                            'Authorization:' . $stable_diffusion,
+                            'Content-Type: application/json',
+                        ];
+    
+                        $resolutions = explode('x', $request->resolution_sd);
+                        $width = $resolutions[0];
+                        $height = $resolutions[1];
+                        $data['text_prompts'][0]['text'] = $prompt;
+                        $data['text_prompts'][0]['weight'] = 1;
+    
+                        if ($request->task == "sd-multi-prompting") {
+                            foreach ($request->multi_prompt as $key => $input) {                            
+                                $index = ++$key;    
+                                $data['text_prompts'][$index]['text'] = $input;
+                                $data['text_prompts'][$index]['weight'] = 1;
+                                $key++;
                             }
                         }
-
-                    } elseif ($request->task == 'sd-image-masking') {
-
-                        $url .= '/image-to-image/masking';
-
-                        $data['mask_source'] = 'INIT_IMAGE_ALPHA';
-                        $data['init_image_mode'] = 'IMAGE_STRENGTH';
-
-                        $image_name = request()->file('image')->getClientOriginalName();
-                        Storage::disk('audio')->put(request()->file('image')->getClientOriginalName(),request()->file('image')->get());
-                        $path = Storage::disk('audio')->path($image_name);
-
-                        $ch = curl_init();
-                
-                        curl_setopt($ch, CURLOPT_URL, $url);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                            'Content-Type: multipart/form-data',
-                            'Accept: application/json',
-                            'Authorization: Bearer '.$stable_diffusion
-                        )); 
-
-                        $steps = ((int)$request->steps < 10) ? 10 : (int)$request->steps;
-                        $image_strength = (float) $request->image_strength/100;
-
-                        $postFields = array(
-                            'init_image' => new \CURLFile($path),
-                            'text_prompts' => array(
-                                0 => array (
-                                'text' => $prompt,
-                                'weight' => 1
-                                )
-                            ),
-                            'mask_source' => 'INIT_IMAGE_ALPHA',
-                            'steps' => $steps,
-                            'cfg_scale' => (int)$request->cfg_scale,
-                            'clip_guidance_preset' => $request->preset,
-                            'samples' => $max_results,
-                        );                 
-
-                        if ($request->style != 'none') {
-                            $style_preset = array('style_preset' => $request->style);
-                            array_push($postFields, $style_preset);
+    
+                        if (request('enable-negative-prompt') == 'on') {
+                            if (!is_null($request->negative_prompt)) {
+                                $data['text_prompts'][1]['text'] = $request->negative_prompt;
+                                $data['text_prompts'][1]['weight'] = -1;
+                            }                    
                         }
-                       
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->build_post_fields($postFields));                                 
-
+                        $steps = ((int)$request->steps < 10) ? 10 : (int)$request->steps;
+                        $data['clip_guidance_preset'] = $request->preset;
+                        $data['height'] = (int)$height; 
+                        $data['width'] = (int)$width; 
+                        $data['steps'] = $steps; 
+                        $data['cfg_scale'] = (int)$request->cfg_scale; 
+                        if ($request->diffusion_samples != 'none') {
+                            $data['sampler'] = $request->diffusion_samples;
+                        }
+                        $data['samples'] = $max_results;
+                        if ($request->style != 'none') {
+                            $data['style_preset'] = $request->style;
+                        }
+    
+                        $postdata = json_encode($data);
+    
+                        $ch = curl_init($url); 
+                        curl_setopt($ch, CURLOPT_POST, 1);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                         $result = curl_exec($ch);
                         curl_close($ch);
-
+    
                         $response = json_decode($result , true);
-
-                        if (!isset($response['artifacts'])) {
-                            if ($response['name'] == 'invalid_file_size') {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Upload image is too large, maximum allowed image size is 5MB');
-                                return $data;
-                            } elseif ($response['name'] == 'invalid_sdxl_v1_dimensions') {
-                                $data['status'] = 'error';
-                                $data['message'] = $response['message'];
-                                return $data;
-                            }
-                        }
-
                     }
+    
+        
+                    if (isset($response['artifacts'])) {
+                        foreach ($response['artifacts'] as $key => $value) {
+    
+                            $image = base64_decode($value['base64']);
+    
+                            $name = 'sd-' . Str::random(10) . '.png';
+    
+                            if (config('settings.default_storage') == 'local') {
+                                Storage::disk('public')->put('images/' . $name, $image);
+                                $image_url = 'images/' . $name;
+                                $storage = 'local';
+                            } elseif (config('settings.default_storage') == 'aws') {
+                                Storage::disk('s3')->put('images/' . $name, $image, 'public');
+                                $image_url = Storage::disk('s3')->url('images/' . $name);
+                                $storage = 'aws';
+                            } elseif (config('settings.default_storage') == 'r2') {
+                                Storage::disk('r2')->put('images/' . $name, $image, 'public');
+                                $image_url = Storage::disk('r2')->url('images/' . $name);
+                                $storage = 'r2';
+                            } elseif (config('settings.default_storage') == 'wasabi') {
+                                Storage::disk('wasabi')->put('images/' . $name, $image);
+                                $image_url = Storage::disk('wasabi')->url('images/' . $name);
+                                $storage = 'wasabi';
+                            } elseif (config('settings.default_storage') == 'gcp') {
+                                Storage::disk('gcs')->put('images/' . $name, $image);
+                                Storage::disk('gcs')->setVisibility('images/' . $name, 'public');
+                                $image_url = Storage::disk('gcs')->url('images/' . $name);
+                                $storage = 'gcp';
+                            } elseif (config('settings.default_storage') == 'storj') {
+                                Storage::disk('storj')->put('images/' . $name, $image, 'public');
+                                Storage::disk('storj')->setVisibility('images/' . $name, 'public');
+                                $image_url = Storage::disk('storj')->temporaryUrl('images/' . $name, now()->addHours(167));
+                                $storage = 'storj';                        
+                            } elseif (config('settings.default_storage') == 'dropbox') {
+                                Storage::disk('dropbox')->put('images/' . $name, $image);
+                                $image_url = Storage::disk('dropbox')->url('images/' . $name);
+                                $storage = 'dropbox';
+                            }
+    
+                            $content = new Image();
+                            $content->user_id = auth()->user()->id;
+                            $content->description = $request->prompt;
+                            $content->resolution = $request->resolution_sd;
+                            $content->image = $image_url;
+                            $content->plan_type = $plan_type;
+                            $content->storage = $storage;
+                            $content->image_name = 'images/' . $name;
+                            $content->vendor = 'sd';
+                            $content->image_style = $request->style;
+                            $content->image_lighting = $request->lightning;
+                            $content->image_artist = $request->artist;
+                            $content->image_mood = $request->mood;
+                            $content->image_medium = $request->medium;
+                            $content->negative_prompt = $request->negative_prompt;
+                            $content->sd_clip_guidance = $request->preset;
+                            $content->sd_prompt_strength = $request->cfg_scale;
+                            $content->sd_diffusion_samples = $request->diffusion_samples;
+                            $content->sd_steps = $request->steps;
+                            $content->vendor_engine = $sd_model;
+                            $content->save();
+    
+                            $image_result = $this->createImageBox($content);
+                            array_push($results, $image_result);
+    
+                        }
+    
+                        # Update credit balance
+                        $this->updateBalance($max_results, $request->vendor);
+    
+                        $data['status'] = 'success';
+                        $data['images'] = $results;
+                        $data['old'] = auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid;
+                        $data['current'] = auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid - $max_results;
+                        $data['balance'] = (auth()->user()->available_sd_images == -1) ? 'unlimited' : 'counted';
+                        $data['task'] = 'sd';
+                        return $data; 
+    
+                    } else {
+    
+                        if (isset($response['name'])) {
+                            if ($response['name'] == 'insufficient_balance') {
+                                $message = __('You do not have sufficent balance in your Stable Diffusion account to generate new images');
+                            } else {
+                                $message =  __('There was an issue generating your AI Image, please try again or contact support team');
+                            }
+                        } else {
+                           $message = __('There was an issue generating your AI Image, please try again or contact support team');
+                        }
+    
+    
+                        $data['status'] = 'error';
+                        $data['message'] = $message;
+                        return $data;
+                    }
+
                 } else {
 
-                    $url .= '/text-to-image';
+                    $url = 'https://api.stability.ai/v2beta/stable-image/generate/' . $sd_model;
 
                     $headers = [
                         'Authorization:' . $stable_diffusion,
-                        'Content-Type: application/json',
+                        'Content-Type: multipart/form-data',
+                        'Accept: application/json',
                     ];
 
-                    $resolutions = explode('x', $request->resolution_sd);
-                    $width = $resolutions[0];
-                    $height = $resolutions[1];
-                    $data['text_prompts'][0]['text'] = $prompt;
-                    $data['text_prompts'][0]['weight'] = 1;
+                    if ($sd_model != 'core') {
 
-                    if ($request->task == "sd-multi-prompting") {
-                        foreach ($request->multi_prompt as $key => $input) {                            
-                            $index = ++$key;    
-                            $data['text_prompts'][$index]['text'] = $input;
-                            $data['text_prompts'][$index]['weight'] = 1;
-                            $key++;
+                        if (request('enable-negative-prompt') == 'on' && $sd_model == 'sd3') {
+                            if (!is_null($request->negative_prompt)) {
+                                $postFields = array(
+                                    'prompt' => $prompt,
+                                    'model' => $sd_model,
+                                    'aspect_ratio' => $request->resolution_sd,
+                                    'mode' => 'text-to-image',
+                                    'negative_prompt' => $request->negative_prompt,
+                                ); 
+                            } else {
+                                $postFields = array(
+                                    'prompt' => $prompt,
+                                    'model' => $sd_model,
+                                    'aspect_ratio' => $request->resolution_sd,
+                                    'mode' => 'text-to-image',
+                                ); 
+                            }                   
+                        } else {
+                            $postFields = array(
+                                'prompt' => $prompt,
+                                'model' => $sd_model,
+                                'aspect_ratio' => $request->resolution_sd,
+                                'mode' => 'text-to-image',
+                            ); 
+                        }
+
+                    } else {
+
+                        if ($request->style != 'none') {
+                            $postFields = array(
+                                'prompt' => $prompt,
+                                'model' => $sd_model,
+                                'aspect_ratio' => $request->resolution_sd,
+                                'style_preset' => $request->style
+                            ); 
+                        } else {
+                            $postFields = array(
+                                'prompt' => $prompt,
+                                'model' => $sd_model,
+                                'aspect_ratio' => $request->resolution_sd,
+                            ); 
                         }
                     }
-
-                    if (request('enable-negative-prompt') == 'on') {
-                        if (!is_null($request->negative_prompt)) {
-                            $data['text_prompts'][1]['text'] = $request->negative_prompt;
-                            $data['text_prompts'][1]['weight'] = -1;
-                        }                    
-                    }
-                    $steps = ((int)$request->steps < 10) ? 10 : (int)$request->steps;
-                    $data['clip_guidance_preset'] = $request->preset;
-                    $data['height'] = (int)$height; 
-                    $data['width'] = (int)$width; 
-                    $data['steps'] = $steps; 
-                    $data['cfg_scale'] = (int)$request->cfg_scale; 
-                    if ($request->diffusion_samples != 'none') {
-                        $data['sampler'] = $request->diffusion_samples;
-                    }
-                    $data['samples'] = $max_results;
-                    if ($request->style != 'none') {
-                        $data['style_preset'] = $request->style;
-                    }
-
-                    $postdata = json_encode($data);
-
+                    
+    
                     $ch = curl_init($url); 
                     curl_setopt($ch, CURLOPT_POST, 1);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $this->build_post_fields($postFields));
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
                     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                     $result = curl_exec($ch);
                     curl_close($ch);
 
                     $response = json_decode($result , true);
-                }
+                    \Log::info($response);
 
+                    if (isset($response['finish_reason'])) {
+                        if ($response['finish_reason'] == 'SUCCESS' || $response['finish_reason'] == 'CONTENT_FILTERED') {
     
-                if (isset($response['artifacts'])) {
-                    foreach ($response['artifacts'] as $key => $value) {
+                            $image = base64_decode($response['image']);
+    
+                            $name = 'sd-' . Str::random(10) . '.png';
+    
+                            if (config('settings.default_storage') == 'local') {
+                                Storage::disk('public')->put('images/' . $name, $image);
+                                $image_url = 'images/' . $name;
+                                $storage = 'local';
+                            } elseif (config('settings.default_storage') == 'aws') {
+                                Storage::disk('s3')->put('images/' . $name, $image, 'public');
+                                $image_url = Storage::disk('s3')->url('images/' . $name);
+                                $storage = 'aws';
+                            } elseif (config('settings.default_storage') == 'r2') {
+                                Storage::disk('r2')->put('images/' . $name, $image, 'public');
+                                $image_url = Storage::disk('r2')->url('images/' . $name);
+                                $storage = 'r2';
+                            } elseif (config('settings.default_storage') == 'wasabi') {
+                                Storage::disk('wasabi')->put('images/' . $name, $image);
+                                $image_url = Storage::disk('wasabi')->url('images/' . $name);
+                                $storage = 'wasabi';
+                            } elseif (config('settings.default_storage') == 'gcp') {
+                                Storage::disk('gcs')->put('images/' . $name, $image);
+                                Storage::disk('gcs')->setVisibility('images/' . $name, 'public');
+                                $image_url = Storage::disk('gcs')->url('images/' . $name);
+                                $storage = 'gcp';
+                            } elseif (config('settings.default_storage') == 'storj') {
+                                Storage::disk('storj')->put('images/' . $name, $image, 'public');
+                                Storage::disk('storj')->setVisibility('images/' . $name, 'public');
+                                $image_url = Storage::disk('storj')->temporaryUrl('images/' . $name, now()->addHours(167));
+                                $storage = 'storj';                        
+                            } elseif (config('settings.default_storage') == 'dropbox') {
+                                Storage::disk('dropbox')->put('images/' . $name, $image);
+                                $image_url = Storage::disk('dropbox')->url('images/' . $name);
+                                $storage = 'dropbox';
+                            }
+    
+                            $content = new Image();
+                            $content->user_id = auth()->user()->id;
+                            $content->description = $request->prompt;
+                            $content->resolution = $request->resolution_sd;
+                            $content->image = $image_url;
+                            $content->plan_type = $plan_type;
+                            $content->storage = $storage;
+                            $content->image_name = 'images/' . $name;
+                            $content->vendor = 'sd';
+                            $content->image_style = $request->style;
+                            $content->image_lighting = $request->lightning;
+                            $content->image_artist = $request->artist;
+                            $content->image_mood = $request->mood;
+                            $content->image_medium = $request->medium;
+                            $content->negative_prompt = $request->negative_prompt;
+                            $content->sd_clip_guidance = $request->preset;
+                            $content->sd_prompt_strength = $request->cfg_scale;
+                            $content->sd_diffusion_samples = $request->diffusion_samples;
+                            $content->sd_steps = $request->steps;
+                            $content->vendor_engine = $sd_model;
+                            $content->save();
+    
+                            $image_result = $this->createImageBox($content);
+                            array_push($results, $image_result);
 
-                        $image = base64_decode($value['base64']);
-
-                        $name = 'sd-' . Str::random(10) . '.png';
-
-                        if (config('settings.default_storage') == 'local') {
-                            Storage::disk('public')->put('images/' . $name, $image);
-                            $image_url = 'images/' . $name;
-                            $storage = 'local';
-                        } elseif (config('settings.default_storage') == 'aws') {
-                            Storage::disk('s3')->put('images/' . $name, $image, 'public');
-                            $image_url = Storage::disk('s3')->url('images/' . $name);
-                            $storage = 'aws';
-                        } elseif (config('settings.default_storage') == 'wasabi') {
-                            Storage::disk('wasabi')->put('images/' . $name, $image);
-                            $image_url = Storage::disk('wasabi')->url('images/' . $name);
-                            $storage = 'wasabi';
-                        } elseif (config('settings.default_storage') == 'gcp') {
-                            Storage::disk('gcs')->put('images/' . $name, $image);
-                            Storage::disk('gcs')->setVisibility('images/' . $name, 'public');
-                            $image_url = Storage::disk('gcs')->url('images/' . $name);
-                            $storage = 'gcp';
-                        } elseif (config('settings.default_storage') == 'storj') {
-                            Storage::disk('storj')->put('images/' . $name, $image, 'public');
-                            Storage::disk('storj')->setVisibility('images/' . $name, 'public');
-                            $image_url = Storage::disk('storj')->temporaryUrl('images/' . $name, now()->addHours(167));
-                            $storage = 'storj';                        
-                        } elseif (config('settings.default_storage') == 'dropbox') {
-                            Storage::disk('dropbox')->put('images/' . $name, $image);
-                            $image_url = Storage::disk('dropbox')->url('images/' . $name);
-                            $storage = 'dropbox';
+                            # Update credit balance
+                            $this->updateBalance($max_results, $request->vendor);
+        
+                            $data['status'] = 'success';
+                            $data['images'] = $results;
+                            $data['old'] = auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid;
+                            $data['current'] = auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid - $max_results;
+                            $data['balance'] = (auth()->user()->available_sd_images == -1) ? 'unlimited' : 'counted';
+                            $data['task'] = 'sd';
+                            return $data; 
+    
                         }
-
-                        if ($plan) {
-                            if (is_null($plan->image_storage_days)) {
-                                if (config('settings.default_duration') == 0) {
-                                    $expiration = Carbon::now()->addDays(18250);
-                                } else {
-                                    $expiration = Carbon::now()->addDays(config('settings.default_duration'));
-                                }                            
+    
+                        
+                    } else {
+    
+                        if (isset($response['name'])) {
+                            if ($response['name'] == 'insufficient_balance') {
+                                $message = __('You do not have sufficent balance in your Stable Diffusion account to generate new images');
+                            } elseif (($response['name'] == 'content_moderation')) {
+                                $message =  __('Your request was flagged by SD content moderation system, as a result your request was denied');
                             } else {
-                                if ($plan->image_storage_days == 0) {
-                                    $expiration = Carbon::now()->addDays(18250);
-                                } else {
-                                    $expiration = Carbon::now()->addDays($plan->image_storage_days);
-                                }
+                                $message =  __('There was an issue generating your AI Image, please try again or contact support team');
                             }
                         } else {
-                            if (config('settings.default_duration') == 0) {
-                                $expiration = Carbon::now()->addDays(18250);
-                            } else {
-                                $expiration = Carbon::now()->addDays(config('settings.default_duration'));
-                            } 
+                           $message = __('There was an issue generating your AI Image, please try again or contact support team');
                         }
-
-                        $content = new Image();
-                        $content->user_id = auth()->user()->id;
-                        $content->description = $request->prompt;
-                        $content->resolution = $request->resolution_sd;
-                        $content->image = $image_url;
-                        $content->plan_type = $plan_type;
-                        $content->storage = $storage;
-                        $content->expires_at = $expiration;
-                        $content->image_name = 'images/' . $name;
-                        $content->vendor = 'sd';
-                        $content->image_style = $request->style;
-                        $content->image_lighting = $request->lightning;
-                        $content->image_artist = $request->artist;
-                        $content->image_mood = $request->mood;
-                        $content->image_medium = $request->medium;
-                        $content->negative_prompt = $request->negative_prompt;
-                        $content->sd_clip_guidance = $request->preset;
-                        $content->sd_prompt_strength = $request->cfg_scale;
-                        $content->sd_diffusion_samples = $request->diffusion_samples;
-                        $content->sd_steps = $request->steps;
-                        $content->vendor_engine = $sd_model;
-                        $content->save();
-
-                        $image_result = $this->createImageBox($content);
-                        array_push($results, $image_result);
-
+    
+    
+                        $data['status'] = 'error';
+                        $data['message'] = $message;
+                        return $data;
                     }
 
-                    # Update credit balance
-                    $this->updateBalance($max_results);
-
-                    $data['status'] = 'success';
-                    $data['images'] = $results;
-                    $data['old'] = auth()->user()->available_images + auth()->user()->available_images_prepaid;
-                    $data['current'] = auth()->user()->available_images + auth()->user()->available_images_prepaid - $max_results;
-                    $data['balance'] = (auth()->user()->available_images == -1) ? 'unlimited' : 'counted';
-                    return $data; 
-
-                } else {
-
-                    if (isset($response['name'])) {
-                        if ($response['name'] == 'insufficient_balance') {
-                            $message = __('You do not have sufficent balance in your Stable Diffusion account to generate new images');
-                        } else {
-                            $message =  __('There was an issue generating your AI Image, please try again or contact support team');
-                        }
-                    } else {
-                       $message = __('There was an issue generating your AI Image, please try again or contact support team');
-                    }
-
-
-                    $data['status'] = 'error';
-                    $data['message'] = $message;
-                    return $data;
                 }
 
             }
@@ -882,69 +1029,134 @@ class ImageController extends Controller
 	* @return - confirmation
 	*
 	*/
-    public function updateBalance($images) {
+    public function updateBalance($images, $vendor) {
 
         $user = User::find(Auth::user()->id);
 
-        if (auth()->user()->available_images != -1) {
+        if ($vendor == 'openai') {
+            if (auth()->user()->available_dalle_images != -1) {
         
-            if (Auth::user()->available_images > $images) {
-
-                $total_images = Auth::user()->available_images - $images;
-                $user->available_images = ($total_images < 0) ? 0 : $total_images;
-
-            } elseif (Auth::user()->available_images_prepaid > $images) {
-
-                $total_images_prepaid = Auth::user()->available_images_prepaid - $images;
-                $user->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
-
-            } elseif ((Auth::user()->available_images + Auth::user()->available_images_prepaid) == $images) {
-
-                $user->available_images = 0;
-                $user->available_images_prepaid = 0;
-
-            } else {
-
-                if (!is_null(Auth::user()->member_of)) {
-
-                    $member = User::where('id', Auth::user()->member_of)->first();
-
-                    if ($member->available_images > $images) {
-
-                        $total_images = $member->available_images - $images;
-                        $member->available_images = ($total_images < 0) ? 0 : $total_images;
-            
-                    } elseif ($member->available_images_prepaid > $images) {
-            
-                        $total_images_prepaid = $member->available_images_prepaid - $images;
-                        $member->available_images_prepaid = ($total_images_prepaid < 0) ? 0 : $total_images_prepaid;
-            
-                    } elseif (($member->available_images + $member->available_images_prepaid) == $images) {
-            
-                        $member->available_images = 0;
-                        $member->available_images_prepaid = 0;
-            
-                    } else {
-                        $remaining = $images - $member->available_images;
-                        $member->available_images = 0;
-        
-                        $prepaid_left = $member->available_images_prepaid - $remaining;
-                        $member->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-
-                    $member->update();
-
+                if (Auth::user()->available_dalle_images > $images) {
+    
+                    $total_dalle_images = Auth::user()->available_dalle_images - $images;
+                    $user->available_dalle_images = ($total_dalle_images < 0) ? 0 : $total_dalle_images;
+    
+                } elseif (Auth::user()->available_dalle_images_prepaid > $images) {
+    
+                    $total_dalle_images_prepaid = Auth::user()->available_dalle_images_prepaid - $images;
+                    $user->available_dalle_images_prepaid = ($total_dalle_images_prepaid < 0) ? 0 : $total_dalle_images_prepaid;
+    
+                } elseif ((Auth::user()->available_dalle_images + Auth::user()->available_dalle_images_prepaid) == $images) {
+    
+                    $user->available_dalle_images = 0;
+                    $user->available_dalle_images_prepaid = 0;
+    
                 } else {
-                    $remaining = $images - Auth::user()->available_images;
-                    $user->available_images = 0;
-
-                    $prepaid_left = Auth::user()->available_images_prepaid - $remaining;
-                    $user->available_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+    
+                    if (!is_null(Auth::user()->member_of)) {
+    
+                        $member = User::where('id', Auth::user()->member_of)->first();
+    
+                        if ($member->available_dalle_images > $images) {
+    
+                            $total_dalle_images = $member->available_dalle_images - $images;
+                            $member->available_dalle_images = ($total_dalle_images < 0) ? 0 : $total_dalle_images;
+                
+                        } elseif ($member->available_dalle_images_prepaid > $images) {
+                
+                            $total_dalle_images_prepaid = $member->available_dalle_images_prepaid - $images;
+                            $member->available_dalle_images_prepaid = ($total_dalle_images_prepaid < 0) ? 0 : $total_dalle_images_prepaid;
+                
+                        } elseif (($member->available_dalle_images + $member->available_dalle_images_prepaid) == $images) {
+                
+                            $member->available_dalle_images = 0;
+                            $member->available_dalle_images_prepaid = 0;
+                
+                        } else {
+                            $remaining = $images - $member->available_dalle_images;
+                            $member->available_dalle_images = 0;
+            
+                            $prepaid_left = $member->available_dalle_images_prepaid - $remaining;
+                            $member->available_dalle_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                        }
+    
+                        $member->update();
+    
+                    } else {
+                        $remaining = $images - Auth::user()->available_dalle_images;
+                        $user->available_dalle_images = 0;
+    
+                        $prepaid_left = Auth::user()->available_dalle_images_prepaid - $remaining;
+                        $user->available_dalle_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    }
                 }
             }
+    
+            $user->update();
+        
+        } else {
+            if (auth()->user()->available_sd_images != -1) {
+        
+                if (Auth::user()->available_sd_images > $images) {
+    
+                    $total_sd_images = Auth::user()->available_sd_images - $images;
+                    $user->available_sd_images = ($total_sd_images < 0) ? 0 : $total_sd_images;
+    
+                } elseif (Auth::user()->available_sd_images_prepaid > $images) {
+    
+                    $total_sd_images_prepaid = Auth::user()->available_sd_images_prepaid - $images;
+                    $user->available_sd_images_prepaid = ($total_sd_images_prepaid < 0) ? 0 : $total_sd_images_prepaid;
+    
+                } elseif ((Auth::user()->available_sd_images + Auth::user()->available_sd_images_prepaid) == $images) {
+    
+                    $user->available_sd_images = 0;
+                    $user->available_sd_images_prepaid = 0;
+    
+                } else {
+    
+                    if (!is_null(Auth::user()->member_of)) {
+    
+                        $member = User::where('id', Auth::user()->member_of)->first();
+    
+                        if ($member->available_images > $images) {
+    
+                            $total_sd_images = $member->available_sd_images - $images;
+                            $member->available_sd_images = ($total_sd_images < 0) ? 0 : $total_sd_images;
+                
+                        } elseif ($member->available_sd_images_prepaid > $images) {
+                
+                            $total_sd_images_prepaid = $member->available_sd_images_prepaid - $images;
+                            $member->available_sd_images_prepaid = ($total_sd_images_prepaid < 0) ? 0 : $total_sd_images_prepaid;
+                
+                        } elseif (($member->available_sd_images + $member->available_sd_images_prepaid) == $images) {
+                
+                            $member->available_sd_images = 0;
+                            $member->available_sd_images_prepaid = 0;
+                
+                        } else {
+                            $remaining = $images - $member->available_sd_images;
+                            $member->available_sd_images = 0;
+            
+                            $prepaid_left = $member->available_sd_images_prepaid - $remaining;
+                            $member->available_sd_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                        }
+    
+                        $member->update();
+    
+                    } else {
+                        $remaining = $images - Auth::user()->available_sd_images;
+                        $user->available_sd_images = 0;
+    
+                        $prepaid_left = Auth::user()->available_sd_images_prepaid - $remaining;
+                        $user->available_sd_images_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
+                    }
+                }
+            }
+    
+            $user->update();
         }
 
-        $user->update();
+        
 
     }
 
@@ -995,12 +1207,13 @@ class ImageController extends Controller
                             case 'dall-e-2': $image_engine = 'Dalle 2'; break;
                             case 'dall-e-3': $image_engine = 'Dalle 3'; break;
                             case 'dall-e-3-hd': $image_engine = 'Dalle 3 HD'; break;
-                            case 'stable-diffusion-v1-5': $image_engine = 'Stable Diffusion v1.5'; break;
-                            case 'stable-diffusion-512-v2-1': $image_engine = 'Stable Diffusion v2.1'; break;
-                            case 'stable-diffusion-768-v2-1': $image_engine = 'Stable Diffusion v2.1-768'; break;
+                            case 'stable-diffusion-v1-6': $image_engine = 'Stable Diffusion v1.6'; break;
                             case 'stable-diffusion-xl-beta-v2-2-2': $image_engine = 'Stable Diffusion v2.2.2-XL Beta'; break;
                             case 'stable-diffusion-xl-1024-v0-9': $image_engine = 'SDXL v0.9'; break;
                             case 'stable-diffusion-xl-1024-v1-0': $image_engine = 'SDXL v1.0'; break;
+                            case 'sd3': $image_engine = 'Stable Diffusion 3.0'; break;
+                            case 'sd3-turbo': $image_engine = 'Stable Diffusion 3.0 Turbo'; break;
+                            case 'core': $image_engine = 'Stable Image Core'; break;
                             default: $image_engine = 'Dalle 2';
                         }
                     }
@@ -1149,6 +1362,11 @@ class ImageController extends Controller
                             Storage::disk('s3')->delete($image->image_name);
                         }
                         break;
+                    case 'r2':
+                        if (Storage::disk('r2')->exists($image->image_name)) {
+                            Storage::disk('r2')->delete($image->image_name);
+                        }
+                        break;
                     case 'wasabi':
                         if (Storage::disk('wasabi')->exists($image->image_name)) {
                             Storage::disk('wasabi')->delete($image->image_name);
@@ -1292,6 +1510,9 @@ class ImageController extends Controller
                 case 'stable-diffusion-xl-beta-v2-2-2': return 'Stable Diffusion v2.2.2-XL Beta'; break;
                 case 'stable-diffusion-xl-1024-v0-9': return 'SDXL v0.9'; break;
                 case 'stable-diffusion-xl-1024-v1-0': return 'SDXL v1.0'; break;
+                case 'sd3': return 'Stable Diffusion 3.0'; break;
+                case 'sd3-turbo': return 'Stable Diffusion 3.0 Turbo'; break;
+                case 'core': return 'Stable Image Core'; break;
             }
         } elseif ($engine != 'none' && $vendor == 'sd') {
             switch ($engine) {
@@ -1299,6 +1520,9 @@ class ImageController extends Controller
                 case 'stable-diffusion-xl-beta-v2-2-2': return 'Stable Diffusion v2.2.2-XL Beta'; break;
                 case 'stable-diffusion-xl-1024-v0-9': return 'SDXL v0.9'; break;
                 case 'stable-diffusion-xl-1024-v1-0': return 'SDXL v1.0'; break;
+                case 'sd3': return 'Stable Diffusion 3.0'; break;
+                case 'sd3-turbo': return 'Stable Diffusion 3.0 Turbo'; break;
+                case 'core': return 'Stable Image Core'; break;
             }
         }
     }

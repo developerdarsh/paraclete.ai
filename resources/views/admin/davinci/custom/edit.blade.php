@@ -17,7 +17,7 @@
 		</ol>
 	</div>
 	<div class="page-rightheader">
-		<a href="{{ route('admin.davinci.custom.category') }}" class="btn btn-primary mt-1">{{ __('Category Manager') }}</a>
+		<a href="{{ route('admin.davinci.custom.category') }}" class="btn btn-primary mt-1 ripple">{{ __('Category Manager') }}</a>
 	</div>
 </div>
 <!-- END PAGE HEADER -->
@@ -96,6 +96,40 @@
 							</div>						
 						</div>
 
+						<hr class="text-center mb-4 mt-2">
+
+						<div class="row">
+							<div class="col-md-12 col-sm-12 mt-2 mb-4">
+								<div class="form-group">
+									<label class="custom-switch">
+										<input type="checkbox" name="model_mode" class="custom-switch-input" @if($id->model_mode) checked @endif>
+										<span class="custom-switch-indicator"></span>
+										<span class="custom-switch-description">{{ __('Use Fixed Model for this Template') }} <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('By turning this option on, this template will be fixed to use only the model that is set below and user will not be able to change the model during template usage') }}"></i></span>
+									</label>
+								</div>
+							</div>
+
+							<div class="col-lg-6 col-md-12 col-sm-12">
+								<div class="input-box">
+									<h6>{{ __('Set Model for this Template') }} </h6>
+									<select id="model" name="model" class="form-select">
+										<option value='gpt-3.5-turbo-0125' @if ($id->model == 'gpt-3.5-turbo-0125') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
+										<option value='gpt-4' @if ($id->model == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>																																																																																																																																																																																																																																																																																																																																																			
+										<option value='gpt-4-0125-preview' @if ($id->model == 'gpt-4-0125-preview') selected @endif>{{ __('GPT 4 Turbo') }}</option>																																																																																																																											
+										<option value='gpt-4-turbo-2024-04-09' @if ($id->model == 'gpt-4-turbo-2024-04-09') selected @endif>{{ __('GPT 4 Turbo with Vision') }}</option>
+										{{-- <option value="claude-3-opus-20240229" @if ($id->model == 'claude-3-opus-20240229') selected @endif>{{ __('Claude 3 Opus') }}</option>											
+										<option value="claude-3-sonnet-20240229" @if ($id->model == 'claude-3-sonnet-20240229') selected @endif>{{ __('Claude 3 Sonnet') }}</option>									
+										<option value="claude-3-haiku-20240307" @if ($id->model == 'claude-3-haiku-20240307') selected @endif>{{ __('Claude 3 Haiku') }}</option>	 --}}
+										@foreach ($models as $model)
+											<option value="{{ $model->model }}" @if ($id->model == $model->model) selected @endif> {{ $model->description }} ({{ __('Fine Tune Model')}})</option>
+										@endforeach																																																										
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<hr class="text-center mt-2 mb-4">
+
 						<div class="row">
 							<div class="col-lg-6 col-md-12 col-sm-12 mt-2">
 								<div class="form-group">
@@ -117,6 +151,8 @@
 								</div>
 							</div>
 						</div>
+
+						<hr class="text-center mb-1 mt-4">
 
 						<div class="row">
 							<div class="col-sm-12 mt-4 mb-5">
@@ -169,8 +205,8 @@
 							</div>
 				
 							<div class="col-md-12 col-sm-12 text-center mb-2">
-								<a href="{{ route('admin.davinci.custom') }}" class="btn btn-cancel mr-2">{{ __('Return') }}</a>
-								<button type="submit" class="btn btn-primary pl-5 pr-5">{{ __('Update') }}</button>	
+								<a href="{{ route('admin.davinci.custom') }}" class="btn btn-cancel mr-2 pl-7 pr-7 ripple">{{ __('Return') }}</a>
+								<button type="submit" class="btn btn-primary pl-7 pr-7 ripple">{{ __('Update') }}</button>	
 							</div>	
 							
 						</div>

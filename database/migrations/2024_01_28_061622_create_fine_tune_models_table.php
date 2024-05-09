@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('fine_tune_models', function (Blueprint $table) {
             $table->id();
             $table->string("model");
-            $table->string("description")->nullable();
+            $table->text("description")->nullable();
+            $table->string("name")->nullable();
             $table->timestamps();
         });
     }

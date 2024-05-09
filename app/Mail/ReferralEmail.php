@@ -5,11 +5,16 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Email;
 
 class ReferralEmail extends Mailable
 {
     use Queueable, SerializesModels;
+
+    public $email;
 
     /**
      * Create a new message instance.
@@ -18,17 +23,42 @@ class ReferralEmail extends Mailable
      */
     public function __construct()
     {
-        //
+        $current = Email::where('id', 6)->first();
+        
+        $this->email = $current;
     }
 
     /**
-     * Build the message.
+     * Get the message envelope.
      *
-     * @return $this
+     * @return \Illuminate\Mail\Mailables\Envelope
      */
-    public function build()
+    public function envelope()
     {
-        return $this->subject('You have beeen referred to join ' . config('app.name'))
-                    ->markdown('emails.referral');
+        return new Envelope(
+            subject: $this->email->subject,
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     *
+     * @return \Illuminate\Mail\Mailables\Content
+     */
+    public function content()
+    {
+        return new Content(
+            markdown: 'emails.referral',
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array
+     */
+    public function attachments()
+    {
+        return [];
     }
 }

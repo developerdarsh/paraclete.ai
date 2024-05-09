@@ -18,6 +18,20 @@ Route::get('/register', [RegisteredUserController::class, 'create'])
 Route::post('/register', [RegisteredUserController::class, 'store'])
                 ->middleware('guest');
 
+Route::post('/register/subscriber', [RegisteredUserController::class, 'storeSubscriber'])->name('register.subscriber');
+
+Route::get('/register/subscriber/plans', [RegisteredUserController::class, 'stepTwo'])
+                ->middleware(['auth'])
+                ->name('register.subscriber.plans');
+
+Route::post('/register/subscriber/plans/{id}', [RegisteredUserController::class, 'stepTwoStore'])
+                ->middleware(['auth'])
+                ->name('register.subscriber.plans.store');
+
+Route::get('/register/subscriber/payment', [RegisteredUserController::class, 'stepThree'])
+                ->middleware(['auth'])
+                ->name('register.subscriber.payment');
+
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])
                 ->name('login');
 
@@ -56,6 +70,9 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke
 Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
                 ->middleware(['auth', 'throttle:6,1'])
                 ->name('verification.send');
+
+Route::post('/verify-email/confirm', [EmailVerificationNotificationController::class, 'check'])
+                ->middleware(['auth', 'throttle:6,1']);
 
 Route::get('/confirm-password', [ConfirmablePasswordController::class, 'show'])
                 ->middleware('auth')

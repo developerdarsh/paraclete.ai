@@ -7,8 +7,10 @@
     "require": {
         "php": "^8.0.2",
         "authorizenet/authorizenet": "^2.0",
+        "aws/aws-sdk-php-laravel": "^3.8",
         "bacon/bacon-qr-code": "^2.0",
         "braintree/braintree_php": "^6.11",
+        "google-gemini-php/laravel": "^1.0",
         "google/cloud-text-to-speech": "^1.5",
         "guzzlehttp/guzzle": "^7.7.0",
         "iyzico/iyzipay-php": "^2.0",
@@ -21,10 +23,12 @@
         "league/csv": "^9.14",
         "league/flysystem-aws-s3-v3": "^3.0",
         "league/html-to-markdown": "^5.1",
+        "michelf/php-markdown": "^2.0",
         "midtrans/midtrans-php": "^2.5",
-        "openai-php/client": "^0.7.8",
-        "openai-php/laravel": "^0.7.8",
+        "openai-php/client": "^0.8.4",
+        "openai-php/laravel": "^0.8.1",
         "orhanerday/open-ai": "^4.7",
+        "phpxmlrpc/phpxmlrpc": "^4.10",
         "pragmarx/google2fa-laravel": "^2.0",
         "smalot/pdfparser": "^2.8",
         "spatie/flysystem-dropbox": "^3.0",
@@ -34,6 +38,8 @@
         "spatie/laravel-permission": "^5.5",
         "stripe/stripe-php": "^10.18",
         "symfony/dom-crawler": "^6.4",
+        "symfony/http-client": "^6.4",
+        "wpai-inc/anthropic-sdk-php": "^0.1.0",
         "yajra/laravel-datatables-oracle": "^10.0",
         "yoeunes/toastr": "^2.3",
         "yoomoney/yookassa-sdk-php": "^3.1",
@@ -55,7 +61,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Services/AdsenseService.php"
+            "app/Services/AdsenseService.php",
+            "app/Services/HelperService.php"
         ]
     },
     "autoload-dev": {

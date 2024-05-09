@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid justify-content-center">
-    <div class="row h-100vh align-items-center background-white">
+    <div class="row h-100vh align-items-center login-background">
 
         <div class="col-md-6 col-sm-12 h-100" id="login-responsive">                
             <div class="card-body pr-10 pl-10 pt-10">

@@ -185,7 +185,7 @@
 							<div id="single-template-view">
 								<div class="single-template-options">
 									<div class="form-group mb-5">	
-										<h6 class="fs-13 mb-2 font-weight-bold">{{ __('Language') }}</h6>								
+										<h6 class="fs-11 text-muted mb-2 font-weight-semibold">{{ __('Language') }}</h6>								
 										<select id="language" name="language" class="form-select" data-placeholder="{{ __('Select input language') }}">		
 											@foreach ($languages as $language)
 												<option value="{{ $language->language_code }}" data-img="{{ URL::asset($language->language_flag) }}" @if (auth()->user()->default_template_language == $language->language_code) selected @endif> {{ __($language->language) }}</option>
@@ -203,8 +203,31 @@
 
 								<div class="single-template-options">
 									
+									<div class="form-group mb-5">	
+										<h6 class="fs-11 mb-2 text-muted font-weight-semibold">{{ __('AI Model') }}</h6>								
+										<select id="model" name="model" class="form-select" >
+											<option value="gpt-3.5-turbo-0125">{{ __('GPT 3.5 Turbo') }}</option>		
+											@foreach ($models as $model)													
+												@if (trim($model) == 'gpt-4')
+													<option value="{{ trim($model) }}">{{ __('GPT 4') }}</option>
+												@elseif (trim($model) == 'gpt-4-0125-preview')
+													<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo') }}</option>
+												@elseif (trim($model) == 'gpt-4-turbo-2024-04-09')
+													<option value="{{ trim($model) }}">{{ __('GPT 4 Turbo with Vision') }}</option>
+												@else
+													@foreach ($fine_tunes as $fine_tune)
+														@if (trim($model) == $fine_tune->model)
+															<option value="{{ trim($model) }}">{{ $fine_tune->description }} ({{ __('Fine Tune') }})</option>
+														@endif
+													@endforeach
+												@endif
+												
+											@endforeach									
+										</select>	
+									</div>									
+									
 									<div class="form-group mb-5">
-										<h6 class="fs-13 mb-2 font-weight-bold">{{ __('Writing Tone') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Set result tone of the text as needed') }}"></i></h6>
+										<h6 class="fs-11 mb-2 text-muted font-weight-semibold">{{ __('Writing Tone') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Set result tone of the text as needed') }}"></i></h6>
 										<select id="tone" name="tone" class="form-select" >
 											<option value="Professional" selected> {{ __('Professional') }}</option>	
 											<option value="Exciting"> {{ __('Exciting') }}</option>	
@@ -233,7 +256,7 @@
 									</div>
 								
 									<div class="form-group mb-5">
-										<h6 class="fs-13 mb-2 font-weight-bold">{{ __('Creativity') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Increase or decrease the creativity level to get variety in generated results') }}"></i></h6>
+										<h6 class="fs-11 mb-2 text-muted font-weight-semibold">{{ __('Creativity') }} <i class="ml-1 text-dark fs-12 fa-solid fa-circle-info" data-tippy-content="{{ __('Increase or decrease the creativity level to get variety in generated results') }}"></i></h6>
 										<select id="creativity" name="creativity" class="form-select">
 											<option value=0>{{ __('Repetitive') }}</option>
 											<option value=0.25> {{ __('Deterministic') }}</option>																															
@@ -337,7 +360,7 @@
 				'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor', 'wordcount', 'autosave', 'code',
 			],
 			toolbar: 'AIMain | AIOptions | styles | bold italic link | alignleft aligncenter alignright | bullist numlist | forecolor backcolor emoticons | image link code | blockquote | undo redo',
-			contextmenu: 'customwrite | rewrite summarize improve simplify expand trim fixgrammar tone style translate',
+			contextmenu: 'customwrite | rewrite summarize improve simplify expand trim fixgrammar tone style translate | copy paste',
 			setup: function ( editor ) {
 				const menuItems = {
 					'customwrite': {
@@ -358,7 +381,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on');  
+							document.querySelector('#loader-line')?.classList?.remove('hidden'); 
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -370,17 +393,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						},
@@ -410,17 +433,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -438,7 +461,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -450,17 +473,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on');
+										document.querySelector('#loader-line')?.classList?.add('hidden');
 										calculateCredits();   
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -478,7 +501,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -490,17 +513,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -518,7 +541,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -530,17 +553,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -558,7 +581,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -570,17 +593,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -598,7 +621,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -610,17 +633,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -638,7 +661,7 @@
 							formData.append( 'content', editor.selection.getContent() );
 							let language = document.getElementById('language').value;
 							formData.append( 'language', language );
-							document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.remove('hidden');
 							$.ajax( {
 								headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 								type: "post",
@@ -650,17 +673,17 @@
 
 									if (data.status == 'success') {
 										editor.selection.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 							} );
 						}
@@ -684,7 +707,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -696,17 +719,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -724,7 +747,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -736,17 +759,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -764,7 +787,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -776,17 +799,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -804,7 +827,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -816,17 +839,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -844,7 +867,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -856,17 +879,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -884,7 +907,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -896,17 +919,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -924,7 +947,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -936,17 +959,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -964,7 +987,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -976,17 +999,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1004,7 +1027,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1016,17 +1039,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1044,7 +1067,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1056,17 +1079,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1084,7 +1107,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1096,17 +1119,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1124,7 +1147,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1136,17 +1159,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1164,7 +1187,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1176,17 +1199,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1204,7 +1227,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1216,17 +1239,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1244,7 +1267,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1256,17 +1279,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1284,7 +1307,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1296,17 +1319,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1324,7 +1347,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1336,17 +1359,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1364,7 +1387,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1376,17 +1399,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1404,7 +1427,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1416,17 +1439,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1444,7 +1467,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1456,17 +1479,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1484,7 +1507,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1496,17 +1519,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1524,7 +1547,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1536,17 +1559,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1573,7 +1596,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1585,17 +1608,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1613,7 +1636,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1625,17 +1648,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1653,7 +1676,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1665,17 +1688,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1693,7 +1716,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1705,17 +1728,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1733,7 +1756,7 @@
 									formData.append( 'content', editor.selection.getContent() );
 									let language = document.getElementById('language').value;
 									formData.append( 'language', language );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1745,17 +1768,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits(); 
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1780,7 +1803,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Afrikaans' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1792,17 +1815,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1818,7 +1841,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Arabic' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1830,17 +1853,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1856,7 +1879,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Armenian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1868,17 +1891,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1894,7 +1917,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Azerbaijani' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1906,17 +1929,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1932,7 +1955,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Belarusian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1944,17 +1967,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -1969,7 +1992,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Bosnian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -1981,17 +2004,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2007,7 +2030,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Bulgarian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2019,17 +2042,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2045,7 +2068,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Catalan' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2057,17 +2080,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2083,7 +2106,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Chinese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2095,17 +2118,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2121,7 +2144,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Croatian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2133,17 +2156,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2159,7 +2182,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Czech' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2171,17 +2194,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2197,7 +2220,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Danish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2209,17 +2232,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2235,7 +2258,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Dutch' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2247,17 +2270,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2273,7 +2296,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to English' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2285,17 +2308,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2311,7 +2334,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Estonian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2323,17 +2346,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2349,7 +2372,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Finnish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2361,17 +2384,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2387,7 +2410,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to French' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2399,17 +2422,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2425,7 +2448,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to German' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2437,17 +2460,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2463,7 +2486,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Greek' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2475,17 +2498,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2501,7 +2524,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Hebrew' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2513,17 +2536,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2539,7 +2562,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Hindi' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2551,17 +2574,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2577,7 +2600,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Hungarian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2589,17 +2612,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2615,7 +2638,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Icelandic' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2627,17 +2650,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2653,7 +2676,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Indonesian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2665,17 +2688,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2691,7 +2714,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Italian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2703,17 +2726,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2729,7 +2752,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Japanese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2741,17 +2764,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2767,7 +2790,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Kazakh' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2779,17 +2802,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2805,7 +2828,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Korean' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2817,17 +2840,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2842,7 +2865,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Malay' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2854,17 +2877,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2880,7 +2903,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Norwegian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2892,17 +2915,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2918,7 +2941,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Persian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2930,17 +2953,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2956,7 +2979,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Polish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -2968,17 +2991,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -2994,7 +3017,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Portuguese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3006,17 +3029,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3032,7 +3055,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Romanian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3044,17 +3067,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3070,7 +3093,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Russian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3082,17 +3105,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3107,7 +3130,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Serbian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3119,17 +3142,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3145,7 +3168,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Slovak' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3157,17 +3180,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3183,7 +3206,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Slovenian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3195,17 +3218,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3221,7 +3244,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Spanish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3233,17 +3256,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3259,7 +3282,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Swahili' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3271,17 +3294,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3297,7 +3320,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Tamil' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3309,17 +3332,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3335,7 +3358,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Thai' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3347,17 +3370,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3373,7 +3396,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Turkish' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3385,17 +3408,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3411,7 +3434,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Ukrainian' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3423,17 +3446,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3449,7 +3472,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Urdu' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3461,17 +3484,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3487,7 +3510,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Vietnamese' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3499,17 +3522,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on');
+												document.querySelector('#loader-line')?.classList?.add('hidden');
 												calculateCredits();   
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3525,7 +3548,7 @@
 									let formData = new FormData();
 									formData.append( 'prompt', 'Translate the text below to Welsh' );
 									formData.append( 'content', editor.selection.getContent() );
-									document.querySelector('#loader-line')?.classList?.remove('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.remove('hidden');
 									$.ajax( {
 										headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 										type: "post",
@@ -3537,17 +3560,17 @@
 
 											if (data.status == 'success') {
 												editor.selection.setContent( data.message );
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 												calculateCredits();  
 											} else {
 												toastr.warning(data.message);
-												document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+												document.querySelector('#loader-line')?.classList?.add('hidden'); 
 											}
 											
 										},
 										error: function ( data ) {
 											toastr.error('There was an unexpected error, please contact support');
-											document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+											document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										}
 									} );
 								}
@@ -3603,20 +3626,20 @@
 
 									if (data.status == 'success') {
 										tinymce.activeEditor.setContent( data.message );
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 										calculateCredits();  
 										// let count = tinymce.activeEditor.plugins.wordcount.getCount();
 										// let words = document.getElementById('total-words-templates');
 										// words.innerHTML = count;
 									} else {
 										toastr.warning(data.message);
-										document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+										document.querySelector('#loader-line')?.classList?.add('hidden'); 
 									}
 									
 								},
 								error: function ( data ) {
 									toastr.error('There was an unexpected error, please contact support');
-									document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+									document.querySelector('#loader-line')?.classList?.add('hidden'); 
 								}
 						
 							} );
@@ -3629,7 +3652,7 @@
 					predicate: function (node) {
 						return !editor.selection.isCollapsed();
 					},
-					items: 'AIMain AIOptions | bold italic underline | bullist numlist blockquote',
+					items: 'AIMain AIOptions | bold italic underline | bullist numlist blockquote | copy paste',
 					position: 'selection',
 					scope: 'node'
 				});
@@ -3712,7 +3735,7 @@
 					$('#generate').prop('disabled', true);
 					let btn = document.getElementById('generate');					
 					btn.innerHTML = loading;  
-					document.querySelector('#loader-line')?.classList?.remove('opacity-on');      
+					document.querySelector('#loader-line')?.classList?.remove('hidden');     
 				},		
 				success: function (data) {	
 					
@@ -3721,7 +3744,7 @@
 						let btn = document.getElementById('generate');					
 						btn.innerHTML = '{{ __('Generate') }}';
 						toastr.warning(data['message']);
-						document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+						document.querySelector('#loader-line')?.classList?.add('hidden'); 
 					} else {		
 	
 						const eventSource = new EventSource( "/user/smart-editor/process?content_id=" + data.id+"&temperature=" + data.temperature + "&language=" + data.language);
@@ -3735,7 +3758,7 @@
 								btn.innerHTML = '{{ __('Generate') }}'; 
 								var $body = $(tinymce.activeEditor.getBody());
 								$body.find('p:last').append('<br><br>');
-								document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+								document.querySelector('#loader-line')?.classList?.add('hidden');  
 								calculateCredits();  
 							
 							} else if (e.data == '[ERROR]') {
@@ -3743,7 +3766,7 @@
 								$('#generate').prop('disabled', false);
 								let btn = document.getElementById('generate');					
 								btn.innerHTML = '{{ __('Generate') }}'; 
-								document.querySelector('#loader-line')?.classList?.add('opacity-on');    
+								document.querySelector('#loader-line')?.classList?.add('hidden');    
 							} else {
 
 								let stream = e.data
@@ -3762,7 +3785,7 @@
 							$('#generate').prop('disabled', false);
 							let btn = document.getElementById('generate');					
 							btn.innerHTML = '{{ __('Generate') }}';  
-							document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+							document.querySelector('#loader-line')?.classList?.add('hidden'); 
 						};
 					}
 				},
@@ -3770,7 +3793,7 @@
 				error: function(data) {
 					$('#generate').prop('disabled', false);
 					$('#generate').html('{{ __('Generate') }}'); 
-					document.querySelector('#loader-line')?.classList?.add('opacity-on'); 
+					document.querySelector('#loader-line')?.classList?.add('hidden'); 
 					console.log(data)
 				}
 			});	
@@ -3847,7 +3870,7 @@
 		let textarea = tinymce.activeEditor.getContent();
 		let workbook = document.getElementById('project').value;
 		let language = document.getElementById("language");
-		document.querySelector('#loader-line')?.classList?.remove('opacity-on');  
+		document.querySelector('#loader-line')?.classList?.remove('hidden'); 
 
 		$.ajax({
 			headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
@@ -3858,18 +3881,18 @@
 				if (data['status'] == 'new') {
 					toastr.success('{{ __('Successfully saved in the documents') }}');
 					active_content = data['id'];
-					document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+					document.querySelector('#loader-line')?.classList?.add('hidden');  
 				} else if(data['status'] == 'updated') {
 					toastr.success('{{ __('Changes were successfully saved in the documents') }}');
-					document.querySelector('#loader-line')?.classList?.add('opacity-on');
+					document.querySelector('#loader-line')?.classList?.add('hidden');
 				} else {						
 					toastr.warning('{{ __('There was an issue while saving your changes') }}');
-					document.querySelector('#loader-line')?.classList?.add('opacity-on');
+					document.querySelector('#loader-line')?.classList?.add('hidden');
 				}
 			},
 			error: function(data) {
 				toastr.warning('{{ __('There was an issue while saving your changes') }}');
-				document.querySelector('#loader-line')?.classList?.add('opacity-on');
+				document.querySelector('#loader-line')?.classList?.add('hidden');
 			}
 		});
 
@@ -4041,14 +4064,14 @@
 		$.ajax({
 			headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 			method: 'post',
-			url: '/user/chat/csv/credits',
+			url: '/user/chat/file/credits',
 			data: 'credit',
 			processData: false,
 			contentType: false,
 			success: function (data) {
 				console.log(data)
 				if (data['credits'] != 'Unlimited') {
-					animateValue("balance-number", parseInt(current.replace(/,/g, '')), data['credits'], 300);
+					//animateValue("balance-number", parseInt(current.replace(/,/g, '')), data['credits'], 300);
 				}
 					
 			},

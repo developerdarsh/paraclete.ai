@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid h-100vh ">
-    <div class="row background-white justify-content-center">
+    <div class="row login-background justify-content-center">
         <div class="col-md-6 col-sm-12" id="login-responsive"> 
             <div class="row justify-content-center">
                 <div class="col-lg-7 mx-auto">
@@ -28,7 +28,7 @@
                             </div>
                         </div>
 
-                        <form method="POST" action="{{ route('login') }}">
+                        <form method="POST" action="{{ route('login') }}" onsubmit="process()">
                             @csrf                                       
         
                             <h3 class="text-center login-title mb-8">{{ __('Welcome Back to') }} <span class="text-info"><a href="{{ url('/') }}">{{ config('app.name') }}</a></span></h3>
@@ -96,7 +96,7 @@
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" autocomplete="off" placeholder="{{ __('Email Address') }}" required>
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
-                                        {{ $message }}
+                                        {{ __($message) }}
                                     </span>
                                 @enderror                            
                             </div>
@@ -106,7 +106,7 @@
                                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" autocomplete="off" placeholder="{{ __('Password') }}" required>
                                 @error('password')
                                     <span class="invalid-feedback" role="alert">
-                                        {{ $message }}
+                                        {{ __($message) }}
                                     </span>
                                 @enderror                            
                             </div>
@@ -131,12 +131,12 @@
         
                             <div class="text-center">
                                 <div class="form-group mb-0">                        
-                                    <button type="submit" class="btn btn-primary font-weight-bold login-main-button">{{ __('Sign In') }}</button>              
+                                    <button type="submit" class="btn btn-primary font-weight-bold login-main-button" id="sign-in">{{ __('Sign In') }}</button>              
                                 </div>
             
                                 @if (config('settings.registration') == 'enabled')
-                                    <p class="fs-10 text-muted pt-3 mb-0">{{ __('New to ') }} <a href="{{ url('/') }}">{{ config('app.name') }}?</a></p>
-                                    <a href="{{ route('register') }}"  class="fs-12 font-weight-bold">{{ __('Sign Up') }}</a> 
+                                    <p class="fs-10 text-muted pt-3 mb-0">{{ __('New to ') }} <a href="{{ url('/') }}" class="special-action-sign">{{ config('app.name') }}?</a></p>
+                                    <a href="{{ route('register') }}"  class="fs-12 font-weight-bold special-action-sign">{{ __('Sign Up') }}</a> 
                                 @endif
                             </div>
         
@@ -179,5 +179,21 @@
             });
         </script>
     @endif
+
+    <script type="text/javascript">
+        let loading = `<span class="loading">
+					<span style="background-color: #fff;"></span>
+					<span style="background-color: #fff;"></span>
+					<span style="background-color: #fff;"></span>
+					</span>`;
+
+        function process() {
+            $('#sign-in').prop('disabled', true);
+            let btn = document.getElementById('sign-in');					
+            btn.innerHTML = loading;  
+            document.querySelector('#loader-line')?.classList?.remove('hidden'); 
+            return; 
+        }
+    </script>
     
 @endsection

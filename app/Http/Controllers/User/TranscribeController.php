@@ -172,6 +172,9 @@ class TranscribeController extends Controller
                 } elseif (config('settings.whisper_default_storage') == 'aws') {
                     Storage::disk('s3')->put($name, file_get_contents($audio));
                     $audio_url = Storage::disk('s3')->url($name);
+                } elseif (config('settings.whisper_default_storage') == 'r2') {
+                    Storage::disk('r2')->put($name, file_get_contents($audio));
+                    $audio_url = Storage::disk('r2')->url($name);
                 } elseif (config('settings.whisper_default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->put($name, file_get_contents($audio));
                     $audio_url = Storage::disk('wasabi')->url($name);
@@ -240,28 +243,6 @@ class TranscribeController extends Controller
 
                 $text = $response['text'];
 
-                if ($plan) {
-                    if (is_null($plan->whisper_storage_days)) {
-                        if (config('settings.whisper_default_duration') == 0) {
-                            $expiration = Carbon::now()->addDays(18250);
-                        } else {
-                            $expiration = Carbon::now()->addDays(config('settings.whisper_default_duration'));
-                        }                            
-                    } else {
-                        if ($plan->whisper_storage_days == 0) {
-                            $expiration = Carbon::now()->addDays(18250);
-                        } else {
-                            $expiration = Carbon::now()->addDays($plan->whisper_storage_days);
-                        }
-                    }
-                } else {
-                    if (config('settings.whisper_default_duration') == 0) {
-                        $expiration = Carbon::now()->addDays(18250);
-                    } else {
-                        $expiration = Carbon::now()->addDays(config('settings.whisper_default_duration'));
-                    } 
-                }
-
                 # Delete temp file
                 if (config('settings.whisper_default_storage') != 'local') {
                     if (Storage::disk('public')->exists('transcribe/' . $file_name)) {
@@ -288,7 +269,6 @@ class TranscribeController extends Controller
                 $transcript->url = $audio_url;
                 $transcript->audio_type = $audio_type;
                 $transcript->storage = config('settings.whisper_default_storage');
-                $transcript->expires_at = $expiration;
                 $transcript->save();
     
                 $data['text'] = $text;

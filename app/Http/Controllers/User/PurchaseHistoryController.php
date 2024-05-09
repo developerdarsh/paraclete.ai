@@ -5,12 +5,18 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\Models\Subscriber;
 use App\Models\Payment;
 use App\Models\User;
 use DataTables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BankTransferInvoiceUploaded;
+use Exception;
+
 
 class PurchaseHistoryController extends Controller
 {
@@ -24,9 +30,17 @@ class PurchaseHistoryController extends Controller
             return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
-                        $actionBtn = '<div>                                            
+                        if ($row["gateway"] == 'BankTransfer') {
+                            $actionBtn = '<div>                                            
+                                        <a href="'. route("user.purchases.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons view-action-button" title="'. __('View Transaction') .'"></i></a>
+                                        <a class="uploadConfirmation" id="' . $row["id"] . '" href="#"><i class="fa-solid fa-file-upload table-action-buttons edit-action-button" title="'. __('Upload Confirmation') .'"></i></a>
+                                    </div>';
+                        } else {
+                            $actionBtn = '<div>                                            
                                         <a href="'. route("user.purchases.show", $row["id"] ). '"><i class="fa-solid fa-file-invoice-dollar table-action-buttons view-action-button" title="'. __('View Transaction') .'"></i></a>
                                     </div>';
+                        }
+                        
                         return $actionBtn;
                     })
                     ->addColumn('created-on', function($row){
@@ -38,80 +52,22 @@ class PurchaseHistoryController extends Controller
                         return $custom_status;
                     })
                     ->addColumn('custom-frequency', function($row){
-                        $custom_status = '<span class="cell-box payment-'.strtolower($row["frequency"]).'">'.ucfirst($row["frequency"]).'</span>';
+                        $custom_status = '<span>'.ucfirst($row["frequency"]).'</span>';
                         return $custom_status;
                     })
-                    ->addColumn('custom-words', function($row){
-                        $words = ($row["words"] == -1) ? __('Unlimited') : number_format($row["words"]);
-                        $custom_words = '<span>'.$words.'</span>';
-                        return $custom_words;
+                    ->addColumn('custom-price', function($row){
+                        $custom_price = '<span>'.$row["price"] . ' ' .$row['currency'].'</span>';
+                        return $custom_price;
                     })
                     ->addColumn('custom-order', function($row){
                         $custom_storage = '<span>'.$row["order_id"].'</span>';
                         return $custom_storage;
                     })
                     ->addColumn('custom-plan-name', function($row){
-                        $custom_status = '<span class="font-weight-bold">'.ucfirst($row["plan_name"]).'</span><br><span class="text-muted">'.$row["price"] . ' ' .$row['currency'].'</span>';
+                        $custom_status = '<span>'.ucfirst($row["plan_name"]).'</span>';
                         return $custom_status;
                     })
-                    ->addColumn('custom-gateway', function($row){
-                        switch ($row['gateway']) {
-                            case 'PayPal':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="PayPal Gateway" class="w-30" src="' . URL::asset('img/payments/paypal.svg') . '"></div>';                             
-                                break;
-                            case 'Stripe':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Stripe Gateway" class="w-20" src="' . URL::asset('img/payments/stripe.svg') . '"></div>';
-                                break;
-                            case 'Paystack':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Paystack Gateway" class="w-40" src="' . URL::asset('img/payments/paystack.svg') . '"></div>';
-                                break;
-                            case 'Razorpay':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Razorpay Gateway" class="w-40" src="' . URL::asset('img/payments/razorpay.svg') . '"></div>';
-                                break;
-                            case 'BankTransfer':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="BankTransfer Gateway" class="w-40" src="' . URL::asset('img/payments/bank-transfer.png') . '"></div>';
-                                break;
-                            case 'Coinbase':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Coinbase Gateway" class="w-40" src="' . URL::asset('img/payments/coinbase.svg') . '"></div>';
-                                break;
-                            case 'Mollie':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Mollie Gateway" class="w-40" src="' . URL::asset('img/payments/mollie.svg') . '"></div>';
-                                break;
-                            case 'Braintree':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Braintree Gateway" class="w-40" src="' . URL::asset('img/payments/braintree.svg') . '"></div>';
-                                break;
-                            case 'Midtrans':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Midtrans Gateway" class="w-40" src="' . URL::asset('img/payments/midtrans.png') . '"></div>';
-                                break;
-                            case 'Flutterwave':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Flutterwave Gateway" class="w-40" src="' . URL::asset('img/payments/flutterwave.svg') . '"></div>';
-                                break; 
-                            case 'Yookassa':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Yookassa Gateway" class="w-40" src="' . URL::asset('img/payments/yookassa.svg') . '"></div>';
-                                break;
-                            case 'Paddle':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Paddle Gateway" class="w-40" src="' . URL::asset('img/payments/paddle.svg') . '"></div>';
-                                break;
-                            case 'Iyzico':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="Iyzico Gateway" class="w-40" src="' . URL::asset('img/payments/iyzico.svg') . '"></div>';
-                                break;
-                            case 'TwoCheckout':
-                                $custom_gateway = '<div class="overflow-hidden"><img alt="TwoCheckout Gateway" class="w-40" src="' . URL::asset('img/payments/twocheckout.svg') . '"></div>';
-                                break;
-                            case 'Manual':
-                                $custom_gateway = '<div>Manual Assign</div>';
-                                break;
-                            case 'FREE':
-                                $custom_gateway = '<div>Free Plan</div>';
-                                break;
-                            default:
-                                $custom_gateway = '<div class="overflow-hidden">Unknown</div>';
-                                break;
-                        }
-                        
-                        return $custom_gateway;
-                    })
-                    ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-gateway', 'custom-amount', 'custom-plan-name', 'custom-order', 'custom-frequency', 'custom-words'])
+                    ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-amount', 'custom-plan-name', 'custom-order', 'custom-frequency', 'custom-price'])
                     ->make(true);
                     
         }
@@ -237,5 +193,57 @@ class PurchaseHistoryController extends Controller
         }
     }
 
+
+    public function uploadConfirmation(Request $request) {
+
+        if (request()->has('confirmation')) {
+        
+            try {
+                request()->validate([
+                    'confirmation' => 'nullable|mimes:jpeg,png,jpg,pdf|max:5048'
+                ]);
+                
+            } catch (\Exception $e) {
+                toastr()->error(__('Incorrect file extension, please upload only image or pdf files.') . $e->getMessage());
+                return redirect()->back();
+            }
+            
+            $invoice = request()->file('confirmation');
+
+            $name = Str::random(15);
+
+            $payment = Payment::find(request('id'));
+
+            $folder = 'storage/';
+            
+            $filePath = $folder . $name . '.' . $invoice->getClientOriginalExtension();
+            
+            $this->uploadImage($invoice, $folder, 'public', $name);
+            
+            $payment->invoice = $filePath;
+            $payment->save();
+
+            try {
+                Mail::to($request->user())->send(new BankTransferInvoiceUploaded($payment));
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not setup to send payment notifications via email');
+            }
+
+            return  response()->json('success');
+        }
+    }
+
+
+    /**
+     * Upload voice avatar image
+     */
+    public function uploadImage(UploadedFile $file, $folder = null, $disk = 'public', $filename = null)
+    {
+        $name = !is_null($filename) ? $filename : Str::random(25);
+
+        $image = $file->storeAs($folder, $name .'.'. $file->getClientOriginalExtension(), $disk);
+
+        return $image;
+    }
 
 }

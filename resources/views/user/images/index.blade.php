@@ -11,12 +11,23 @@
 	<div class="row" id="image-side-space">
 		<div class="row no-gutters justify-content-center">
 			<div class="col-lg-9 col-md-11 col-sm-12 text-center">
-				<a class="info-btn-alt mt-4" data-bs-toggle="modal" data-bs-target="#info-alert-model" href="javascript:void(0)">How It works ?</a>
 				<h3 class="card-title mt-6 fs-20"><i class="fa-solid fa-wand-magic-sparkles mr-2 text-primary"></i></i>{{ __('AI Image Generator') }}</h3>
 				<h6 class="text-muted mb-7">{{ __('Unleash your creativity with our AI image generator that produces stunning visuals in seconds') }}</h6>
 				<div class="card-top d-flex text-right justify-content-right right mx-auto">
 					<div class="mr-4">
-						<p class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid) }} {{ __('Images') }}@endif</span></p>
+						<p class="fs-11 text-muted pl-3"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} 
+							<span class="font-weight-semibold">
+								@if (auth()->user()->available_dalle_images == -1) 
+									<span id="balance-number-dalle">{{ __('Unlimited') }}</span>
+								@else <span id="balance-number-dalle">{{ number_format(auth()->user()->available_dalle_images + auth()->user()->available_dalle_images_prepaid) }} </span> {{ __('Dalle Images') }}@endif
+							</span>
+							|
+							<span class="font-weight-semibold">
+								@if (auth()->user()->available_sd_images == -1) 
+									<span id="balance-number-sd">{{ __('Unlimited') }} </span>
+								@else <span id="balance-number-sd">{{ number_format(auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid) }} </span> {{ __('SD Images') }}@endif
+							</span>
+						</p>
 					</div>
 					<div>
 						<a href="#" id="main-settings-toggle"><i class="fa-sharp fa-solid fa-sliders text-muted"></i></a>
@@ -175,6 +186,10 @@
 							<img id="source-image-variations"/>
 						</div>
 					</div>
+				</div>
+
+				<div class="card-bottom p-0">
+					<a class="prompts text-muted fs-11 font-weight-semibold" href="#" data-bs-toggle="modal" data-bs-target="#promptModal" data-tippy-content="{{ __('Prompt Library') }}">{{ __('Prompts') }}</a>
 				</div>
 
 				@if (config('settings.image_vendor') == 'stable_diffusion' || config('settings.image_vendor') == 'both')
@@ -373,6 +388,15 @@
 								<option value='832x1216'>832 x 1216px</option>
 								<option value='768x1344'>768 x 1344px</option>
 								<option value='640x1536'>640 x 1536px</option>
+							@elseif (config('settings.image_stable_diffusion_engine') == 'sd3' || config('settings.image_stable_diffusion_engine') == 'sd3-turbo' || config('settings.image_stable_diffusion_engine') == 'core')
+								<option value='1:1'>1:1 ({{ __('Aspect Ratio') }})</option>
+								<option value='2:3'>2:3 ({{ __('Aspect Ratio') }})</option>
+								<option value='3:2'>3:2 ({{ __('Aspect Ratio') }})</option>
+								<option value='4:5'>4:5 ({{ __('Aspect Ratio') }})</option>
+								<option value='5:4'>5:4 ({{ __('Aspect Ratio') }})</option>
+								<option value='9:16'>9:16 ({{ __('Aspect Ratio') }})</option>
+								<option value='16:9'>16:9 ({{ __('Aspect Ratio') }})</option>
+								<option value='9:21'>9:21 ({{ __('Aspect Ratio') }})</option>
 							@endif	
 						@else
 							@if ($sd_model == 'stable-diffusion-v1-6')
@@ -405,6 +429,15 @@
 								<option value='832x1216'>832 x 1216px</option>
 								<option value='768x1344'>768 x 1344px</option>
 								<option value='640x1536'>640 x 1536px</option>
+							@elseif (config('settings.image_stable_diffusion_engine') == 'sd3' || config('settings.image_stable_diffusion_engine') == 'sd3-turbo' || config('settings.image_stable_diffusion_engine') == 'core')
+								<option value='1:1'>1:1 ({{ __('Aspect Ratio') }})</option>
+								<option value='2:3'>2:3 ({{ __('Aspect Ratio') }})</option>
+								<option value='3:2'>3:2 ({{ __('Aspect Ratio') }})</option>
+								<option value='4:5'>4:5 ({{ __('Aspect Ratio') }})</option>
+								<option value='5:4'>5:4 ({{ __('Aspect Ratio') }})</option>
+								<option value='9:16'>9:16 ({{ __('Aspect Ratio') }})</option>
+								<option value='16:9'>16:9 ({{ __('Aspect Ratio') }})</option>
+								<option value='9:21'>9:21 ({{ __('Aspect Ratio') }})</option>
 							@endif	
 						@endif																																																																		
 					</select>
@@ -1113,23 +1146,61 @@
 
 </form>
 
-<div class="modal fade" id="info-alert-model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-		<div class="modal-header">
-		<h2></h2>
-		 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-		</div>
-      <div class="modal-body">
-        <div class="row">
-          	<div style="position: relative; padding-bottom: calc(46.925329428989755% + 41px); height: 0; width: 100%"><iframe src="https://demo.arcade.software/pKW6lSdfLVsENFCLPlow?embed" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;color-scheme: light;" title="Paraclete AI templates"></iframe></div>
-          </div>
-      </div>
-    </div>
+<div class="modal fade" id="promptModal" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+		  <div class="modal-content">
+			<div class="modal-header">
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body pl-5 pr-5">
+				<h6 class="text-center font-weight-extra-bold fs-16"><i class="fa-solid fa-notebook mr-2"></i> {{ __('Prompt Library') }}</h6>
+
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12 p-4">
+						<div id="chat-search-panel">
+							<div class="search-template">
+								<div class="input-box">								
+									<div class="form-group prompt-search-bar-dark">							    
+										<input type="text" class="form-control" id="search-template" placeholder="{{ __('Search for prompts...') }}">
+									</div> 
+								</div> 
+							</div>
+						</div>
+					</div>	
+				</div>				
+				
+				<div class="prompts-panel">
+		
+					<div class="tab-content" id="myTabContent">
+		
+						<div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+							<div class="row" id="templates-panel">			
+								@foreach ($prompts as $prompt)
+									<div class="col-md-6 col-sm-12">
+										<div class="prompt-boxes">
+											<div class="card border-0" onclick='applyPrompt("{{ __($prompt->prompt) }}")'>
+												<div class="card-body pt-3">
+													<div class="template-title">
+														<h6 class="mb-2 fs-15 number-font">{{ __($prompt->title) }}</h6>
+													</div>
+													<div class="template-info">
+														<p class="fs-13 text-muted mb-2">{{ __($prompt->prompt) }}</p>
+													</div>							
+												</div>
+											</div>
+										</div>	
+									</div>														
+								@endforeach
+							</div>
+						</div>
+		
+					</div>
+				</div>
+				
+			</div>
+		  </div>
+	</div>
   </div>
-</div>
 @endsection
 
 @section('js')
@@ -1613,7 +1684,7 @@
 			$.ajax({
 				headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 				method: 'POST',
-				url: 'images/process',
+				url: '/user/images/process',
 				data: form,
 				contentType: false,
 				processData: false,
@@ -1641,9 +1712,16 @@
 						}
 						toastr.success('{{ __('Images were generated successfully') }}');	
 						
-						if (data['balance'] != 'unlimited') {
-							animateValue("balance-number", data['old'], data['current'], 2000);	
+						if (data['task'] == 'dalle') {
+							if (data['balance'] != 'unlimited') {
+								animateValue("balance-number-dalle", data['old'], data['current'], 2000);	
+							}
+						} else {
+							if (data['balance'] != 'unlimited') {
+								animateValue("balance-number-sd", data['old'], data['current'], 2000);	
+							}
 						}
+						
 
 						clearFileInput(task);
 						clearFileInputOpenai(openai_task);
@@ -1934,6 +2012,26 @@
 				break;
 		}
 	}
+
+	// Apply prompt
+	function applyPrompt(prompt) {
+		document.querySelector('[name=prompt]').value = prompt;
+	}
+
+
+	// Search prompt
+	$(document).on('keyup', '#search-template', function () {
+		var searchTerm = $(this).val().toLowerCase();
+		$('#templates-panel').find('> div').each(function () {
+			if ($(this).filter(function() {
+				return (($(this).find('h6').text().toLowerCase().indexOf(searchTerm) > -1) || ($(this).find('p').text().toLowerCase().indexOf(searchTerm) > -1));
+			}).length > 0 || searchTerm.length < 1) {
+				$(this).show();
+			} else {
+				$(this).hide();
+			}
+		});
+	});
 
 </script>
 @endsection

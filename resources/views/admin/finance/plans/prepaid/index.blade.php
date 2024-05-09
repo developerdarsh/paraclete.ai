@@ -19,7 +19,7 @@
 			</ol>
 		</div>
 		<div class="page-rightheader">
-			<a href="{{ route('admin.finance.prepaid.create') }}" class="btn btn-primary mt-1">{{ __('Create New Prepaid Plan') }}</a>
+			<a href="{{ route('admin.finance.prepaid.create') }}" class="btn btn-primary ripple mt-1">{{ __('Create New Prepaid Plan') }}</a>
 		</div>
 	</div>	
 	<!-- END PAGE HEADER -->
@@ -37,16 +37,13 @@
 					<table id='prepaidAdminTable' class='table' width='100%'>
 							<thead>
 								<tr>
-									<th width="12%">{{ __('Plan Name') }}</th>
-									<th width="10%">{{ __('Status') }}</th>									
-									<th width="10%">{{ __('Words') }}</th>																																																																																						
-									<th width="10%">{{ __('Images') }}</th>																																																																																						
-									<th width="10%">{{ __('Characters') }}</th>																																																																																						
-									<th width="10%">{{ __('Minutes') }}</th>																																																																																						
-									<th width="10%">{{ __('Pricing Plan') }}</th>
-									<th width="7%">{{ __('Featured') }}</th>
-									<th width="10%">{{ __('Created On') }}</th>
-									<th width="10%">{{ __('Actions') }}</th>
+									<th width="10%">{{ __('Plan Name') }}</th>
+									<th width="5%">{{ __('Status') }}</th>																	
+									<th width="22%">{{ __('GPT 4 / GPT 4T / GPT 3.5T') }} / {{ __('DE Images') }} / {{ __('SD Images') }} / {{ __('Characters') }} / {{ __('Minutes') }}</th>																																																																																																																																																																											
+									<th width="5%">{{ __('Pricing Plan') }}</th>
+									<th width="5%">{{ __('Featured') }}</th>
+									<th width="7%">{{ __('Created On') }}</th>
+									<th width="7%">{{ __('Actions') }}</th>
 								</tr>
 							</thead>
 					</table> <!-- END SET DATATABLE -->
@@ -100,28 +97,10 @@
 						name: 'custom-status',
 						orderable: true,
 						searchable: true
-					},				
+					},			
 					{
-						data: 'custom-words',
-						name: 'custom-words',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'custom-images',
-						name: 'custom-images',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'custom-characters',
-						name: 'custom-characters',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'custom-minutes',
-						name: 'custom-minutes',
+						data: 'custom-credits',
+						name: 'custom-credits',
 						orderable: true,
 						searchable: true
 					},

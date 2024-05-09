@@ -7,8 +7,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0"> {{ __('Google Adsense') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa fa-globe mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -20,8 +20,8 @@
 	<!-- END PAGE HEADER -->
 @endsection
 @section('content')						
-	<div class="row">
-		<div class="col-lg-12 col-md-12 col-xm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-9 col-md-12 col-xm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Google Adsense List') }}</h3>

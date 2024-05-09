@@ -231,7 +231,7 @@ return [
     "Uganda",
     "United Kingdom",
     "Ukraine",
-    "United Arab Erimates",
+    "United Arab Emirates",
     "United States",
     "Uraguay",
     "Uzbekistan",

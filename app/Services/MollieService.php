@@ -14,7 +14,11 @@ use App\Models\SubscriptionPlan;
 use App\Models\PrepaidPlan;
 use App\Models\Subscriber;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PaymentSuccess;
+use App\Mail\NewPaymentNotification;
+use App\Services\HelperService;
+use Exception;
 
 class MollieService 
 {
@@ -142,7 +146,7 @@ class MollieService
     }
 
 
-    public function handleApproval()
+    public function handleApproval(Request $request)
     {        
         if (session()->has('paymentIntentID')) {
             $paymentIntentID = session()->get('paymentIntentID');
@@ -178,66 +182,24 @@ class MollieService
                 $subscription_id = Str::random(10);
                 $days = 18250;
 
-                $subscription = Subscriber::create([
-                    'user_id' => auth()->user()->id,
-                    'plan_id' => $plan->id,
-                    'status' => 'Active',
-                    'created_at' => now(),
-                    'gateway' => 'Mollie',
-                    'frequency' => 'lifetime',
-                    'plan_name' => $plan->plan_name,
-                    'words' => $plan->words,
-                    'images' => $plan->images,
-                    'characters' => $plan->characters,
-                    'minutes' => $plan->minutes,
-                    'subscription_id' => $subscription_id,
-                    'active_until' => Carbon::now()->addDays($days),
-                ]);  
+                HelperService::registerSubscriber($plan, 'Mollie', 'Active', $subscription_id, $days);
             }
 
-            $record_payment = new Payment();
-            $record_payment->user_id = auth()->user()->id;
-            $record_payment->order_id = $paymentIntentID;
-            $record_payment->plan_id = $plan->id;
-            $record_payment->plan_name = $plan->plan_name;
-            $record_payment->frequency = $type;
-            $record_payment->price = $amount;
-            $record_payment->currency = $currency;
-            $record_payment->gateway = 'Mollie';
-            $record_payment->status = 'completed';
-            $record_payment->words = $plan->words;
-            $record_payment->images = $plan->images;
-            $record_payment->characters = $plan->characters;
-            $record_payment->minutes = $plan->minutes;
-            $record_payment->save();
+            $payment = HelperService::registerPayment($type, $plan->id, $paymentIntentID, $amount, 'Mollie', 'completed');
 
-            $user = User::where('id',auth()->user()->id)->first();
-
-            if ($type == 'lifetime') {
-                $group = (auth()->user()->hasRole('admin'))? 'admin' : 'subscriber';
-                $user->syncRoles($group);    
-                $user->group = $group;
-                $user->plan_id = $plan->id;
-                $user->total_words = $plan->words;
-                $user->total_images = $plan->images;
-                $user->total_chars = $plan->characters;
-                $user->total_minutes = $plan->minutes;
-                $user->available_words = $plan->words;
-                $user->available_images = $plan->images;
-                $user->available_chars = $plan->characters;
-                $user->available_minutes = $plan->minutes;
-                $user->member_limit = $plan->team_members;
-            } else {
-                $user->available_words_prepaid = $user->available_words_prepaid + $plan->words;
-                $user->available_images_prepaid = $user->available_images_prepaid + $plan->images;
-                $user->available_chars_prepaid = $user->available_chars_prepaid + $plan->characters;
-                $user->available_minutes_prepaid = $user->available_minutes_prepaid + $plan->minutes;
-            }
-
-            $user->save();
+            HelperService::registerCredits($type, $plan->id);
 
             event(new PaymentProcessed(auth()->user()));
             $order_id = $paymentIntentID;
+
+            try {
+                $admin = User::where('group', 'admin')->first();
+                
+                Mail::to($admin)->send(new NewPaymentNotification($payment));
+                Mail::to($request->user())->send(new PaymentSuccess($payment));
+            } catch (Exception $e) {
+                \Log::info('SMTP settings are not setup to send payment notifications via email');
+            }
 
             return view('user.plans.success', compact('plan', 'order_id'));
         }

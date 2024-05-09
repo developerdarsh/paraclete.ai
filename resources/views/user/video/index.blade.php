@@ -12,13 +12,15 @@
 	<div class="row mt-24">
 
 		@if ($type == 'Regular License' || $type == '')
-			<p class="fs-14" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem;">{{ __('Extended License is required in order to have access to these features') }}</p>
+			<div class="row text-center justify-content-center">
+				<p class="fs-14" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem; max-width: 1200px;">{{ __('Extended License is required in order to have access to these features') }}</p>
+			</div>			
 		@else
 			<div class="col-lg-4 col-md-12 col-sm-12">
 				<div class="card border-0">
 					<div class="card-header pt-4 border-0" id="video-image-counter">
 						<h3 class="card-title"><i class="fa-sharp fa-solid fa-video mr-4 text-info"></i>{{ __('AI Image to Video') }} </h3>
-						<p class="fs-11 text-muted mb-0 text-right"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_images + auth()->user()->available_images_prepaid) }} {{ __('Images') }}@endif</span></p>
+						<p class="fs-11 text-muted mb-0 text-right"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_sd_images == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_sd_images + auth()->user()->available_sd_images_prepaid) }} {{ __('SD Images') }}@endif</span></p>
 					</div>
 					<form id="create-video-form" action="{{ route('user.video.create') }}" method="POST" enctype="multipart/form-data">
 						@csrf
@@ -95,6 +97,7 @@
 				<div class="card border-0">
 					<div class="card-header">
 						<h3 class="card-title">{{ __('AI Image to Video Results') }} </h3>
+						<a id="refresh-button" href="#" data-tippy-content="{{ __('Update Status') }}"><i class="fa fa-refresh table-action-buttons edit-action-button"></i></a>
 					</div>
 					<div class="card-body pt-2">
 						<!-- SET DATATABLE -->
@@ -254,13 +257,13 @@
 						$('#create-video').prop('disabled', true);
 						let btn = document.getElementById('create-video');					
 						btn.innerHTML = loading;  
-						document.querySelector('#loader-line')?.classList?.remove('opacity-on');     
+						document.querySelector('#loader-line')?.classList?.remove('hidden');  
 					},
 					complete: function() {
 						$('#create-video').prop('disabled', false);
 						let btn = document.getElementById('create-video');					
-						btn.innerHTML = '{{ __('Create Voice') }}';
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');                
+						btn.innerHTML = '{{ __('Create Video') }}';
+						document.querySelector('#loader-line')?.classList?.add('hidden');                
 					},
 					success: function(data) {
 						console.log(data)
@@ -281,14 +284,10 @@
 
 						$('#create-video').prop('disabled', false);
 						let btn = document.getElementById('create-video');					
-						btn.innerHTML = '{{ __('Create Voice') }}';
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');          
+						btn.innerHTML = '{{ __('Create Video') }}';
+						document.querySelector('#loader-line')?.classList?.add('hidden');          
 					}
-				}).done(function(data) {
-
-					
-
-				})
+				}).done(function(data) {})
 			});
 
 			$(".range").each(function() {
@@ -333,6 +332,25 @@
 				}
 			}, stepTime);
 		}
+
+		$('#refresh-button').on('click', function(e){
+
+			e.preventDefault();
+
+			$.ajax({
+					headers: {
+						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+					},
+					type: "POST",
+					url: 'video/refresh',
+					success: function(data) {
+						$("#resultTable").DataTable().ajax.reload();
+					},
+					error: function(data) {          
+					}
+				}).done(function(data) {})
+
+		});
 		
 	</script>
 @endsection

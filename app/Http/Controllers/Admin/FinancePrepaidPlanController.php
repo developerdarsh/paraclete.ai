@@ -36,21 +36,16 @@ class FinancePrepaidPlanController extends Controller
                         $custom_priority = '<span class="cell-box plan-'.strtolower($row["status"]).'">'.ucfirst($row["status"]).'</span>';
                         return $custom_priority;
                     })
-                    ->addColumn('custom-words', function($row){
-                        $custom_storage = '<span>'.number_format($row["words"]).'</span>';
-                        return $custom_storage;
-                    })
-                    ->addColumn('custom-images', function($row){
-                        $custom_storage = '<span>'.number_format($row["images"]).'</span>';
-                        return $custom_storage;
-                    })
-                    ->addColumn('custom-characters', function($row){
-                        $custom_storage = '<span>'.number_format($row["characters"]).'</span>';
-                        return $custom_storage;
-                    })
-                    ->addColumn('custom-minutes', function($row){
-                        $custom_storage = '<span>'.number_format($row["minutes"]).'</span>';
-                        return $custom_storage;
+                    ->addColumn('custom-credits', function($row){
+                        $gpt_3_turbo = number_format($row["gpt_3_turbo_credits_prepaid"]);
+                        $gpt_4_turbo = number_format($row["gpt_4_turbo_credits_prepaid"]);
+                        $gpt_4 = number_format($row["gpt_4_credits_prepaid"]);
+                        $dalle_images = number_format($row["dalle_images"]);
+                        $sd_images = number_format($row["sd_images"]);
+                        $characters = number_format($row["characters"]);
+                        $minutes = number_format($row["minutes"]);
+                        $custom_credits = '<span>'. $gpt_4 .' / ' . $gpt_4_turbo .' / ' . $gpt_3_turbo .' / ' . $dalle_images . ' / '. $sd_images . ' / '. $characters . ' / ' . $minutes .'</span>';
+                        return $custom_credits;
                     })
                     ->addColumn('custom-name', function($row){
                         $custom_name = '<span class="font-weight-bold">'.$row["plan_name"].'</span><br><span>' . $row["price"] . ' ' . $row["currency"].'</span>';
@@ -65,7 +60,7 @@ class FinancePrepaidPlanController extends Controller
                         $custom_status = '<span class="cell-box payment-prepaid">'.ucfirst($row["pricing_plan"]).'</span>';
                         return $custom_status;
                     })
-                    ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-words', 'custom-name', 'custom-featured', 'custom-frequency', 'custom-images', 'custom-characters', 'custom-minutes'])
+                    ->rawColumns(['actions', 'custom-status', 'created-on', 'custom-name', 'custom-featured', 'custom-frequency', 'custom-credits'])
                     ->make(true);
                     
         }
@@ -98,10 +93,6 @@ class FinancePrepaidPlanController extends Controller
             'plan-name' => 'required',
             'price' => 'required|numeric',
             'currency' => 'required',
-            'words' => 'required|integer|min:0',
-            'images' => 'required|integer|min:0',
-            'characters' => 'required|integer|min:0',
-            'minutes' => 'required|integer|min:0',
         ]);
         
         $frequency = 'prepaid';
@@ -113,8 +104,16 @@ class FinancePrepaidPlanController extends Controller
             'currency' => request('currency'),
             'pricing_plan' => $frequency,
             'featured' => request('featured'),
-            'words' => request('words'),
-            'images' => request('images'),
+            'gpt_3_turbo_credits_prepaid' => request('gpt_3_turbo'),
+            'gpt_4_turbo_credits_prepaid' => request('gpt_4_turbo'),
+            'gpt_4_credits_prepaid' => request('gpt_4'),
+            'claude_3_opus_credits_prepaid' => request('claude_3_opus'),
+            'claude_3_sonnet_credits_prepaid' => request('claude_3_sonnet'),
+            'claude_3_haiku_credits_prepaid' => request('claude_3_haiku'),
+            'gemini_pro_credits_prepaid' => request('gemini_pro'),
+            'fine_tune_credits_prepaid' => request('fine_tune'),
+            'dalle_images' => request('dalle_images'),
+            'sd_images' => request('sd_images'),
             'characters' => request('characters'),
             'minutes' => request('minutes'),
         ]); 
@@ -164,10 +163,6 @@ class FinancePrepaidPlanController extends Controller
             'plan-name' => 'required',
             'price' => 'required|numeric',
             'currency' => 'required',
-            'words' => 'required|integer|min:0',
-            'images' => 'required|integer|min:0',
-            'characters' => 'required|integer|min:0',
-            'minutes' => 'required|integer|min:0',
         ]);
 
         $id->update([
@@ -175,8 +170,16 @@ class FinancePrepaidPlanController extends Controller
             'plan_name' => request('plan-name'),
             'price' => request('price'),
             'currency' => request('currency'),
-            'words' => request('words'),
-            'images' => request('images'),
+            'gpt_3_turbo_credits_prepaid' => request('gpt_3_turbo'),
+            'gpt_4_turbo_credits_prepaid' => request('gpt_4_turbo'),
+            'gpt_4_credits_prepaid' => request('gpt_4'),
+            'claude_3_opus_credits_prepaid' => request('claude_3_opus'),
+            'claude_3_sonnet_credits_prepaid' => request('claude_3_sonnet'),
+            'claude_3_haiku_credits_prepaid' => request('claude_3_haiku'),
+            'gemini_pro_credits_prepaid' => request('gemini_pro'),
+            'fine_tune_credits_prepaid' => request('fine_tune'),
+            'dalle_images' => request('dalle_images'),
+            'sd_images' => request('sd_images'),
             'characters' => request('characters'),
             'minutes' => request('minutes'),
             'featured' => request('featured'),

@@ -32,6 +32,16 @@ return new class extends Migration
             $table->string('paystack_authorization_code')->nullable();
             $table->string('paystack_email_token')->nullable();
             $table->string('paddle_cancel_url')->nullable();
+            $table->integer('dalle_images')->nullable()->default(0);
+            $table->integer('sd_images')->nullable()->default(0);
+            $table->integer('gpt_3_turbo_credits')->default(0);
+            $table->integer('gpt_4_turbo_credits')->default(0);
+            $table->integer('gpt_4_credits')->default(0);
+            $table->integer('claude_3_opus_credits')->default(0);
+            $table->integer('claude_3_sonnet_credits')->default(0);
+            $table->integer('claude_3_haiku_credits')->default(0);
+            $table->integer('fine_tune_credits')->default(0);
+            $table->integer('gemini_pro_credits')->default(0);
             $table->timestamps();
         });
     }

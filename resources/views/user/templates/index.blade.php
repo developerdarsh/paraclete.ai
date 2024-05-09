@@ -12,9 +12,15 @@
 			<div class="border-0 templates-nav-header">
 				<div class="card-body">
 					<div>
-						<div class="text-center"><a class="info-btn-alt" data-bs-toggle="modal" data-bs-target="#info-alert-model" href="javascript:void(0)">How It works ?</a></div>
-						<h3 class="card-title mb-3 ml-2 fs-20 super-strong"><i class="fa-solid fa-microchip-ai mr-2 text-primary"></i>{{ __('AI Templates') }}</h3>
+						<h3 class="card-title mb-3 ml-2 fs-20 super-strong"><i class="fa-solid fa-microchip-ai mr-2 text-primary"></i>{{ __('AI Writer') }}</h3>
 						<h6 class="text-muted mb-3 ml-2">{{ __('Seeking that perfect content? Look no further! Get ready to explore our fantastic lineup of templates') }}</h6>
+						@if (config('settings.custom_templates') == 'anyone')
+							<a href="{{ route('user.templates.custom') }}" class="btn btn-primary ripple" id="create-ai-button" style="text-transform: none;">{{ __('Create Custom Template') }}</a>
+						@else
+							@if ($check)
+								<a href="{{ route('user.templates.custom') }}" class="btn btn-primary ripple" id="create-ai-button" style="text-transform: none;">{{ __('Create Custom Template') }}</a>
+							@endif	
+						@endif											
 						<div class="search-template">
 							<div class="input-box">								
 								<div class="form-group">							    
@@ -194,6 +200,38 @@
 												</div>
 											@endif
 										@endforeach
+
+										@foreach ($private_templates as $template)
+											@if ($template->group == $category->code)
+												<div class="col-lg-3 col-md-6 col-sm-12">
+													<div class="template">
+														<a id="{{ $template->template_code }}" @if($template->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatusCustom(this.id)"><i id="{{ $template->template_code }}-icon" class="@if($template->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+														<div class="card @if($template->package == 'professional') professional @elseif($template->package == 'premium') premium @elseif($template->favorite) favorite @else border-0 @endif" id="{{ $template->template_code }}-card" onclick="window.location.href='{{ url('user/templates') }}/{{ $template->slug }}/{{ $template->template_code }}'">
+															<div class="card-body pt-5">
+																<div class="template-icon mb-4">
+																	{!! $template->icon !!}												
+																</div>
+																<div class="template-title">
+																	<h6 class="mb-2 fs-15 number-font">{{ __($template->name) }}</h6>
+																</div>
+																<div class="template-info">
+																	<p class="fs-13 text-muted mb-2">{{ __($template->description) }}</p>
+																</div>
+																@if($template->package == 'professional') 
+																	<p class="fs-8 btn btn-pro mb-0"><i class="fa-sharp fa-solid fa-crown mr-2"></i>{{ __('Pro') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-pro"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+																@elseif($template->package == 'free')
+																	<p class="fs-8 btn btn-free mb-0"><i class="fa-sharp fa-solid fa-gift mr-2"></i>{{ __('Free') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-free"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+																@elseif($template->package == 'premium')
+																	<p class="fs-8 btn btn-yellow mb-0"><i class="fa-sharp fa-solid fa-gem mr-2"></i>{{ __('Premium') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-premium"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+																@elseif($template->new)
+																	<span class="fs-8 btn btn-new mb-0"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</span>
+																@endif	
+															</div>
+														</div>
+													</div>							
+												</div>
+											@endif
+										@endforeach
 									@endif	
 								@endforeach		
 
@@ -302,6 +340,38 @@
 										@endforeach	
 										
 										@foreach ($custom_templates as $template)
+											@if ($template->group == $category->code)
+												<div class="col-lg-3 col-md-6 col-sm-12">
+													<div class="template">
+														<a id="{{ $template->template_code }}" @if($template->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatusCustom(this.id)"><i id="{{ $template->template_code }}-icon" class="@if($template->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+														<div class="card @if($template->package == 'professional') professional @elseif($template->package == 'premium') premium @elseif($template->favorite) favorite @else border-0 @endif" id="{{ $template->template_code }}-card" onclick="window.location.href='{{ url('user/templates') }}/{{ $template->slug }}/{{ $template->template_code }}'">
+															<div class="card-body pt-5">
+																<div class="template-icon mb-4">
+																	{!! $template->icon !!}												
+																</div>
+																<div class="template-title">
+																	<h6 class="mb-2 fs-15 number-font">{{ __($template->name) }}</h6>
+																</div>
+																<div class="template-info">
+																	<p class="fs-13 text-muted mb-2">{{ __($template->description) }}</p>
+																</div>
+																@if($template->package == 'professional') 
+																	<p class="fs-8 btn btn-pro mb-0"><i class="fa-sharp fa-solid fa-crown mr-2"></i>{{ __('Pro') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-pro"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+																@elseif($template->package == 'free')
+																	<p class="fs-8 btn btn-free mb-0"><i class="fa-sharp fa-solid fa-gift mr-2"></i>{{ __('Free') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-free"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+																@elseif($template->package == 'premium')
+																	<p class="fs-8 btn btn-yellow mb-0"><i class="fa-sharp fa-solid fa-gem mr-2"></i>{{ __('Premium') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-premium"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+																@elseif($template->new)
+																	<span class="fs-8 btn btn-new mb-0"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</span>
+																@endif	
+															</div>
+														</div>
+													</div>							
+												</div>
+											@endif
+										@endforeach
+
+										@foreach ($private_templates as $template)
 											@if ($template->group == $category->code)
 												<div class="col-lg-3 col-md-6 col-sm-12">
 													<div class="template">
@@ -467,6 +537,38 @@
 											</div>
 										@endif
 									@endforeach	
+
+									@foreach ($private_templates as $template)
+										@if ($template->group == $category->code)
+											<div class="col-lg-3 col-md-6 col-sm-12">
+												<div class="template">
+													<a id="{{ $template->template_code }}" @if($template->favorite) data-tippy-content="{{ __('Remove from favorite') }}" @else data-tippy-content="{{ __('Select as favorite') }}" @endif onclick="favoriteStatusCustom(this.id)"><i id="{{ $template->template_code }}-icon" class="@if($template->favorite) fa-solid fa-stars @else fa-regular fa-star @endif star"></i></a>
+													<div class="card @if($template->package == 'professional') professional @elseif($template->package == 'premium') premium @elseif($template->favorite) favorite @else border-0 @endif" id="{{ $template->template_code }}-card" onclick="window.location.href='{{ url('user/templates') }}/{{ $template->slug }}/{{ $template->template_code }}'">
+														<div class="card-body pt-5">
+															<div class="template-icon mb-4">
+																{!! $template->icon !!}												
+															</div>
+															<div class="template-title">
+																<h6 class="mb-2 fs-15 number-font">{{ __($template->name) }}</h6>
+															</div>
+															<div class="template-info">
+																<p class="fs-13 text-muted mb-2">{{ __($template->description) }}</p>
+															</div>
+															@if($template->package == 'professional') 
+																<p class="fs-8 btn btn-pro mb-0"><i class="fa-sharp fa-solid fa-crown mr-2"></i>{{ __('Pro') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-pro"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+															@elseif($template->package == 'free')
+																<p class="fs-8 btn btn-free mb-0"><i class="fa-sharp fa-solid fa-gift mr-2"></i>{{ __('Free') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-free"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+															@elseif($template->package == 'premium')
+																<p class="fs-8 btn btn-yellow mb-0"><i class="fa-sharp fa-solid fa-gem mr-2"></i>{{ __('Premium') }} @if($template->new) <p class="fs-8 btn btn-new mb-0 btn-new-premium"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</p> @endif</p> 
+															@elseif($template->new)
+																<span class="fs-8 btn btn-new mb-0"><i class="fa-sharp fa-solid fa-sparkles mr-2"></i>{{ __('New') }}</span>
+															@endif	
+														</div>
+													</div>
+												</div>							
+											</div>
+										@endif
+									@endforeach	
 								</div>
 							</div>
 						@endforeach	
@@ -479,23 +581,6 @@
 		</div>
 
 	</div>
-	<div class="modal fade" id="info-alert-model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-modal="true" role="dialog">
-		<div class="modal-dialog modal-dialog-centered modal-xl">
-			<div class="modal-content">
-				<div class="modal-header">
-				<h2></h2>
-				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-				</button>
-				</div>
-			<div class="modal-body">
-				<div class="row">
-					<div style="position: relative; padding-bottom: calc(46.925329428989755% + 41px); height: 0; width: 100%"><iframe src="https://demo.arcade.software/pKW6lSdfLVsENFCLPlow?embed" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;color-scheme: light;" title="Paraclete AI templates"></iframe></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 @endsection
 
 @section('js')

@@ -19,7 +19,7 @@
 			</ol>
 		</div>
 		<div class="page-rightheader">
-			<a href="{{ route('admin.settings.feature.create') }}" class="btn btn-primary mt-1">{{ __('Create New Feature') }}</a>
+			<a href="{{ route('admin.settings.feature.create') }}" class="btn btn-primary ripple mt-1">{{ __('Create New Feature') }}</a>
 		</div>
 	</div>
 	<!-- END PAGE HEADER -->

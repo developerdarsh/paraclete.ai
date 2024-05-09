@@ -7,8 +7,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Edit Tool') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa fa-globe mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -23,7 +23,7 @@
 
 @section('content')						
 	<!-- SUPPORT REQUEST -->
-	<div class="row">
+	<div class="row justify-content-center">
 		<div class="col-lg-8 col-md-8 col-xm-12">
 			<div class="card overflow-hidden border-0">
 				<div class="card-header">
@@ -34,7 +34,32 @@
 						@method('PUT')
 						@csrf
 
-						<div class="row mb-5">          
+						<div class="row mb-5">    
+							
+							<div class="col-md-6 col-sm-12">							
+								<div class="input-box">								
+									<h6>{{ __('Tool Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+									<div class="form-group">							    
+										<input type="text" class="form-control" id="name" name="name" value="{{ $id->tool_name }}" required>
+									</div> 
+									@error('name')
+										<p class="text-danger">{{ $errors->first('name') }}</p>
+									@enderror	
+								</div>						
+							</div>
+	
+							<div class="col-md-6 col-sm-12">							
+								<div class="input-box">								
+									<h6>{{ __('Tool Sub-Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+									<div class="form-group">							    
+										<input type="text" class="form-control" id="subname" name="subname" value="{{ $id->title_meta }}" required>
+									</div> 
+									@error('subname')
+										<p class="text-danger">{{ $errors->first('subname') }}</p>
+									@enderror	
+								</div>						
+							</div>
+
 							<div class="col-sm-12 col-md-3">
 							  	<div class="tool-banner-image overflow-hidden">
 									<img class="rounded-circle" src="{{ URL::asset($id->image) }}" alt="Main Logo">
@@ -112,9 +137,9 @@
 						</div>
 
 						<!-- ACTION BUTTON -->
-						<div class="border-0 text-right mb-2 mt-1">
-							<a href="{{ route('admin.settings.faq') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Update') }}</button>							
+						<div class="border-0 text-center mb-2 mt-1">
+							<a href="{{ route('admin.settings.tool') }}" class="btn btn-cancel mr-2 ripple pl-7 pr-7">{{ __('Return') }}</a>
+							<button type="submit" class="btn btn-primary ripple pl-7 pr-7">{{ __('Update') }}</button>							
 						</div>				
 
 					</form>					
@@ -127,6 +152,7 @@
 
 @section('js')
 	<!-- RichText JS -->
+	<script src="{{URL::asset('js/avatar.js')}}"></script>
 	<script src="{{URL::asset('plugins/richtext/jquery.richtext.min.js')}}"></script>
 	<script type="text/javascript">
 		$(function () {

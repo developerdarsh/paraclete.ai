@@ -9,11 +9,13 @@
 @endsection
 
 @section('content')
-	@if ($type == 'Regular License' || $type == '')
-		<p class="fs-14 mt-24" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem;">{{ __('Extended License is required in order to have access to these features') }}</p>
-	@else
-
 		<div class="row mt-24">
+			@if ($type == 'Regular License' || $type == '')
+				<div class="row text-center justify-content-center">
+					<p class="fs-14" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem; max-width: 1200px;">{{ __('Extended License is required in order to have access to these features') }}</p>
+				</div>	
+			@else
+
 			<div class="col-lg-4 col-md-12 col-sm-12">
 				<div class="card border-0">
 					<div class="card-header pt-4 border-0" id="voiceover-character-counter-top">
@@ -22,10 +24,30 @@
 					<form id="create-voice-form" action="{{ route('user.voiceover.clone.create') }}" method="POST" enctype="multipart/form-data">
 						@csrf
 						<div class="card-body pt-2 pl-6 pr-6 pb-6" id="">
+
 							<div class="input-box" style="position: relative">	
-								<h6>{{ __('Voice Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+								<h6>{{ __('New Voice Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 								<input type="text" class="form-control @error('name') is-danger @enderror" id="name" name="name" value="{{ old('name') }}" required>
-							</div> 	
+							</div>
+							
+							<div class="row">
+								<div class="col-lg-10 col-md-10 col-sm-10">
+									<div class="input-box">
+										<h6>{{ __('Re-Train Existing Voice') }} <i class="ml-2 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('For re-training your existing custom voice clone, select the target voice from the list and upload additional audio samples to further train the selected voice and click the Train Voice button.') }}."></i></h6>
+										<select id="train" name="train" class="form-select">	
+											<option value="none" selected> {{ __('Select your existing voice clone') }}</option>	
+											@foreach ($voices as $voice)																			
+												<option value="{{ $voice->voice_id }}"> {{ ucfirst($voice->voice) }}</option>
+											@endforeach																					
+										</select>
+									</div>
+								</div>
+								<div class="col-lg-2 col-md-2 col-sm-2">
+									<div class="dropdown w-100 mt-4">											
+										<button class="btn btn-special create-project" type="button" id="delete-voice" data-tippy-content="{{ __('Delete Voice Clone') }}"><i class="fa-solid fa-music-note-slash"></i></button>												
+									</div>
+								</div>
+							</div>
 
 							<div class="input-box" style="position: relative">
 								<h6 class="mb-0">{{ __('Audio Samples') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
@@ -71,6 +93,7 @@
 
 							<div class="text-center">
 								<button type="button" class="btn btn-primary ripple main-action-button" id="create-voice" style="text-transform: none; min-width: 200px;">{{ __('Create Voice') }}</button>
+								<button type="button" class="btn btn-primary ripple main-action-button" id="train-voice" style="text-transform: none; min-width: 200px;">{{ __('Re-Train Voice') }}</button>
 							</div>
 						</div>
 					</form>
@@ -172,7 +195,7 @@
 												<div id="textarea-row-box">
 													<div class="textarea-row pl-2 pr-0" id="maintextarea">
 														<div class="textarea-voice pl-0 mr-2">
-															<div class="ml-1 mt-1 voicee"><img src="" id="ZZZOOOVVVIMG"  data-tippy-content=""></div>
+															<div class="ml-1 mt-1 voicee"><img src="{{ URL::asset('img/files/avatar.webp') }}" id="ZZZOOOVVVIMG"  data-tippy-content=""></div>
 														</div>
 														<div class="textarea-text ml-0 mr-3">
 															<textarea class="form-control textarea" name="textarea[]" id="ZZZOOOVVVZ" data-voice="" onkeyup="countCharacters();" onmousedown="mouseDown(this);" rows="1" placeholder="{{ __('Enter your text here to synthesize') }}..." maxlength="5000"></textarea>
@@ -266,6 +289,34 @@
 		</div>
 	@endif
 </div>
+
+<!-- DELETE VOICE MODAL -->
+<div class="modal fade" id="deleteVoiceModal" tabindex="-1" role="dialog" aria-labelledby="projectModalLabel" aria-hidden="true" data-bs-keyboard="false">
+	<div class="modal-dialog modal-dialog-centered modal-md" role="document">
+		<div class="modal-content">
+			<div class="modal-header mb-1">
+				<h4 class="modal-title" id="myModalLabel"><i class="fa-solid fa-music-note-slash"></i> {{ __('Delete Voice Clone') }}</h4>
+				<button type="button" class="btn-close fs-12" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body pb-0 pl-6 pr-6">       
+				<p class="text-danger mb-3 fs-12">{{ __('Warning! This will permanently delete this custom voice clone') }}</p> 
+				<div class="input-box">	
+					<select id="del-voice" class="form-select">
+						<option value="none" selected> {{ __('Select voice clone to delete') }}</option>				
+						@foreach ($voices as $voice)																			
+							<option value="{{ $voice->voice_id }}"> {{ ucfirst($voice->voice) }}</option>
+						@endforeach	
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer pr-6 pb-3 modal-footer-awselect">
+				<button type="button" class="btn btn-cancel mb-4" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+				<button type="submit" class="btn btn-confirm mb-4" id="del-voice-button">{{ __('Delete') }}</button>
+			</div>						
+		</div>
+	</div>
+</div>
+<!-- END DELETE VOICE MODAL -->
 @endsection
 @section('js')
 	<!-- Green Audio Players JS -->
@@ -296,7 +347,6 @@
 			let samples = [];
 
 			$("input[type=file]").on('change',function(){
-				console.log(this.files);
 
 				for (let i = 0; i < this.files.length; i++) {
 					samples.push(this.files[i]);
@@ -310,7 +360,7 @@
 
 					$("#uploaded-samples").append(newRow);
 				}
-				console.log(samples)
+
 			});
 			
 			function format(d) {
@@ -361,7 +411,7 @@
 				pagingType : 'full_numbers',
 				processing: true,
 				serverSide: true,
-				ajax: "{{ route('user.voiceover') }}",
+				ajax: "{{ route('user.voiceover.clone') }}",
 				columns: [{
 						"className":      'details-control',
 						"orderable":      false,
@@ -473,16 +523,16 @@
 						$.ajax({
 							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 							method: 'post',
-							url: 'text-to-speech/delete',
+							url: '/user/text-to-speech/clone/delete',
 							data: formData,
 							processData: false,
 							contentType: false,
 							success: function (data) {
 								if (data == 'success') {
-									Swal.fire('{{ __('Result Deleted') }}', '{{ __('Synthesize result has been successfully deleted') }}', 'success');	
+									toastr.success('{{ __('Synthesize result has been successfully deleted') }}');
 									$("#resultTable").DataTable().ajax.reload();								
 								} else {
-									Swal.fire('{{ __('Delete Failed') }}', '{{ __('There was an error while deleting this result') }}', 'error');
+									toastr.error('{{ __('There was an error while deleting this result') }}');
 								}      
 							},
 							error: function(data) {
@@ -609,7 +659,7 @@
     				$('#create-voice').prop('disabled', false);
 					let btn = document.getElementById('create-voice');					
 					btn.innerHTML = '{{ __('Create Voice') }}';
-					document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+					document.querySelector('#loader-line')?.classList?.remove('hidden');
 					return;
 				}
 
@@ -618,7 +668,7 @@
     				$('#create-voice').prop('disabled', false);
 					let btn = document.getElementById('create-voice');					
 					btn.innerHTML = '{{ __('Create Voice') }}';
-					document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+					document.querySelector('#loader-line')?.classList?.add('hidden'); 
 					return;
 				}
 
@@ -642,17 +692,16 @@
 						$('#create-voice').prop('disabled', true);
 						let btn = document.getElementById('create-voice');					
 						btn.innerHTML = loading;  
-						document.querySelector('#loader-line')?.classList?.remove('opacity-on');  
+						document.querySelector('#loader-line')?.classList?.remove('hidden');  
 						$('#uploaded-samples').html('');     
 					},
 					complete: function() {
 						$('#create-voice').prop('disabled', false);
 						let btn = document.getElementById('create-voice');					
 						btn.innerHTML = '{{ __('Create Voice') }}';
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');                
+						document.querySelector('#loader-line')?.classList?.add('hidden');               
 					},
 					success: function(data) {
-						console.log(data)
 						if (data['status'] == 200) {
 							toastr.success('{{ __('New Custom Voice successfully created') }}');
 							location.reload();
@@ -671,18 +720,125 @@
 						$('#create-voice').prop('disabled', false);
 						let btn = document.getElementById('create-voice');					
 						btn.innerHTML = '{{ __('Create Voice') }}';
-						document.querySelector('#loader-line')?.classList?.add('opacity-on');  
+						document.querySelector('#loader-line')?.classList?.add('hidden');
 						document.getElementById("name").value = '';
 						samples = [];          
 					}
-				}).done(function(data) {
-
-					
-
-				})
+				}).done(function(data) {})
 			});
 
 
+			$('#train-voice').on('click',function(e) {
+
+				let train = document.getElementById("train").value;
+
+				if (train == 'none') {
+					toastr.warning('{{ __('You need to select a voice clone to re-train first') }}');
+				} else {
+
+					if(samples.length == 0) {
+						toastr.warning('{{ __('Upload your audio samples for re-training first') }}');
+						$('#train-voice').prop('disabled', false);
+						let btn = document.getElementById('train-voice');					
+						btn.innerHTML = '{{ __('Re-Train Voice') }}';
+						document.querySelector('#loader-line')?.classList?.add('hidden'); 
+						return;
+					}
+
+					const form = document.getElementById("create-voice-form");
+					let data = new FormData(form);
+
+					for (var x = 0; x < samples.length; x++) {
+						data.append("samples[]", samples[x]);
+					}
+
+					$.ajax({
+						headers: {
+							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+						},
+						type: "POST",
+						url: 'clone/edit',
+						data: data,
+						processData: false,
+						contentType: false,
+						beforeSend: function() {
+							$('#train-voice').prop('disabled', true);
+							let btn = document.getElementById('train-voice');					
+							btn.innerHTML = loading;  
+							document.querySelector('#loader-line')?.classList?.remove('hidden');  
+							$('#uploaded-samples').html('');     
+						},
+						complete: function() {
+							$('#train-voice').prop('disabled', false);
+							let btn = document.getElementById('train-voice');					
+							btn.innerHTML = '{{ __('Re-Train Voice') }}';
+							document.querySelector('#loader-line')?.classList?.add('hidden');                
+						},
+						success: function(data) {
+							if (data['status'] == 200) {
+								toastr.success('{{ __('Voice clone has been re-trained successfully') }}');
+								location.reload();
+							} else if(data['status'] == 400) {
+								toastr.warning(data['message']);
+							}
+							
+							document.getElementById("name").value = '';
+							samples = [];
+						},
+						error: function(data) {
+							if (data.responseJSON['error']) {
+								Swal.fire('Text to Speech Notification', data.responseJSON['error'], 'warning');
+							}
+
+							$('#train-voice').prop('disabled', false);
+							let btn = document.getElementById('train-voice');					
+							btn.innerHTML = '{{ __('Re-Train Voice') }}';
+							document.querySelector('#loader-line')?.classList?.add('hidden');  
+							document.getElementById("name").value = '';
+							samples = [];          
+						}
+					}).done(function(data) {})
+				}
+			});
+
+
+			$('#delete-voice').on('click', function() {
+				$('#deleteVoiceModal').modal('show');
+			});
+
+
+			$('#del-voice-button').on('click',function(e) {
+
+				let voice = document.getElementById("del-voice").value;
+
+				if (voice == 'none') {
+					toastr.warning('{{ __('You need to select a voice clone to delete first') }}');
+				} else {
+					$.ajax({
+						headers: {
+							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+						},
+						type: "POST",
+						url: '/user/text-to-speech/clone/voice/remove',
+						data: { 'id': voice},
+						success: function(data) {
+							if (data == 'success') {
+								toastr.success('{{ __('Voice clone was successfully deleted') }}');
+								$('#deleteVoiceModal').modal('hide');
+								location.reload();
+							} else if(data == 'error') {
+								toastr.error('{{ __('There was an issue with voice clone deletion') }}');
+							}
+							
+						},
+						error: function(data) {
+							if (data.responseJSON['error']) {
+								toastr.error('{{ __('There was an issue with voice clone deletion') }}');
+							}       
+						}
+					}).done(function(data) {})
+				}
+			});
 		});	
 		
 		

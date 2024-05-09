@@ -45,7 +45,7 @@ class DocumentController extends Controller
                     ->addColumn('custom-title', function($row){
                         $custom = '<div class="d-flex">
                                     <div class="mr-2">' . $row['icon'] . '</div>
-                                    <div><a class="font-weight-bold document-title" href="'. route("user.documents.show", $row["id"] ). '">'.ucfirst($row["title"]).'</a><br><span class="text-muted">'.ucfirst($row["template_name"]).'</span><div>
+                                    <div><a class="font-weight-bold document-title" href="'. route("user.documents.show", $row["id"] ). '">'.ucfirst($row["title"]).'</a><br><span class="text-muted">'. ucfirst(__($row["template_name"])).'</span><div>
                                     </div>'; 
                         return $custom;
                     })
@@ -55,7 +55,7 @@ class DocumentController extends Controller
                     })
                     ->addColumn('custom-group', function($row){
                         $group = ($row['group'] == 'text') ? 'content' : $row['group'];
-                        $custom =  '<span class="cell-box category-'.strtolower($row["group"]).'">'.ucfirst($group).'</span>';
+                        $custom =  '<span class="cell-box category-'.strtolower($row["group"]).'">'.ucfirst(__($group)).'</span>';
                         return $custom;
                     })
                     ->addColumn('custom-language', function($row) {
@@ -540,6 +540,11 @@ class DocumentController extends Controller
                             Storage::disk('s3')->delete($result->file_name);
                         }
                         break;
+                    case 'r2':
+                        if (Storage::disk('r2')->exists($result->file_name)) {
+                            Storage::disk('r2')->delete($result->file_name);
+                        }
+                        break;
                     case 'wasabi':
                         if (Storage::disk('wasabi')->exists($result->file_name)) {
                             Storage::disk('wasabi')->delete($result->file_name);
@@ -603,6 +608,11 @@ class DocumentController extends Controller
                     case 'aws':
                         if (Storage::disk('s3')->exists($transcript->temp_name)) {
                             Storage::disk('s3')->delete($transcript->temp_name);
+                        }
+                        break;
+                    case 'r2':
+                        if (Storage::disk('r2')->exists($transcript->temp_name)) {
+                            Storage::disk('r2')->delete($transcript->temp_name);
                         }
                         break;
                     case 'wasabi':

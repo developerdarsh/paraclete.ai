@@ -20,6 +20,7 @@ use App\Models\Workbook;
 use App\Models\CustomVoice;
 use GuzzleHttp\Exception\Report;
 use DataTables;
+use Exception;
 use DB;
 
 class VoiceoverCloneController extends Controller
@@ -43,7 +44,7 @@ class VoiceoverCloneController extends Controller
     {   
         # Today's TTS Results for Datatable
         if ($request->ajax()) {
-            $data = VoiceoverResult::where('user_id', Auth::user()->id)->where('mode', 'file')->where('voice_type', 'custom')->latest()->get();
+            $data = VoiceoverResult::where('user_id', Auth::user()->id)->where('voice_type', 'custom')->where('mode', 'file')->latest()->get();
             return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('actions', function($row){
@@ -82,7 +83,8 @@ class VoiceoverCloneController extends Controller
 
         # Set Voice Types
         $voices = DB::table('custom_voices')
-            ->where('status', 'active')
+            ->where('user_id', auth()->user()->id)
+            ->where('status', 'active')            
             ->orderBy('voice', 'asc')
             ->get();
         
@@ -92,7 +94,25 @@ class VoiceoverCloneController extends Controller
         $verify = $this->api->verify_license();
         $type = (isset($verify['type'])) ? $verify['type'] : '';
 
-        return view('user.clone.index', compact('voices', 'projects', 'type'));
+        if (auth()->user()->group == 'user') {
+            if (config('settings.voice_clone_user_access') != 'allow') {
+                toastr()->warning(__('Voice Clone feature is not available for free tier users, subscribe to get a proper access'));
+                return redirect()->route('user.plans');
+            } else {
+                return view('user.clone.index', compact('voices', 'projects', 'type'));
+            }
+        } elseif (auth()->user()->group == 'subscriber') {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            if ($plan->voice_clone_feature == false) {     
+                toastr()->warning(__('Your current subscription plan does not include support for Voice Clone feature'));
+                return redirect()->back();                   
+            } else {
+                return view('user.clone.index', compact('voices', 'projects', 'type'));
+            }
+        } else {
+            return view('user.clone.index', compact('voices', 'projects', 'type'));
+        }
+
     }
 
 
@@ -209,6 +229,10 @@ class VoiceoverCloneController extends Controller
                         Storage::disk('s3')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
                         $result_url = Storage::disk('s3')->url($temp_file_name); 
                         Storage::disk('audio')->delete($temp_file_name);   
+                    } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                        Storage::disk('r2')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
+                        $result_url = Storage::disk('r2')->url($temp_file_name); 
+                        Storage::disk('audio')->delete($temp_file_name); 
                     } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                         Storage::disk('wasabi')->writeStream($temp_file_name, Storage::disk('audio')->readStream($temp_file_name));
                         $result_url = Storage::disk('wasabi')->url($temp_file_name);
@@ -309,6 +333,10 @@ class VoiceoverCloneController extends Controller
                     Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('s3')->url($file_name); 
                     Storage::disk('audio')->delete($file_name);   
+                } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                    Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                    $result_url = Storage::disk('r2')->url($file_name); 
+                    Storage::disk('audio')->delete($file_name); 
                 } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('wasabi')->url($file_name);
@@ -465,6 +493,10 @@ class VoiceoverCloneController extends Controller
                         Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                         $result_url = Storage::disk('s3')->url($file_name); 
                         Storage::disk('audio')->delete($file_name);   
+                    } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                        Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                        $result_url = Storage::disk('r2')->url($file_name); 
+                        Storage::disk('audio')->delete($file_name); 
                     } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                         Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                         $result_url = Storage::disk('wasabi')->url($file_name);
@@ -561,6 +593,10 @@ class VoiceoverCloneController extends Controller
                     Storage::disk('s3')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('s3')->url($file_name); 
                     Storage::disk('audio')->delete($file_name);   
+                } elseif (config('settings.voiceover_default_storage') === 'r2') {
+                    Storage::disk('r2')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
+                    $result_url = Storage::disk('r2')->url($file_name); 
+                    Storage::disk('audio')->delete($file_name); 
                 } elseif (config('settings.voiceover_default_storage') == 'wasabi') {
                     Storage::disk('wasabi')->writeStream($file_name, Storage::disk('audio')->readStream($file_name));
                     $result_url = Storage::disk('wasabi')->url($file_name);
@@ -638,6 +674,23 @@ class VoiceoverCloneController extends Controller
     {
         if ($request->ajax()) {
 
+            $voices = CustomVoice::where('user_id', auth()->user()->id)->count();
+
+            if (auth()->user()->group == 'user') {               
+                if (config('settings.voice_clone_limit') <= $voices) {
+                    $data['status'] = 400; 
+                    $data['message'] = __('You have reached voice clone limits, subscribe to create more');
+                    return $data;
+                } 
+            } elseif (auth()->user()->group == 'subscriber') {
+                $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+                if ($plan->voice_clone_number <= $voices) {  
+                    $data['status'] = 400; 
+                    $data['message'] = __('You have reached voice clone limits included in your subscription plan');
+                    return $data;                   
+                } 
+            }
+
             $elevenlabs = new ElevenlabsTTSService();
             $files = [];
 
@@ -679,6 +732,63 @@ class VoiceoverCloneController extends Controller
 
         }
     }
+
+
+    public function edit(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $voice = CustomVoice::where('voice_id', request('train'))->first();
+
+            if ($voice->user_id == Auth::user()->id) {
+                $elevenlabs = new ElevenlabsTTSService();
+                $files = [];
+
+                $count = count($_FILES['samples']['name']);
+                for($i = 0; $i < $count; $i++){
+                    $files[$i] = $_FILES['samples']['tmp_name'][$i];
+                }
+    
+                try {
+
+                    while (count($files) !== 0) {
+                        $element = array_shift($files);
+                        $contents = fopen($element, 'r');
+        
+                        $requestData = [
+                            [
+                                'name' => 'name',
+                                'contents' => $voice->voice,
+                            ],
+                            [
+                                'name' => 'files',
+                                'contents' =>$contents,
+                            ],
+                            [
+                                'name' => 'description',
+                                'contents' => $voice->description,
+                            ],
+                            [
+                                'name' => 'labels',
+                                'contents' => '',
+                            ],
+                        ];
+        
+                        $response = $elevenlabs->editVoice($requestData, request('train'));
+                    }
+
+                        $data['status'] = 200; 
+                    
+                        return $data;
+
+                } catch (\Exception $exception) {
+                    \Log::info($exception->getMessage());
+                }
+            }
+
+        }
+    }
+
 
     /**
      * Display the specified resource.
@@ -722,6 +832,11 @@ class VoiceoverCloneController extends Controller
                     case 'aws':
                         if (Storage::disk('s3')->exists($result->result_url)) {
                             Storage::disk('s3')->delete($result->result_url);
+                        }
+                        break;
+                    case 'r2':
+                        if (Storage::disk('r2')->exists($result->result_url)) {
+                            Storage::disk('r2')->delete($result->result_url);
                         }
                         break;
                     case 'wasabi':
@@ -835,10 +950,9 @@ class VoiceoverCloneController extends Controller
     {   
         $elevenlabs = new ElevenlabsTTSService();
     
-        return $elevenlabs->synthesizeSpeech($voice, $text, $file_name);
+        return $elevenlabs->synthesizeSpeechCustom($voice, $text, $file_name);
               
     }
-
 
 
     /**
@@ -856,6 +970,36 @@ class VoiceoverCloneController extends Controller
             $data['voice_limit'] = config('settings.voiceover_max_voice_limit');
 
             return response()->json($data);   
+        }    
+    }
+
+
+    /**
+     * Delete cloned voice.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function voiceDelete(Request $request)
+    {   
+        if ($request->ajax()) {
+
+            $result = CustomVoice::where('voice_id', request('id'))->firstOrFail();  
+
+            if ($result->user_id == Auth::user()->id) {
+
+                $elevenlabs = new ElevenlabsTTSService();
+                
+                $elevenlabs->deleteVoice(request('id'));
+
+                $result->delete();
+
+                return response()->json('success');    
+    
+            } else{
+                return response()->json('error');
+            } 
         }    
     }
 

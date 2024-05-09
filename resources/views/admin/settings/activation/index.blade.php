@@ -1,9 +1,12 @@
 @extends('layouts.app')
+@section('css')
+	<link href="{{URL::asset('plugins/sweetalert/sweetalert2.min.css')}}" rel="stylesheet" />
+@endsection
 
 @section('page-header')
 	<!-- EDIT PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Activation') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa fa-sliders mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -64,7 +67,7 @@
 							@if (!$notification)
 								<button type="submit" class="btn btn-primary pl-7 pr-7">{{ __('Activate') }}</button>						
 							@else
-								<a class="btn btn-primary pl-7 pr-7" id="deactivateButton" data-toggle="modal" data-target="#deleteModal" href="" data-attr={{ route("admin.settings.activation.remove")}}>{{ __('Deactivate') }}</a>
+								<a class="btn btn-primary pl-7 pr-7" id="deactivateButton">{{ __('Deactivate') }}</a>
 							@endif							
 						</div>		
 					</form>
@@ -73,53 +76,53 @@
 		</div>
 	</div>
 	
-	<!-- MODAL -->
-	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered modal-md" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title" id="myModalLabel"><i class="mdi mdi-alert-circle-outline color-red"></i> {{ __('Confirm License Code Deactivation') }}</h4>
-					<button type="button" class="close btn" data-bs-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body" id="deleteModalBody">
-					<div>
-						<!-- DELETE CONFIRMATION -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- END MODAL -->
 @endsection
 
 @section('js')
+	<script src="{{URL::asset('plugins/sweetalert/sweetalert2.all.min.js')}}"></script>
 	<script type="text/javascript">
 		$(function () {
 
 			"use strict";
 
-			// DELETE CONFIRMATION MODAL
-			$(document).on('click', '#deactivateButton', function(event) {
-				event.preventDefault();
-				let href = $(this).attr('data-attr');
-				$.ajax({
-					url: href
-					, beforeSend: function() {
-						$('#loader').show();
-					},
-					// return the result
-					success: function(result) {
-						$('#deleteModal').modal("show");
-						$('#deleteModalBody').html(result).show();
-					}
-					, error: function(jqXHR, testStatus, error) {
-						console.log(error);
-						alert("Page " + href + " cannot open. Error:" + error);
-						$('#loader').hide();
-					}
-					, timeout: 8000
+
+			$(document).on('click', '#deactivateButton', function(e) {
+
+				e.preventDefault();
+
+				Swal.fire({
+					title: '{{ __('Confirm License Deactivation') }}',
+					text: '{{ __('Are you sure you want to deactivate your license?') }}',
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: '{{ __('Yes, Deactivate') }}',
+					reverseButtons: true,
+				}).then((result) => {
+					if (result.isConfirmed) {
+						var formData = new FormData();
+						formData.append("id", $(this).attr('id'));
+						$.ajax({
+							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+							method: 'post',
+							url: '/admin/settings/activation/destroy',
+							data: formData,
+							processData: false,
+							contentType: false,
+							success: function (data) {
+								if (data == 'success') {
+									Swal.fire('{{ __('License Deactivated') }}', '{{ __('License has been successfully deactivated') }}', 'success');	
+									setTimeout(function(){
+										window.location.reload();
+									}, 2000);							
+								} else {
+									Swal.fire('{{ __('Dectivation Failed') }}', '{{ __('There was an error while deactivating your license') }}', 'error');
+								}      
+							},
+							error: function(data) {
+								Swal.fire({ type: 'error', title: 'Oops...', text: 'Something went wrong!' })
+							}
+						})
+					} 
 				})
 			});
 	

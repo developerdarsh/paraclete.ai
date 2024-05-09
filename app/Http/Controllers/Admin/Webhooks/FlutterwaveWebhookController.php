@@ -11,6 +11,7 @@ use App\Models\SubscriptionPlan;
 use App\Models\Payment;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Services\HelperService;
 
 use KingFlamez\Rave\Facades\Rave as Flutterwave;
 
@@ -61,35 +62,9 @@ class FlutterwaveWebhookController extends Controller
                         }
                     }
 
-                    $record_payment = new Payment();
-                    $record_payment->user_id = $user->id;
-                    $record_payment->plan_id = $plan->id;
-                    $record_payment->order_id = $subscription->plan_id;
-                    $record_payment->plan_name = $plan->plan_name;
-                    $record_payment->price = $total_price;
-                    $record_payment->currency = $plan->currency;
-                    $record_payment->gateway = 'Flutterwave';
-                    $record_payment->frequency = $plan->payment_frequency;
-                    $record_payment->status = 'completed';
-                    $record_payment->words = $plan->words;
-                    $record_payment->images = $plan->images;
-                    $record_payment->save();
-                    
-                    $group = ($user->hasRole('admin')) ? 'admin' : 'subscriber';
+                    HelperService::registerRecurringPayment($plan, $subscription->plan_id, 'Flutterwave', 'completed', $user);
 
-                    $user->syncRoles($group);    
-                    $user->group = $group;
-                    $user->plan_id = $plan->id;
-                    $user->total_words = $plan->words;
-                    $user->total_images = $plan->images;
-                    $user->total_chars = $plan->characters;
-                    $user->total_minutes = $plan->minutes;
-                    $user->available_words = $plan->words;
-                    $user->available_images = $plan->images;
-                    $user->available_chars = $plan->characters;
-                    $user->available_minutes = $plan->minutes;
-                    $user->member_limit = $plan->team_members;
-                    $user->save();       
+                    HelperService::registerRecurringCredits($user, 'monthly', $plan->id);
 
                     event(new PaymentProcessed($user));
                 }
@@ -108,10 +83,6 @@ class FlutterwaveWebhookController extends Controller
                     $user->syncRoles($group);    
                     $user->group = $group;
                     $user->plan_id = null;
-                    $user->total_words = 0;
-                    $user->total_images = 0;
-                    $user->total_chars = 0;
-                    $user->total_minutes = 0;
                     $user->member_limit = null;
                     $user->save();
                 } else {

@@ -2,8 +2,8 @@
 
 @section('page-header')
 	<!-- EDIT PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Add Subscription') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-id-badge mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -17,7 +17,7 @@
 @endsection
 
 @section('content')
-	<div class="row">
+	<div class="row justify-content-center">
 		<div class="col-lg-6 col-md-12 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">

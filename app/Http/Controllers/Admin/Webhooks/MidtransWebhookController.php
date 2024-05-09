@@ -61,8 +61,15 @@ class MidtransWebhookController extends Controller
                 }   
                 
                 if ($user_data->payment_type == 'prepaid') {
-                    $user->available_words_prepaid = $user->available_words_prepaid + $plan->words;
-                    $user->available_images_prepaid = $user->available_images_prepaid + $plan->images;
+                    $user->gpt_3_turbo_credits_prepaid = ($user->gpt_3_turbo_credits_prepaid + $plan->gpt_3_turbo_credits_prepaid);
+                    $user->gpt_4_turbo_credits_prepaid = ($user->gpt_4_turbo_credits_prepaid + $plan->gpt_4_turbo_credits_prepaid);
+                    $user->gpt_4_credits_prepaid = ($user->gpt_4_credits_prepaid + $plan->gpt_4_credits_prepaid);
+                    $user->fine_tune_credits_prepaid = ($user->fine_tune_credits_prepaid + $plan->fine_tune_credits_prepaid);
+                    $user->claude_3_opus_credits_prepaid = ($user->claude_3_opus_credits_prepaid + $plan->claude_3_opus_credits_prepaid);
+                    $user->claude_3_sonnet_credits_prepaid = ($user->claude_3_sonnet_credits_prepaid + $plan->claude_3_sonnet_credits_prepaid);
+                    $user->claude_3_haiku_credits_prepaid = ($user->claude_3_haiku_credits_prepaid + $plan->claude_3_haiku_credits_prepaid);
+                    $user->available_dalle_images_prepaid = $user->available_dalle_images_prepaid + $plan->dalle_images;
+                    $user->available_sd_images_prepaid = $user->available_sd_images_prepaid + $plan->sd_images;
                     $user->available_chars_prepaid = $user->available_chars_prepaid + $plan->characters;
                     $user->available_minutes_prepaid = $user->available_minutes_prepaid + $plan->minutes;
                 } else {
@@ -70,16 +77,18 @@ class MidtransWebhookController extends Controller
                     $user->syncRoles($group);    
                     $user->group = $group;
                     $user->plan_id = $plan->id;
-                    $user->total_words = $plan->words;
-                    $user->total_images = $plan->images;
-                    $user->total_chars = $plan->characters;
-                    $user->total_minutes = $plan->minutes;
-                    $user->available_words = $plan->words;
-                    $user->available_images = $plan->images;
+                    $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                    $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                    $user->gpt_4_credits = $plan->gpt_4_credits;
+                    $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                    $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                    $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                    $user->fine_tune_credits = $plan->fine_tune_credits;
                     $user->available_chars = $plan->characters;
                     $user->available_minutes = $plan->minutes;
                     $user->member_limit = $plan->team_members;
-                   
+                    $user->available_dalle_images = $plan->dalle_images;
+                    $user->available_sd_images = $plan->sd_images;
                 }
     
                 $user->save();
@@ -131,15 +140,19 @@ class MidtransWebhookController extends Controller
                 $user->syncRoles($group);    
                 $user->group = $group;
                 $user->plan_id = $plan->id;
-                $user->total_words = $plan->words;
-                $user->total_images = $plan->images;
-                $user->total_chars = $plan->characters;
-                $user->total_minutes = $plan->minutes;
-                $user->available_words = $plan->words;
-                $user->available_images = $plan->images;
+                $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                $user->gpt_4_credits = $plan->gpt_4_credits;
+                $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                $user->gemini_pro_credits = $plan->gemini_pro_credits;
+                $user->fine_tune_credits = $plan->fine_tune_credits;
                 $user->available_chars = $plan->characters;
                 $user->available_minutes = $plan->minutes;
                 $user->member_limit = $plan->team_members;
+                $user->available_dalle_images = $plan->dalle_images;
+                $user->available_sd_images = $plan->sd_images;
                    
     
                 $user->save();
@@ -190,23 +203,35 @@ class MidtransWebhookController extends Controller
                     $record_payment->gateway = 'Paddle';
                     $record_payment->frequency = $plan->payment_frequency;
                     $record_payment->status = 'completed';
-                    $record_payment->words = $plan->words;
-                    $record_payment->images = $plan->images;
+                    $record_payment->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                    $record_payment->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                    $record_payment->gpt_4_credits = $plan->gpt_4_credits;
+                    $record_payment->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                    $record_payment->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                    $record_payment->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                    $record_payment->gemini_pro_credits = $plan->gemini_pro_credits;
+                    $record_payment->fine_tune_credits = $plan->fine_tune_credits;
+                    $record_payment->dalle_images = $plan->dalle_images;
+                    $record_payment->sd_images = $plan->sd_images;
                     $record_payment->save();
                     
                     $group = ($user->hasRole('admin'))? 'admin' : 'subscriber';
                     $user->syncRoles($group);    
                     $user->group = $group;
                     $user->plan_id = $plan->id;
-                    $user->total_words = $plan->words;
-                    $user->total_images = $plan->images;
-                    $user->total_chars = $plan->characters;
-                    $user->total_minutes = $plan->minutes;
-                    $user->available_words = $plan->words;
-                    $user->available_images = $plan->images;
+                    $user->gpt_3_turbo_credits = $plan->gpt_3_turbo_credits;
+                    $user->gpt_4_turbo_credits = $plan->gpt_4_turbo_credits;
+                    $user->gpt_4_credits = $plan->gpt_4_credits;
+                    $user->claude_3_opus_credits = $plan->claude_3_opus_credits;
+                    $user->claude_3_sonnet_credits = $plan->claude_3_sonnet_credits;
+                    $user->claude_3_haiku_credits = $plan->claude_3_haiku_credits;
+                    $user->gemini_pro_credits = $plan->gemini_pro_credits;
+                    $user->fine_tune_credits = $plan->fine_tune_credits;
                     $user->available_chars = $plan->characters;
                     $user->available_minutes = $plan->minutes;
                     $user->member_limit = $plan->team_members;
+                    $user->available_dalle_images = $plan->dalle_images;
+                    $user->available_sd_images = $plan->sd_images;
                        
         
                     $user->save();
@@ -230,10 +255,6 @@ class MidtransWebhookController extends Controller
                 $user->syncRoles($group);    
                 $user->group = $group;
                 $user->plan_id = null;
-                $user->total_words = 0;
-                $user->total_images = 0;
-                $user->total_chars = 0;
-                $user->total_minutes = 0;
                 $user->member_limit = null;
                 $user->save();
             }
@@ -251,10 +272,6 @@ class MidtransWebhookController extends Controller
                 $user->syncRoles($group);    
                 $user->group = $group;
                 $user->plan_id = null;
-                $user->total_words = 0;
-                $user->total_images = 0;
-                $user->total_chars = 0;
-                $user->total_minutes = 0;
                 $user->member_limit = null;
                 $user->save();
             }

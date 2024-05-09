@@ -20,7 +20,6 @@
 				<div class="card-body p-5 pb-0">
 
 					<div class="row">
-						<div class="text-center"><a class="info-btn-alt" data-bs-toggle="modal" data-bs-target="#info-alert-model" href="javascript:void(0)">How It works ?</a></div>
 						<div class="template-view">
 							<div class="template-icon mb-2 d-flex">
 								<div>
@@ -233,23 +232,6 @@
 		</div>
 	</div>
 </form>
-<div class="modal fade" id="info-alert-model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-modal="true" role="dialog">
-		<div class="modal-dialog modal-dialog-centered modal-xl">
-			<div class="modal-content">
-				<div class="modal-header">
-				<h2></h2>
-				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-				</button>
-				</div>
-			<div class="modal-body">
-				<div class="row">
-					<div style="position: relative; padding-bottom: calc(46.925329428989755% + 41px); height: 0; width: 100%"><iframe src="https://demo.arcade.software/pKW6lSdfLVsENFCLPlow?embed" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;color-scheme: light;" title="Paraclete AI templates"></iframe></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 @endsection
 
 @section('js')

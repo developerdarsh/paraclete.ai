@@ -5,7 +5,8 @@
  * ========================================================================== */
  .view-action-button,
  .delete-action-button,
- .edit-action-button {
+ .edit-action-button,
+ .table-action-buttons {
   transition: all .3s;
 
   &:hover {

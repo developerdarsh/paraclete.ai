@@ -65,10 +65,6 @@ class SubscriptionCheckTaskCommand extends Command
                     $user->syncRoles($group);    
                     $user->group = $group;
                     $user->plan_id = null;
-                    $user->total_words = 0;
-                    $user->total_images = 0;
-                    $user->total_chars = 0;
-                    $user->total_minutes = 0;
                     $user->save();
                 }
                             

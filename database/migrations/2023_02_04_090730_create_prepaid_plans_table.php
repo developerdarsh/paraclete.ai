@@ -26,6 +26,16 @@ return new class extends Migration
             $table->boolean('featured')->nullable()->default(false);
             $table->string('pricing_plan')->default('prepaid');
             $table->string('model')->nullable();
+            $table->integer('dalle_images')->nullable()->default(0);
+            $table->integer('sd_images')->nullable()->default(0);
+            $table->integer('gpt_3_turbo_credits_prepaid')->default(0);
+            $table->integer('gpt_4_turbo_credits_prepaid')->default(0);
+            $table->integer('gpt_4_credits_prepaid')->default(0);
+            $table->integer('claude_3_opus_credits_prepaid')->default(0);
+            $table->integer('claude_3_sonnet_credits_prepaid')->default(0);
+            $table->integer('claude_3_haiku_credits_prepaid')->default(0);
+            $table->integer('fine_tune_credits_prepaid')->default(0);
+            $table->integer('gemini_pro_credits_prepaid')->default(0);
             $table->timestamps();
         });
     }

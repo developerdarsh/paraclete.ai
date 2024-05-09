@@ -13,7 +13,6 @@
 		<div class="col-lg-12 col-md-12 col-xm-12">
 			<div class="card border-0">
 				<div class="card-header pt-4 border-0" id="voiceover-character-counter-top">
-					<div class="text-center"><a class="info-btn-alt" data-bs-toggle="modal" data-bs-target="#info-alert-model" href="javascript:void(0)">How It works ?</a></div>
 					<h3 class="card-title"><i class="fa-sharp fa-solid fa-waveform-lines mr-4 text-info"></i>{{ __('AI Voiceover Studio') }} </h3>
 					<span class="fs-11 text-muted pl-3" id="voiceover-character-counter"><i class="fa-sharp fa-solid fa-bolt-lightning mr-2 text-primary"></i>{{ __('Your Balance is') }} <span class="font-weight-semibold" id="balance-number">@if (auth()->user()->available_chars == -1) {{ __('Unlimited') }} @else {{ number_format(auth()->user()->available_chars + auth()->user()->available_chars_prepaid) }} {{ __('Characters') }} @endif</span></span>
 				</div>
@@ -399,24 +398,6 @@
 		</div>
 	</div>
 </div>
-
-<div class="modal fade" id="info-alert-model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-		<div class="modal-header">
-		<h2></h2>
-		 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-		</div>
-      <div class="modal-body">
-        <div class="row">
-          	<div style="position: relative; padding-bottom: calc(46.925329428989755% + 41px); height: 0; width: 100%"><iframe src="https://demo.arcade.software/pKW6lSdfLVsENFCLPlow?embed" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;color-scheme: light;" title="Paraclete AI templates"></iframe></div>
-          </div>
-      </div>
-    </div>
-  </div>
-</div>
 @endsection
 @section('js')
 	<!-- Green Audio Players JS -->
@@ -431,275 +412,12 @@
 	<script src="{{URL::asset('js/dashboard.js')}}"></script>
 	<script type="text/javascript">
 		$(function () {
-      $(document).ready(function(){
-        // DELETE SYNTHESIZE RESULT
-          $(document).on('click', '.deleteResultButton', function(e) {
 
-            e.preventDefault();
-
-            Swal.fire({
-              title: '{{ __('Confirm Result Deletion') }}',
-              text: '{{ __('It will permanently delete this synthesize result') }}',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: '{{ __('Delete') }}',
-              reverseButtons: true,
-            }).then((result) => {
-              if (result.isConfirmed) {
-                var formData = new FormData();
-                formData.append("id", $(this).attr('id'));
-                $.ajax({
-                  headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                  method: 'post',
-                  url: 'text-to-speech/delete',
-                  data: formData,
-                  processData: false,
-                  contentType: false,
-                  success: function (data) {
-                    if (data == 'success') {
-                      Swal.fire('{{ __('Result Deleted') }}', '{{ __('Synthesize result has been successfully deleted') }}', 'success');	
-                      $("#resultTable").DataTable().ajax.reload();								
-                    } else {
-                      Swal.fire('{{ __('Delete Failed') }}', '{{ __('There was an error while deleting this result') }}', 'error');
-                    }      
-                  },
-                  error: function(data) {
-                    Swal.fire({ type: 'error', title: 'Oops...', text: 'Something went wrong!' })
-                  }
-                })
-              } 
-            })
-          });
-
-
-          /*************************************************
-           *  Process File Synthesize Mode
-           *************************************************/
-          $('#synthesize-text').on('click',function(e) {
-
-            "use strict";
-
-            e.preventDefault()
-
-            let map = new Map();
-            let textarea = document.getElementsByTagName("textarea");
-            let full_textarea = textarea.length;
-            let full_text = '';
-
-            if (textarea.length == 1) {
-              let value = document.getElementById('ZZZOOOVVVZ').value;
-              let voice = document.getElementById('ZZZOOOVVVZ').getAttribute('data-voice');
-
-              if (value.length == 0) {
-                Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
-              } else if (value.length > text_length_limit) { 
-                Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the overall text length.')}}', 'warning'); 
-              } else {
-                map.set(voice, value);
-                startSynthesizeMode(1, map, value);
-              }
-
-            } else {
-
-              for (let i = 0; i < textarea.length; i++) {
-
-                let value = textarea[i].value;
-                let voice = textarea[i].getAttribute('data-voice');
-                let distinct = generateID(3);
-                
-                if (value != '') {
-                  map.set(voice +'___'+ distinct, value);
-                  full_text +=value;
-                } else {
-                  full_textarea--;
-                }
-              }
-
-              if (full_text.length == 0) {
-                Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
-              } else if (full_text.length > text_length_limit) { 
-                Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed total text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the text length.')}}', 'warning'); 
-              } else {
-                startSynthesizeMode(full_textarea, map, full_text);
-              }    
-            }
-          });
-
-
-          /*************************************************
-           *  Process Live Synthesize Listen Mode
-           *************************************************/
-          $('#listen-text').on('click', function(e) {
-
-            "use strict";
-
-            e.preventDefault()
-
-            let map = new Map();
-            let textarea = document.getElementsByTagName("textarea");
-            let full_textarea = textarea.length;
-            let full_text = '';
-
-            if (textarea.length == 1) {
-              let value = document.getElementById('ZZZOOOVVVZ').value;
-              let voice = document.getElementById('ZZZOOOVVVZ').getAttribute('data-voice');
-
-              if (value.length == 0) {
-                Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
-              } else if (value.length > text_length_limit) { 
-                Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the text length.')}}', 'warning'); 
-              } else {
-                map.set(voice, value);
-                startListenMode(1, map, value);
-              }
-
-            } else {
-
-              for (let i = 0; i < textarea.length; i++) {
-
-                let value = textarea[i].value;
-                let voice = textarea[i].getAttribute('data-voice');
-                let distinct = generateID(3);
-                
-                if (value != '') {
-                  map.set(voice +'___'+ distinct, value);
-                  full_text +=value;
-                } else {
-                  full_textarea--;
-                }
-              }
-
-              if (full_text.length == 0) {
-                Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
-              } else if (full_text.length > text_length_limit) { 
-                Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed total text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the overall text length.')}}', 'warning'); 
-              } else {
-                startListenMode(full_textarea, map, full_text);
-              }    
-            }
-          });
-
-          	$('#add-project').on('click', function() {
-              $('#projectModal').modal('show');
-            });
-
-            	var table = $('#resultTable').DataTable({
-                "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
-                responsive: {
-                  details: {type: 'column'}
-                },
-                colReorder: true,
-                language: {
-                  "emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>{{ __('No synthesized text results yet') }}</div>",
-                  "info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
-                  search: "<i class='fa fa-search search-icon'></i>",
-                  lengthMenu: '_MENU_ ',
-                  paginate : {
-                    first    : '<i class="fa fa-angle-double-left"></i>',
-                    last     : '<i class="fa fa-angle-double-right"></i>',
-                    previous : '<i class="fa fa-angle-left"></i>',
-                    next     : '<i class="fa fa-angle-right"></i>'
-                  }
-                },
-                pagingType : 'full_numbers',
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('user.voiceover') }}",
-                columns: [{
-                    "className":      'details-control',
-                    "orderable":      false,
-                    "searchable":     false,
-                    "data":           null,
-                    "defaultContent": ''
-                  },
-                  {
-                    data: 'created-on',
-                    name: 'created-on',
-                    orderable: true,
-                    searchable: true
-                  },																		
-                  {
-                    data: 'custom-language',
-                    name: 'custom-language',
-                    orderable: true,
-                    searchable: true
-                  },
-                  {
-                    data: 'voice',
-                    name: 'voice',
-                    orderable: true,
-                    searchable: true
-                  },
-                  {
-                    data: 'gender',
-                    name: 'gender',
-                    orderable: true,
-                    searchable: true
-                  },	
-                  {
-                    data: 'single',
-                    name: 'single',
-                    orderable: true,
-                    searchable: true
-                  },				
-                  {
-                    data: 'download',
-                    name: 'download',
-                    orderable: true,
-                    searchable: true
-                  },	
-                  {
-                    data: 'result_ext',
-                    name: 'result_ext',
-                    orderable: true,
-                    searchable: true
-                  },		
-                  {
-                    data: 'characters',
-                    name: 'characters',
-                    orderable: true,
-                    searchable: true
-                  },	
-                  {
-                    data: 'project',
-                    name: 'project',
-                    orderable: true,
-                    searchable: true
-                  },				
-                  {
-                    data: 'actions',
-                    name: 'actions',
-                    orderable: false,
-                    searchable: false
-                  },
-                ]
-              });
-			
-
-          $('#resultTable tbody').on('click', 'td.details-control', function () {
-            var tr = $(this).closest('tr');
-            var row = table.row( tr );
-        
-            if ( row.child.isShown() ) {
-              // This row is already open - close it
-              $('div.slider', row.child()).slideUp( function () {
-                row.child.hide();
-                tr.removeClass('shown');
-              } );
-            }
-            else {
-              // Open this row
-              row.child( format(row.data()), 'no-padding' ).show();
-              tr.addClass('shown');
-        
-              $('div.slider', row.child()).slideDown();
-            }
-          });
-
-      });  
 			"use strict";
 
-		
+			$('#add-project').on('click', function() {
+				$('#projectModal').modal('show');
+			});
 			
 			function format(d) {
 				// `d` is the original data object for the row
@@ -728,7 +446,119 @@
 			}
 
 
+			var table = $('#resultTable').DataTable({
+				"lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+				responsive: {
+					details: {type: 'column'}
+				},
+				colReorder: true,
+				language: {
+					"emptyTable": "<div><img id='no-results-img' src='{{ URL::asset('img/files/no-result.png') }}'><br>{{ __('No synthesized text results yet') }}</div>",
+					"info": "{{ __('Showing page') }} _PAGE_ {{ __('of') }} _PAGES_",
+					search: "<i class='fa fa-search search-icon'></i>",
+					lengthMenu: '_MENU_ ',
+					paginate : {
+						first    : '<i class="fa fa-angle-double-left"></i>',
+						last     : '<i class="fa fa-angle-double-right"></i>',
+						previous : '<i class="fa fa-angle-left"></i>',
+						next     : '<i class="fa fa-angle-right"></i>'
+					}
+				},
+				pagingType : 'full_numbers',
+				processing: true,
+				serverSide: true,
+				ajax: "{{ route('user.voiceover') }}",
+				columns: [{
+						"className":      'details-control',
+						"orderable":      false,
+						"searchable":     false,
+						"data":           null,
+						"defaultContent": ''
+					},
+					{
+						data: 'created-on',
+						name: 'created-on',
+						orderable: true,
+						searchable: true
+					},																		
+					{
+						data: 'custom-language',
+						name: 'custom-language',
+						orderable: true,
+						searchable: true
+					},
+					{
+						data: 'voice',
+						name: 'voice',
+						orderable: true,
+						searchable: true
+					},
+					{
+						data: 'gender',
+						name: 'gender',
+						orderable: true,
+						searchable: true
+					},	
+					{
+						data: 'single',
+						name: 'single',
+						orderable: true,
+						searchable: true
+					},				
+					{
+						data: 'download',
+						name: 'download',
+						orderable: true,
+						searchable: true
+					},	
+					{
+						data: 'result_ext',
+						name: 'result_ext',
+						orderable: true,
+						searchable: true
+					},		
+					{
+						data: 'characters',
+						name: 'characters',
+						orderable: true,
+						searchable: true
+					},	
+					{
+						data: 'project',
+						name: 'project',
+						orderable: true,
+						searchable: true
+					},				
+					{
+						data: 'actions',
+						name: 'actions',
+						orderable: false,
+						searchable: false
+					},
+				]
+			});
+			
+
+			$('#resultTable tbody').on('click', 'td.details-control', function () {
+				var tr = $(this).closest('tr');
+				var row = table.row( tr );
 		
+				if ( row.child.isShown() ) {
+					// This row is already open - close it
+					$('div.slider', row.child()).slideUp( function () {
+						row.child.hide();
+						tr.removeClass('shown');
+					} );
+				}
+				else {
+					// Open this row
+					row.child( format(row.data()), 'no-padding' ).show();
+					tr.addClass('shown');
+		
+					$('div.slider', row.child()).slideDown();
+				}
+			});
+
 
 			let user_voice = "{{ auth()->user()->default_voiceover_voice }}";
 			if (user_voice) {
@@ -737,7 +567,153 @@
 			
 
 
-			
+			// DELETE SYNTHESIZE RESULT
+			$(document).on('click', '.deleteResultButton', function(e) {
+
+				e.preventDefault();
+
+				Swal.fire({
+					title: '{{ __('Confirm Result Deletion') }}',
+					text: '{{ __('It will permanently delete this synthesize result') }}',
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: '{{ __('Delete') }}',
+					reverseButtons: true,
+				}).then((result) => {
+					if (result.isConfirmed) {
+						var formData = new FormData();
+						formData.append("id", $(this).attr('id'));
+						$.ajax({
+							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+							method: 'post',
+							url: 'text-to-speech/delete',
+							data: formData,
+							processData: false,
+							contentType: false,
+							success: function (data) {
+								if (data == 'success') {
+									Swal.fire('{{ __('Result Deleted') }}', '{{ __('Synthesize result has been successfully deleted') }}', 'success');	
+									$("#resultTable").DataTable().ajax.reload();								
+								} else {
+									Swal.fire('{{ __('Delete Failed') }}', '{{ __('There was an error while deleting this result') }}', 'error');
+								}      
+							},
+							error: function(data) {
+								Swal.fire({ type: 'error', title: 'Oops...', text: 'Something went wrong!' })
+							}
+						})
+					} 
+				})
+			});
+
+
+			/*************************************************
+			 *  Process File Synthesize Mode
+			 *************************************************/
+			$('#synthesize-text').on('click',function(e) {
+
+				"use strict";
+
+				e.preventDefault()
+
+				let map = new Map();
+				let textarea = document.getElementsByTagName("textarea");
+				let full_textarea = textarea.length;
+				let full_text = '';
+
+				if (textarea.length == 1) {
+					let value = document.getElementById('ZZZOOOVVVZ').value;
+					let voice = document.getElementById('ZZZOOOVVVZ').getAttribute('data-voice');
+
+					if (value.length == 0) {
+						Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
+					} else if (value.length > text_length_limit) { 
+						Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the overall text length.')}}', 'warning'); 
+					} else {
+						map.set(voice, value);
+						startSynthesizeMode(1, map, value);
+					}
+
+				} else {
+
+					for (let i = 0; i < textarea.length; i++) {
+
+						let value = textarea[i].value;
+						let voice = textarea[i].getAttribute('data-voice');
+						let distinct = generateID(3);
+						
+						if (value != '') {
+							map.set(voice +'___'+ distinct, value);
+							full_text +=value;
+						} else {
+							full_textarea--;
+						}
+					}
+
+					if (full_text.length == 0) {
+						Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
+					} else if (full_text.length > text_length_limit) { 
+						Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed total text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the text length.')}}', 'warning'); 
+					} else {
+						startSynthesizeMode(full_textarea, map, full_text);
+					}    
+				}
+			});
+
+
+			/*************************************************
+			 *  Process Live Synthesize Listen Mode
+			 *************************************************/
+			$('#listen-text').on('click', function(e) {
+
+				"use strict";
+
+				e.preventDefault()
+
+				let map = new Map();
+				let textarea = document.getElementsByTagName("textarea");
+				let full_textarea = textarea.length;
+				let full_text = '';
+
+				if (textarea.length == 1) {
+					let value = document.getElementById('ZZZOOOVVVZ').value;
+					let voice = document.getElementById('ZZZOOOVVVZ').getAttribute('data-voice');
+
+					if (value.length == 0) {
+						Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
+					} else if (value.length > text_length_limit) { 
+						Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the text length.')}}', 'warning'); 
+					} else {
+						map.set(voice, value);
+						startListenMode(1, map, value);
+					}
+
+				} else {
+
+					for (let i = 0; i < textarea.length; i++) {
+
+						let value = textarea[i].value;
+						let voice = textarea[i].getAttribute('data-voice');
+						let distinct = generateID(3);
+						
+						if (value != '') {
+							map.set(voice +'___'+ distinct, value);
+							full_text +=value;
+						} else {
+							full_textarea--;
+						}
+					}
+
+					if (full_text.length == 0) {
+						Swal.fire('{{ __('Missing Input Text') }}', '{{ __('Enter your text that you want to synthezise before processing') }}', 'warning');
+					} else if (full_text.length > text_length_limit) { 
+						Swal.fire('{{ __('Text to Speech Notification') }}', '{{ __('Text exceeded allowed length, maximum allowed total text length is ') }}' + text_length_limit + '{{__(' characters. Please decrease the overall text length.')}}', 'warning'); 
+					} else {
+						startListenMode(full_textarea, map, full_text);
+					}    
+				}
+			});
+
 
 		});	
 		

@@ -7,8 +7,8 @@
 
 @section('page-header')
 	<!-- EDIT PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Create New User') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-user-shield mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -24,7 +24,7 @@
 
 @section('content')
 	<!-- EDIT USER PROFILE PAGE -->
-	<div class="row">
+	<div class="row justify-content-center">
 		<div class="col-xl-9 col-lg-8 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
@@ -82,7 +82,7 @@
 							<div class="col-md-6 col-sm-12">
 								<div class="form-group">
 									<label class="form-label fs-12">{{ __('User Role') }} <span class="text-muted">({{ __('Required') }})</span></label>
-									<select id="user-role" name="role" data-placeholder="{{ __('Select User Role') }}" required>	
+									<select id="user-role" name="role" class="form-control" required>	
 										<option value="user" selected> {{ __('User') }}</option>
 										<option value="admin">{{ __('Admin') }}</option>																			
 									</select>
@@ -109,7 +109,7 @@
 								<div class="input-box">
 									<div class="form-group">								
 										<label class="form-label fs-12">{{ __('Phone Number') }} <span class="text-muted">({{ __('Optional') }})</span></label>
-										<input type="tel" class="fs-12 @error('phone_number') is-danger @enderror" id="phone-number" name="phone_number" value="{{ old('phone_number') }}">
+										<input type="tel" class="fs-12 form-control @error('phone_number') is-danger @enderror" id="phone-number" name="phone_number" value="{{ old('phone_number') }}">
 										@error('phone_number')
 											<p class="text-danger">{{ $errors->first('phone_number') }}</p>
 										@enderror
@@ -428,9 +428,9 @@
 								</div>
 							</div>
 						</div>
-						<div class="card-footer border-0 text-right mb-2 pr-0">
-							<a href="{{ route('admin.user.list') }}" class="btn btn-cancel mr-2">{{ __('Return') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Create') }}</button>							
+						<div class="card-footer border-0 text-center mb-2 pr-0">
+							<a href="{{ route('admin.user.list') }}" class="btn btn-cancel mr-2 pl-7 pr-7">{{ __('Return') }}</a>
+							<button type="submit" class="btn btn-primary pl-7 pr-7">{{ __('Create') }}</button>							
 						</div>
 					</form>
 				</div>				

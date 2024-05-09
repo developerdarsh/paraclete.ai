@@ -27,6 +27,7 @@ class TwoCheckoutService
     protected $secret;
     protected $promocode;
     private $api;
+    const API_URL = "https://api.2checkout.com/";
 
     /**
      * Stripe payment processing, unless you are familiar with 
@@ -306,14 +307,16 @@ class TwoCheckoutService
                 $user->group = $group;
                 $user->plan_id = $plan->id;
                 $user->total_words = $plan->words;
-                $user->total_images = $plan->images;
                 $user->total_chars = $plan->characters;
                 $user->total_minutes = $plan->minutes;
                 $user->available_words = $plan->words;
-                $user->available_images = $plan->images;
                 $user->available_chars = $plan->characters;
                 $user->available_minutes = $plan->minutes;
                 $user->member_limit = $plan->team_members;
+                $user->total_dalle_images = $plan->dalle_images;
+                    $user->total_sd_images = $plan->sd_images;
+                    $user->available_dalle_images = $plan->dalle_images;
+                    $user->available_sd_images = $plan->sd_images;
             } else {
                 $user->available_words_prepaid = $user->available_words_prepaid + $plan->words;
                 $user->available_images_prepaid = $user->available_images_prepaid + $plan->images;

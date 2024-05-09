@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string("file_name");
             $table->string("status");
             $table->string("result_model")->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

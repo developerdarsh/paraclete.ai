@@ -9,8 +9,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7">
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center">
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Fine Tune Models Manager') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -29,7 +29,7 @@
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Fine Tune Models') }}</h3>
-					<a href="javascript:void(0)" id="createButton" data-bs-toggle="modal" data-bs-target="#finetuneModal"  class="btn btn-primary text-right right">{{ __('Add New Fine Tune Model') }}</a>
+					<a href="javascript:void(0)" id="createButton" data-bs-toggle="modal" data-bs-target="#finetuneModal"  class="btn btn-primary ripple text-right right">{{ __('Add New Fine Tune Model') }}</a>
 				</div>
 				<div class="card-body pt-2">
 					<!-- BOX CONTENT -->
@@ -38,7 +38,7 @@
 						<table id='allTemplates' class='table' width='100%'>
 								<thead>
 									<tr>									
-										<th width="5%">{{ __('Custom Name') }}</th> 
+										<th width="5%">{{ __('Model Name') }}</th> 
 										<th width="7%">{{ __('Fine Tune Model') }}</th>				
 										<th width="5%">{{ __('Base Model') }}</th> 	
 										<th width="5%">{{ __('File Name') }}</th> 													    		 						           	
@@ -51,7 +51,7 @@
 					</div> <!-- END BOX CONTENT -->
 
 					<div class="col-md-12 col-sm-12 text-center mb-2">
-						<a href="{{ route('admin.davinci.configs') }}" class="btn btn-cancel">{{ __('Return') }}</a>
+						<a href="{{ route('admin.davinci.configs') }}" class="btn btn-cancel pl-7 pr-7 ripple">{{ __('Return') }}</a>
 					</div>	
 				</div>
 			</div>
@@ -89,6 +89,12 @@
 											<option value={{ $model->model }}>{{ $model->description }} (Fine Tune Model)</option>
 										@endforeach																														
 									</select>
+								</div>
+							</div>
+							<div class="col-sm-12 mt-2">
+								<div class="input-box">
+									<h6 class="font-weight-bold">{{ __('Description') }}<span class="text-required"><i class="fa-solid fa-asterisk"></i></h6>
+									<textarea class="form-control" name="description" rows="5" placeholder="{{ __('Provide short description of your fine tuned model') }}"></textarea> 
 								</div>
 							</div>
 							<div class="col-sm-12 mt-2">

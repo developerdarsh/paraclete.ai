@@ -1,5 +1,4 @@
 @component('mail::message')
-# {{ $input->subject }}
 
 {{ $input->message }}
 

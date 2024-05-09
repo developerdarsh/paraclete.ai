@@ -13,6 +13,7 @@ use App\Services\MergeService;
 use App\Models\VoiceoverResult;
 use App\Models\Music;
 use App\Models\Studio;
+use App\Models\SubscriptionPlan;
 use Yajra\DataTables\DataTables;
 use GuzzleHttp\Exception\Report;
 
@@ -90,7 +91,25 @@ class VoiceoverStudioController extends Controller
         $verify = $this->api->verify_license();
         $type = (isset($verify['type'])) ? $verify['type'] : '';
 
-        return view('user.studio.index', compact('musics', 'row_limit', 'js', 'type'));
+        if (auth()->user()->group == 'user') {
+            if (config('settings.sound_studio_user_access') != 'allow') {
+                toastr()->warning(__('Sound Studio feature is not available for free tier users, subscribe to get a proper access'));
+                return redirect()->route('user.plans');
+            } else {
+                return view('user.studio.index', compact('musics', 'row_limit', 'js', 'type'));
+            }
+        } elseif (auth()->user()->group == 'subscriber') {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            if ($plan->sound_studio_feature == false) {     
+                toastr()->warning(__('Your current subscription plan does not include support for Sound Studio feature'));
+                return redirect()->back();                   
+            } else {
+                return view('user.studio.index', compact('musics', 'row_limit', 'js', 'type'));
+            }
+        } else {
+            return view('user.studio.index', compact('musics', 'row_limit', 'js', 'type'));
+        }
+
     }
 
 

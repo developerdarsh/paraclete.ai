@@ -38,6 +38,7 @@ class RegistrationController extends Controller
 
         $this->storeSettings('GENERAL_SETTINGS_REGISTRATION', request('registration'));
         $this->storeSettings('GENERAL_SETTINGS_EMAIL_VERIFICATION', request('email-verification'));
+        $this->storeSettings('GENERAL_SETTINGS_SUBSCRIBE_AT_REGISTRATION', request('subscribe'));
   
         toastr()->success(__('Registration settings successfully updated'));
         return redirect()->back();

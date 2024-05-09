@@ -66,6 +66,7 @@ class GlobalController extends Controller
         $this->storeSettings('GENERAL_SETTINGS_USER_NOTIFICATION', request('user-notification'));
         $this->storeSettings('GENERAL_SETTINGS_LIVE_CHAT', request('enable-live-chat'));
         $this->storeSettings('GENERAL_SETTINGS_LIVE_CHAT_LINK', request('live-chat-link'));
+        $this->storeSettings('GENERAL_SETTINGS_THEME', request('theme'));
 
        
         # Enable/Disable GDRP Cookie

@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->back()->with('error', 'Google reCaptcha Validation has Failed');
             }
 
-            if ($recaptchaResult->score >= 0.5) {
+            if ($recaptchaResult->score >= 0.3) {
 
                 $request->authenticate();
                 
@@ -89,7 +89,12 @@ class AuthenticatedSessionController extends Controller
 
                         $request->session()->regenerate();
 
-                        return redirect()->intended(RouteServiceProvider::HOME);
+                        if (auth()->user()->subscription_required) {
+                            return redirect()->route('register.subscriber.plans');
+                        } else {
+                            return redirect()->intended(RouteServiceProvider::HOME);
+                        }
+                        
                     }
                 }
                   
@@ -124,8 +129,13 @@ class AuthenticatedSessionController extends Controller
                 } else{
     
                     $request->session()->regenerate();
-    
-                    return redirect()->intended(RouteServiceProvider::HOME);
+
+                    if (auth()->user()->subscription_required) {
+                        return redirect()->route('register.subscriber.plans');
+                    } else {
+                        return redirect()->intended(RouteServiceProvider::HOME);
+                    }
+
                 }
             }
         }

@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('css')
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+@endsection
+
 @section('content')					
 	<div class="row justify-content-center mt-24">
 		<div class="col-sm-12 text-center">
@@ -7,7 +12,7 @@
 			<h6 class="mb-6 fs-12 text-muted">{{ __('Control all AI settings from one place') }}</h6>
 		</div>
 
-		<div class="col-lg-10 col-sm-12 mb-5">
+		<div class="col-lg-9 col-md-10 col-sm-12 mb-5">
 			<div class="templates-nav-menu">
 				<div class="template-nav-menu-inner">
 					<ul class="nav nav-tabs" id="myTab" role="tablist" style="padding: 3px">
@@ -25,7 +30,7 @@
 			</div>
 		</div>
 
-		<div class="col-lg-10 col-md-12 col-xm-12">
+		<div class="col-lg-9 col-md-10 col-sm-12">
 			<div class="card border-0">
 				<div class="card-body pt-6 pl-6 pr-6 pb-4">				
 					<div class="tab-content" id="myTabContent">
@@ -38,16 +43,18 @@
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
 										<div class="input-box">	
-											<h6>{{ __('Default OpenAI Model') }} <span class="text-muted">({{ __('For Admin Group') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('Default AI Model') }} <span class="text-muted">({{ __('For Admin Group') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<select id="default-model-admin" name="default-model-admin" class="form-select" data-placeholder="{{ __('Select Default Model') }}:">			
-												<option value="gpt-3.5-turbo" @if ( config('settings.default_model_admin')  == 'gpt-3.5-turbo') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
-												<option value="gpt-3.5-turbo-16k" @if ( config('settings.default_model_admin')  == 'gpt-3.5-turbo-16k') selected @endif>{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
-												<option value="gpt-4" @if ( config('settings.default_model_admin')  == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>
-												<option value="gpt-4-32k" @if ( config('settings.default_model_admin')  == 'gpt-4-32k') selected @endif>{{ __('GPT 4') }} ({{ __('32K') }})</option>
-												<option value="gpt-4-1106-preview" @if ( config('settings.default_model_admin')  == 'gpt-4-1106-preview') selected @endif>{{ __('GPT 4 Turbo') }} ({{ __('Preview') }})</option>
-												<option value="gpt-4-vision-preview" @if ( config('settings.default_model_admin')  == 'gpt-4-vision-preview') selected @endif>{{ __('GPT 4 Turbo with Vision') }} ({{ __('Preview') }})</option>
+												<option value="gpt-3.5-turbo-0125" @if ( config('settings.default_model_admin')  == 'gpt-3.5-turbo-0125') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>												
+												<option value="gpt-4" @if ( config('settings.default_model_admin')  == 'gpt-4') selected @endif>{{ __('GPT 4') }}</option>
+												<option value="gpt-4-0125-preview" @if ( config('settings.default_model_admin')  == 'gpt-4-0125-preview') selected @endif>{{ __('GPT 4 Turbo') }}</option>
+												<option value="gpt-4-turbo-2024-04-09" @if ( config('settings.default_model_admin')  == 'gpt-4-turbo-2024-04-09') selected @endif>{{ __('GPT 4 Turbo with Vision') }}</option>
+												<option value="claude-3-opus-20240229" @if ( config('settings.default_model_admin')  == 'claude-3-opus-20240229') selected @endif>{{ __('Claude 3 Opus') }}</option>
+												<option value="claude-3-sonnet-20240229" @if ( config('settings.default_model_admin')  == 'claude-3-sonnet-20240229') selected @endif>{{ __('Claude 3 Sonnet') }}</option>
+												<option value="claude-3-haiku-20240307" @if ( config('settings.default_model_admin')  == 'claude-3-haiku-20240307') selected @endif>{{ __('Claude 3 Haiku') }}</option>
+												<option value="gemini_pro" @if ( config('settings.default_model_admin')  == 'gemini_pro') selected @endif>{{ __('Gemini Pro') }}</option>
 												@foreach ($models as $model)
-													<option value="{{ $model->model }}" @if ( config('settings.default_model_admin')  == $model->model) selected @endif>{{ $model->description }} (Fine Tune Model)</option>
+													<option value="{{ $model->model }}" @if ( config('settings.default_model_admin')  == $model->model) selected @endif>{{ $model->description }} ({{ __('Fine Tune Model')}})</option>
 												@endforeach
 											</select>
 										</div>								
@@ -98,6 +105,7 @@
 												<option value='dall-e-3-hd' @if (config('settings.wizard_image_vendor') == 'dall-e-3-hd') selected @endif> {{ __('Dalle 3 HD') }}</option>																															
 												<option value='stable-diffusion-v1-6' @if (config('settings.wizard_image_vendor') == 'stable-diffusion-v1-6') selected @endif> {{ __('Stable Diffusion v1.6') }}</option>																															
 												<option value='stable-diffusion-xl-1024-v1-0' @if (config('settings.wizard_image_vendor') == 'stable-diffusion-xl-1024-v1-0') selected @endif> {{ __('Stable Diffusion XL v1.0') }}</option>																															
+												<option value='stable-diffusion-xl-beta-v2-2-2' @if (config('settings.wizard_image_vendor') == 'stable-diffusion-xl-beta-v2-2-2') selected @endif> {{ __('Stable Diffusion XL v2.2.2 Beta') }}</option>																																																														
 											</select>
 										</div>
 									</div>
@@ -110,6 +118,38 @@
 												<p class="text-danger">{{ $errors->first('max-results-admin') }}</p>
 											@enderror
 										</div>								
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">	
+											<h6>{{ __('Custom Chats for Users') }} <span class="text-muted">({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="custom-chats" name="custom-chats" class="form-select">			
+												<option value="anyone" @if ( config('settings.custom_chats')  == 'anyone') selected @endif>{{ __('Available to Anyone') }}</option>												
+												<option value="subscription" @if ( config('settings.custom_chats')  == 'subscription') selected @endif>{{ __('Available only via Subscription Plan') }}</option>												
+											</select>
+										</div>								
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">	
+											<h6>{{ __('Custom Templates for Users') }} <span class="text-muted">({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<select id="custom-templates" name="custom-templates" class="form-select">			
+												<option value="anyone" @if ( config('settings.custom_templates')  == 'anyone') selected @endif>{{ __('Available to Anyone') }}</option>												
+												<option value="subscription" @if ( config('settings.custom_templates')  == 'subscription') selected @endif>{{ __('Available only via Subscription Plan') }}</option>												
+											</select>
+										</div>								
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">
+											<h6>{{ __('AI Writer Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">
+												<label class="custom-switch">
+													<input type="checkbox" name="writer-feature-user" class="custom-switch-input" @if ( config('settings.writer_feature_user')  == 'allow') checked @endif>
+													<span class="custom-switch-indicator"></span>
+												</label>
+											</div>
+										</div>
 									</div>
 
 									<div class="col-lg-6 col-md-6 col-sm-12">
@@ -234,29 +274,12 @@
 								</div>
 
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
-										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa fa-gift text-info fs-14 mr-2"></i>{{ __('Free Trial Options') }} <span class="text-muted">({{ __('Free Tier User Group Only') }})</span></h6>
+										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa fa-gift text-warning fs-14 mr-2"></i>{{ __('Free Trial Options') }} <span class="text-muted">({{ __('Free Tier User Group Only') }})</span></h6>
 
 										<div class="row">			
-											
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
-													<h6>{{ __('Default OpenAI Model') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-													<select id="default-model-user" name="default-model-user" class="form-select" data-placeholder="{{ __('Select Default Model') }}:">			
-														<option value="gpt-3.5-turbo" @if ( config('settings.default_model_user')  == 'gpt-3.5-turbo') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>
-														<option value="gpt-3.5-turbo-16k" @if ( config('settings.default_model_user')  == 'gpt-3.5-turbo-16k') selected @endif>{{ __('GPT 3.5 Turbo') }} ({{ __('16K') }})</option>
-														<option value="gpt-4" @if ( config('settings.default_model_user')  == 'gpt-4') selected @endif>{{ __('GPT 4') }} ({{ __('8K') }})</option>
-														<option value="gpt-4-32k" @if ( config('settings.default_model_user')  == 'gpt-4-32k') selected @endif>{{ __('GPT 4') }} ({{ __('32K') }})</option>												
-														<option value="gpt-4-1106-preview" @if ( config('settings.default_model_user')  == 'gpt-4-1106-preview') selected @endif>{{ __('GPT 4 Turbo') }} ({{ __('Preview') }})</option>
-														<option value="gpt-4-vision-preview" @if ( config('settings.default_model_user')  == 'gpt-4-vision-preview') selected @endif>{{ __('GPT 4 Turbo with Vision') }} ({{ __('Preview') }})</option>
-														@foreach ($models as $model)
-															<option value="{{ $model->model }}" @if ( config('settings.default_model_user')  == $model->model) selected @endif>{{ $model->description }} (Fine Tune Model)</option>
-														@endforeach
-													</select>
-												</div>								
-											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<div class="input-box">
@@ -274,7 +297,7 @@
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<div class="input-box">
 													<h6>{{ __('AI Chat Package Type Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-													<select id="chats" name="chat-user" class="form-select" data-placeholder="{{ __('Set AI Chat Package Type Access') }}">
+													<select id="chats" name="chat-user" class="form-select">
 														<option value="all" @if (config('settings.chats_access_user') == 'all') selected @endif>{{ __('All Chat Types') }}</option>
 														<option value="free" @if (config('settings.chats_access_user') == 'free') selected @endif>{{ __('Only Free Chat Types') }}</option>
 														<option value="standard" @if (config('settings.chats_access_user') == 'standard') selected @endif> {{ __('Up to Standard Chat Types') }}</option>
@@ -286,9 +309,84 @@
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<div class="input-box">	
-													<h6>{{ __('Team Members Quantity') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-													<input type="number" class="form-control @error('team-members-quantity') is-danger @enderror" id="team-members-quantity" name="team-members-quantity" placeholder="Ex: 5" value="{{ config('settings.team_members_quantity_user') }}">
-												</div> 						
+													<h6>{{ __('Default AI Model for Chat Bots') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<select id="default-model-user-bot" name="default-model-user-bot" class="form-select">			
+														<option value="gpt-3.5-turbo-0125" @if ( config('settings.default_model_user_bot')  == 'gpt-3.5-turbo-0125') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>												
+														<option value="gpt-4" @if ( config('settings.default_model_user_bot')  == 'gpt-4') selected @endif>{{ __('GPT 4') }}</option>
+														<option value="gpt-4-0125-preview" @if ( config('settings.default_model_user_bot')  == 'gpt-4-0125-preview') selected @endif>{{ __('GPT 4 Turbo') }}</option>
+														<option value="gpt-4-turbo-2024-04-09" @if ( config('settings.default_model_user_bot')  == 'gpt-4-turbo-2024-04-09') selected @endif>{{ __('GPT 4 Turbo with Vision') }}</option>
+														<option value="claude-3-opus-20240229" @if ( config('settings.default_model_user_bot')  == 'claude-3-opus-20240229') selected @endif>{{ __('Claude 3 Opus') }}</option>
+														<option value="claude-3-sonnet-20240229" @if ( config('settings.default_model_user_bot')  == 'claude-3-sonnet-20240229') selected @endif>{{ __('Claude 3 Sonnet') }}</option>
+														<option value="claude-3-haiku-20240307" @if ( config('settings.default_model_user_bot')  == 'claude-3-haiku-20240307') selected @endif>{{ __('Claude 3 Haiku') }}</option>
+														<option value="gemini_pro" @if ( config('settings.default_model_user_bot')  == 'gemini_pro') selected @endif>{{ __('Gemini Pro') }}</option>
+														@foreach ($models as $model)
+															<option value="{{ $model->model }}" @if ( config('settings.default_model_user_bot')  == $model->model) selected @endif>{{ $model->description }} ({{ __('Fine Tune Model')}})</option>
+														@endforeach
+													</select>
+												</div>								
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
+												<div class="input-box">	
+													<h6>{{ __('Default AI Model for Templates') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<select id="default-model-user-template" name="default-model-user-template" class="form-select">	
+														<option value="gpt-3.5-turbo-0125" @if ( config('settings.default_model_user_template')  == 'gpt-3.5-turbo-0125') selected @endif>{{ __('GPT 3.5 Turbo') }}</option>												
+														<option value="gpt-4" @if ( config('settings.default_model_user_template')  == 'gpt-4') selected @endif>{{ __('GPT 4') }}</option>
+														<option value="gpt-4-0125-preview" @if ( config('settings.default_model_user_template')  == 'gpt-4-0125-preview') selected @endif>{{ __('GPT 4 Turbo') }}</option>
+														<option value="gpt-4-turbo-2024-04-09" @if ( config('settings.default_model_user_template')  == 'gpt-4-turbo-2024-04-09') selected @endif>{{ __('GPT 4 Turbo with Vision') }}</option>														
+														<option value="claude-3-opus-20240229" @if ( config('settings.default_model_user_template')  == 'claude-3-opus-20240229') selected @endif>{{ __('Claude 3 Opus') }}</option>
+														<option value="claude-3-sonnet-20240229" @if ( config('settings.default_model_user_template')  == 'claude-3-sonnet-20240229') selected @endif>{{ __('Claude 3 Sonnet') }}</option>
+														<option value="claude-3-haiku-20240307" @if ( config('settings.default_model_user_template')  == 'claude-3-haiku-20240307') selected @endif>{{ __('Claude 3 Haiku') }}</option>
+														<option value="gemini_pro" @if ( config('settings.default_model_user_template')  == 'gemini_pro') selected @endif>{{ __('Gemini Pro') }}</option>
+														@foreach ($models as $model)
+															<option value="{{ $model->model }}" @if ( config('settings.default_model_user_template')  == $model->model) selected @endif>{{ $model->description }} ({{ __('Fine Tune Model')}})</option>
+														@endforeach
+													</select>
+												</div>								
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
+												<div class="input-box">
+													<h6>{{ __('Available AI Models') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Only listed models will be available for non-subscribers. Make sure your default models above are actually included in this list.') }}."></i></h6>
+													<select class="form-select" id="models-list" name="models_list[]" multiple>
+														<option value='gpt-3.5-turbo-0125' @foreach ($all_models as $key=>$value) @if($value == 'gpt-3.5-turbo-0125') selected @endif @endforeach>{{ __('GPT 3.5 Turbo') }}</option>																															
+														<option value='gpt-4' @foreach ($all_models as $key=>$value) @if($value == 'gpt-4') selected @endif @endforeach>{{ __('GPT 4') }}</option>																																																																																																																																																																																																																		
+														<option value='gpt-4-0125-preview' @foreach ($all_models as $key=>$value) @if($value == 'gpt-4-0125-preview') selected @endif @endforeach>{{ __('GPT 4 Turbo') }}</option>																																																																																																																											
+														<option value='gpt-4-turbo-2024-04-09' @foreach ($all_models as $key=>$value) @if($value == 'gpt-4-turbo-2024-04-09') selected @endif @endforeach>{{ __('GPT 4 Turbo with Vision') }}</option>																																																																																																																											
+														<option value="claude-3-opus-20240229" @foreach ($all_models as $key=>$value) @if($value == 'claude-3-opus-20240229') selected @endif @endforeach>{{ __('Claude 3 Opus') }}</option>
+														<option value="claude-3-sonnet-20240229" @foreach ($all_models as $key=>$value) @if($value == 'claude-3-sonnet-20240229') selected @endif @endforeach>{{ __('Claude 3 Sonnet') }}</option>
+														<option value="claude-3-haiku-20240307" @foreach ($all_models as $key=>$value) @if($value == 'claude-3-haiku-20240307') selected @endif @endforeach>{{ __('Claude 3 Haiku') }}</option>
+														<option value="gemini_pro" @foreach ($all_models as $key=>$value) @if($value == 'gemini_pro') selected @endif @endforeach>{{ __('Gemini Pro') }}</option>
+														@foreach ($models as $model)
+															<option value="{{ $model->model }}" @foreach ($all_models as $key=>$value) @if($value == $model->model) selected @endif @endforeach>{{ $model->description }} ({{ __('Fine Tune Model')}})</option>
+														@endforeach
+													</select>
+												</div>
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
+												<div class="input-box">
+													<h6>{{ __('AI Voiceover Vendors Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Only listed TTS voices of the listed vendors will be available for the subscriber. Make sure to include respective vendor API keys in the Davinci settings page.') }}."></i></h6>
+													<select class="form-select" id="voiceover-vendors" name="voiceover_vendors[]" multiple>
+														<option value='aws' @foreach ($vendors as $key=>$value) @if($value == 'aws') selected @endif @endforeach>{{ __('AWS') }}</option>																															
+														<option value='azure' @foreach ($vendors as $key=>$value) @if($value == 'azure') selected @endif @endforeach>{{ __('Azure') }}</option>																																																														
+														<option value='gcp' @foreach ($vendors as $key=>$value) @if($value == 'gcp') selected @endif @endforeach>{{ __('GCP') }}</option>																																																														
+														<option value='openai' @foreach ($vendors as $key=>$value) @if($value == 'openai') selected @endif @endforeach>{{ __('OpenAI') }}</option>																																																														
+														<option value='elevenlabs' @foreach ($vendors as $key=>$value) @if($value == 'elevenlabs') selected @endif @endforeach>{{ __('ElevenLabs') }}</option>																																																																																																																											
+													</select>
+												</div>
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
+												<div class="input-box">
+													<h6>{{ __('AI Writer Feature Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">
+														<label class="custom-switch">
+															<input type="checkbox" name="writer-user-access" class="custom-switch-input" @if ( config('settings.writer_user_access')  == 'allow') checked @endif>
+															<span class="custom-switch-indicator"></span>
+														</label>
+													</div>
+												</div>
 											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
@@ -376,6 +474,18 @@
 											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
+												<div class="input-box">	
+													<h6>{{ __('Brand Voice Feature Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span></h6>
+													<div class="form-group">
+														<label class="custom-switch">
+															<input type="checkbox" name="brand-voice-user-access" class="custom-switch-input" @if ( config('settings.brand_voice_user_access')  == 'allow') checked @endif>
+															<span class="custom-switch-indicator"></span>
+														</label>
+													</div>
+												</div> 						
+											</div>	
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
 												<div class="input-box">
 													<h6>{{ __('Internet Real Time Data Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 													<div class="form-group">
@@ -387,103 +497,223 @@
 												</div>
 											</div>
 
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">								
-													<h6>{{ __('Number of Words as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
-													<div class="form-group">							    
-														<input type="number" class="form-control @error('free-tier-words') is-danger @enderror" id="free-tier-words" name="free-tier-words" placeholder="Ex: 1000" value="{{ config('settings.free_tier_words') }}" required>
-														<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}.</span>
-														@error('free-tier-words')
-															<p class="text-danger">{{ $errors->first('free-tier-words') }}</p>
+											<div class="row">
+
+												<h6 class="fs-12 font-weight-bold mb-6"><i class="fa fa-gift text-warning fs-14 mr-2"></i>{{ __('Welcome Credits & Limits for Non-Subscribers') }}</h6>
+
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of GPT 3.5 Turbo Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('gpt-3-turbo') is-danger @enderror" value={{ config('settings.free_gpt_3_turbo_credits') }} name="gpt-3-turbo">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+					
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of GPT 4 Turbo Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('gpt-4-turbo') is-danger @enderror" value={{ config('settings.free_gpt_4_turbo_credits') }} name="gpt-4-turbo">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+					
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of GPT 4 Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('gpt-4') is-danger @enderror" value={{ config('settings.free_gpt_4_credits') }} name="gpt-4">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>			
+					
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of Fine Tune Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('fine-tune') is-danger @enderror" value={{ config('settings.free_fine_tune_credits') }} name="fine-tune">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+					
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of Claude 3 Opus Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('claude-3-opus') is-danger @enderror" value={{ config('settings.free_claude_3_opus_credits') }} name="claude-3-opus">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of Claude 3 Sonnet Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('claude-3-sonnet') is-danger @enderror" value={{ config('settings.free_claude_3_sonnet_credits') }} name="claude-3-sonnet">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of Claude 3 Haiku Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('claude-3-haiku') is-danger @enderror" value={{ config('settings.free_claude_3_haiku_credits') }} name="claude-3-haiku">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+
+												<div class="col-sm-12 col-md-6">
+													<div class="input-box">
+														<h6>{{ __('Number of Gemini Pro Credits as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">															
+															<input type="number" class="form-control @error('gemini-pro') is-danger @enderror" value={{ config('settings.free_gemini_pro_credits') }} name="gemini-pro">
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited words') }}</span>									
+														</div>
+													</div>
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">								
+														<h6>{{ __('Number of Characters for AI Voiceover as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">							    
+															<input type="number" class="form-control @error('set-free-chars') is-danger @enderror" id="set-free-chars" name="set-free-chars" placeholder="Ex: 1000" value="{{ config('settings.voiceover_welcome_chars') }}" required>
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited characters') }}.</span>
+															@error('set-free-chars')
+																<p class="text-danger">{{ $errors->first('set-free-chars') }}</p>
+															@enderror
+														</div> 
+													</div>							
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">								
+														<h6>{{ __('Number of Minutes for AI Speech to Text as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">							    
+															<input type="number" class="form-control @error('set-free-minutes') is-danger @enderror" id="set-free-minutes" name="set-free-minutes" placeholder="Ex: 1000" value="{{ config('settings.whisper_welcome_minutes') }}" required>
+															<span class="text-muted fs-10">{{ __('Set as -1 for unlimited minutes') }}.</span>
+															@error('set-free-minutes')
+																<p class="text-danger">{{ $errors->first('set-free-minutes') }}</p>
+															@enderror
+														</div> 
+													</div>							
+												</div>	
+
+												<div class="col-lg-6 col-md-6 col-sm-12">							
+													<div class="input-box">								
+														<h6>{{ __('Number of Dalle Images as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">							    
+															<input type="number" class="form-control" id="free-tier-dalle-images" name="free-tier-dalle-images" value="{{ config('settings.free_tier_dalle_images') }}">
+															<span class="text-muted fs-10">{{ __('Valid for all image sizes') }}. {{ __('Set as -1 for unlimited images') }}.</span>
+														</div> 
+														@error('free-tier-dalle-images')
+															<p class="text-danger">{{ $errors->first('free-tier-dalle-images') }}</p>
 														@enderror
-													</div> 
-												</div>							
+													</div> 						
+												</div>
+			
+												<div class="col-lg-6 col-md-6 col-sm-12">							
+													<div class="input-box">								
+														<h6>{{ __('Number Stable Diffusion Images as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
+														<div class="form-group">							    
+															<input type="number" class="form-control" id="free-tier-sd-images" name="free-tier-sd-images" value="{{ config('settings.free_tier_sd_images') }}">
+															<span class="text-muted fs-10">{{ __('Valid for all image sizes') }}. {{ __('Set as -1 for unlimited images') }}.</span>
+														</div> 
+														@error('free-tier-sd-images')
+															<p class="text-danger">{{ $errors->first('free-tier-sd-images') }}</p>
+														@enderror
+													</div> 						
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">	
+														<h6>{{ __('Maximum Result Length') }} <span class="text-muted">({{ __('In Words') }}) ({{ __('For Non-Subscribers') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('OpenAI has a hard limit based on Token limits for each model. Refer to OpenAI documentation to learn more. As a recommended by OpenAI, max result length is capped at 1500 words.') }}"></i></h6>
+														<input type="number" class="form-control @error('max-results-user') is-danger @enderror" id="max-results-user" name="max-results-user" placeholder="Ex: 10" value="{{ config('settings.max_results_limit_user') }}" required>
+														@error('max-results-user')
+															<p class="text-danger">{{ $errors->first('max-results-user') }}</p>
+														@enderror
+													</div>								
+												</div>
+												
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">	
+														<h6>{{ __('Maximum Allowed PDF File Size') }} <span class="text-muted">({{ __('In MB') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum PDF file size limit for free tier user for AI File Chat feature') }}"></i></h6>
+														<input type="number" class="form-control @error('max-pdf-size') is-danger @enderror" id="max-pdf-size" name="max-pdf-size" placeholder="Ex: 10" min="0.1" step="0.1" value="{{ config('settings.chat_pdf_file_size_user') }}" required>
+														@error('max-pdf-size')
+															<p class="text-danger">{{ $errors->first('max-pdf-size') }}</p>
+														@enderror
+													</div>								
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">	
+														<h6>{{ __('Maximum Allowed CSV File Size') }} <span class="text-muted">({{ __('In MB') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum CSV file size limit for free tier user for AI File Chat feature') }}"></i></h6>
+														<input type="number" class="form-control @error('max-csv-size') is-danger @enderror" id="max-csv-size" name="max-csv-size" placeholder="Ex: 10" min="0.1" step="0.1" value="{{ config('settings.chat_csv_file_size_user') }}" required>
+														@error('max-csv-size')
+															<p class="text-danger">{{ $errors->first('max-csv-size') }}</p>
+														@enderror
+													</div>								
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">	
+														<h6>{{ __('Maximum Allowed Word File Size') }} <span class="text-muted">({{ __('In MB') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum Word file size limit for free tier user for AI File Chat feature') }}"></i></h6>
+														<input type="number" class="form-control @error('max-word-size') is-danger @enderror" id="max-word-size" name="max-word-size" placeholder="Ex: 10" min="0.1" step="0.1" value="{{ config('settings.chat_word_file_size_user') }}" required>
+														@error('max-word-size')
+															<p class="text-danger">{{ $errors->first('max-word-size') }}</p>
+														@enderror
+													</div>								
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">	
+														<h6>{{ __('Team Members Quantity') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+														<input type="number" class="form-control @error('team-members-quantity') is-danger @enderror" id="team-members-quantity" name="team-members-quantity" placeholder="Ex: 5" value="{{ config('settings.team_members_quantity_user') }}">
+													</div> 						
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">							
+													<div class="input-box">								
+														<h6>{{ __('Image/Video/Voiceover Results Storage Period') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('After set days file results will be deleted via CRON task') }}."></i></h6>
+														<div class="form-group">							    
+															<input type="number" class="form-control" id="file-result-duration" name="file-result-duration" value="{{ config('settings.file_result_duration_user') }}">
+															<span class="text-muted fs-10">{{ __('In Days') }}. {{ __('Set as -1 for unlimited storage duration') }}.</span>
+														</div> 
+														@error('file-result-duration')
+															<p class="text-danger">{{ $errors->first('file-result-duration') }}</p>
+														@enderror
+													</div> 						
+												</div>
+		
+												<div class="col-lg-6 col-md-6 col-sm-12">							
+													<div class="input-box">								
+														<h6>{{ __('Generated Text Content Results Storage Period') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('After set days results will be deleted from database via CRON task') }}."></i></h6>
+														<div class="form-group">							    
+															<input type="number" class="form-control" id="document-result-duration" name="document-result-duration" value="{{ config('settings.document_result_duration_user') }}">
+															<span class="text-muted fs-10">{{ __('In Days') }}. {{ __('Set as -1 for unlimited storage duration') }}.</span>
+														</div> 
+														@error('document-result-duration')
+															<p class="text-danger">{{ $errors->first('document-result-duration') }}</p>
+														@enderror
+													</div> 						
+												</div>												
 											</div>
 
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">								
-													<h6>{{ __('Number of Images as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
-													<div class="form-group">							    
-														<input type="number" class="form-control @error('free-tier-images') is-danger @enderror" id="free-tier-images" name="free-tier-images" placeholder="Ex: 1000" value="{{ config('settings.free_tier_images') }}" required>
-														<span class="text-muted fs-10">{{ __('Set as -1 for unlimited images') }}.</span>
-														@error('free-tier-images')
-															<p class="text-danger">{{ $errors->first('free-tier-images') }}</p>
-														@enderror
-													</div> 
-												</div>							
-											</div>
-
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">								
-													<h6>{{ __('Number of Characters for AI Voiceover as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
-													<div class="form-group">							    
-														<input type="number" class="form-control @error('set-free-chars') is-danger @enderror" id="set-free-chars" name="set-free-chars" placeholder="Ex: 1000" value="{{ config('settings.voiceover_welcome_chars') }}" required>
-														<span class="text-muted fs-10">{{ __('Set as -1 for unlimited characters') }}.</span>
-														@error('set-free-chars')
-															<p class="text-danger">{{ $errors->first('set-free-chars') }}</p>
-														@enderror
-													</div> 
-												</div>							
-											</div>
-
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">								
-													<h6>{{ __('Number of Minutes for AI Speech to Text as a Gift upon Registration') }} <span class="text-muted">({{ __('One Time') }})<span class="text-required"><i class="fa-solid fa-asterisk"></i></span> </span></h6>
-													<div class="form-group">							    
-														<input type="number" class="form-control @error('set-free-minutes') is-danger @enderror" id="set-free-minutes" name="set-free-minutes" placeholder="Ex: 1000" value="{{ config('settings.whisper_welcome_minutes') }}" required>
-														<span class="text-muted fs-10">{{ __('Set as -1 for unlimited minutes') }}.</span>
-														@error('set-free-minutes')
-															<p class="text-danger">{{ $errors->first('set-free-minutes') }}</p>
-														@enderror
-													</div> 
-												</div>							
-											</div>	
-
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
-													<h6>{{ __('Maximum Result Length') }} <span class="text-muted">({{ __('In Words') }}) ({{ __('For Non-Subscribers') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('OpenAI has a hard limit based on Token limits for each model. Refer to OpenAI documentation to learn more. As a recommended by OpenAI, max result length is capped at 1500 words.') }}"></i></h6>
-													<input type="number" class="form-control @error('max-results-user') is-danger @enderror" id="max-results-user" name="max-results-user" placeholder="Ex: 10" value="{{ config('settings.max_results_limit_user') }}" required>
-													@error('max-results-user')
-														<p class="text-danger">{{ $errors->first('max-results-user') }}</p>
-													@enderror
-												</div>								
-											</div>
 											
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
-													<h6>{{ __('Maximum Allowed PDF File Size') }} <span class="text-muted">({{ __('In MB') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum PDF file size limit for free tier user for AI File Chat feature') }}"></i></h6>
-													<input type="number" class="form-control @error('max-pdf-size') is-danger @enderror" id="max-pdf-size" name="max-pdf-size" placeholder="Ex: 10" min="0.1" step="0.1" value="{{ config('settings.chat_pdf_file_size_user') }}" required>
-													@error('max-pdf-size')
-														<p class="text-danger">{{ $errors->first('max-pdf-size') }}</p>
-													@enderror
-												</div>								
-											</div>
-
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
-													<h6>{{ __('Maximum Allowed CSV File Size') }} <span class="text-muted">({{ __('In MB') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum CSV file size limit for free tier user for AI File Chat feature') }}"></i></h6>
-													<input type="number" class="form-control @error('max-csv-size') is-danger @enderror" id="max-csv-size" name="max-csv-size" placeholder="Ex: 10" min="0.1" step="0.1" value="{{ config('settings.chat_csv_file_size_user') }}" required>
-													@error('max-csv-size')
-														<p class="text-danger">{{ $errors->first('max-csv-size') }}</p>
-													@enderror
-												</div>								
-											</div>
-
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
-													<h6>{{ __('Maximum Allowed Word File Size') }} <span class="text-muted">({{ __('In MB') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Set the maximum Word file size limit for free tier user for AI File Chat feature') }}"></i></h6>
-													<input type="number" class="form-control @error('max-word-size') is-danger @enderror" id="max-word-size" name="max-word-size" placeholder="Ex: 10" min="0.1" step="0.1" value="{{ config('settings.chat_word_file_size_user') }}" required>
-													@error('max-word-size')
-														<p class="text-danger">{{ $errors->first('max-word-size') }}</p>
-													@enderror
-												</div>								
-											</div>
 										</div>	
 									</div>
 								</div>
 
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-message-captions text-info fs-14 mr-2"></i>{{ __('AI Chat Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
@@ -504,18 +734,6 @@
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<div class="input-box">	
-													<h6>{{ __('AI Chat Real Time Data Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
-													<div class="form-group">
-														<label class="custom-switch">
-															<input type="checkbox" name="chat-real-time-data" class="custom-switch-input" @if ( config('settings.chat_real_time_data')  == 'allow') checked @endif>
-															<span class="custom-switch-indicator"></span>
-														</label>
-													</div>
-												</div>								
-											</div>
-
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
 													<h6>{{ __('AI Chat Default Voice') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 													<select id="chat-default-voice" name="chat-default-voice" class="form-select">			
 														<option value="alloy" @if ( config('settings.chat_default_voice')  == 'alloy') selected @endif>{{ __('Alloy') }} ({{ __('Male') }})</option>
@@ -526,33 +744,20 @@
 														<option value="shimmer" @if ( config('settings.chat_default_voice')  == 'shimmer') selected @endif>{{ __('Shimmer') }} ({{ __('Female') }})</option>
 													</select>
 												</div>								
-											</div>
-
-											<div class="col-md-6 col-sm-12">
-												<div class="input-box mb-0">								
-													<h6>{{ __('Serper API Key') }} <span class="text-muted">({{ __('Required for Real-Time Data') }})</span></h6>
-													<div class="form-group">							    
-														<input type="text" class="form-control @error('set-serper-api') is-danger @enderror" id="set-serper-api" name="set-serper-api" value="{{ config('services.serper.key') }}" autocomplete="off">
-														@error('set-serper-api')
-															<p class="text-danger">{{ $errors->first('set-serper-api') }}</p>
-														@enderror
-													</div> 												
-												</div> 
-											</div>
-				
+											</div>				
 										</div>		
 									</div>
 								</div>
 
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-camera-viewfinder text-info fs-14 mr-2"></i>{{ __('AI Image Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
 
 										<div class="row">
 
-											<div class="col-lg-6 col-md-6 col-sm-12">
+											<div class="col-lg-12 col-md-12 col-sm-12">
 												<div class="input-box">
 													<h6>{{ __('AI Image Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 													<div class="form-group">
@@ -585,17 +790,8 @@
 														<option value="gcp" @if ( config('settings.default_storage')  == 'gcp') selected @endif>{{ __('Google Cloud Platform') }}</option>
 														<option value="storj" @if ( config('settings.default_storage')  == 'storj') selected @endif>{{ __('Storj') }}</option>
 														<option value="dropbox" @if ( config('settings.default_storage')  == 'dropbox') selected @endif>{{ __('Dropbox') }}</option>
+														<option value="r2" @if ( config('settings.default_storage')  == 'r2') selected @endif>{{ __('Cloudflare R2') }}</option>
 													</select>
-												</div>								
-											</div>
-				
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<div class="input-box">	
-													<h6>{{ __('Delete AI Image Results After') }} <span class="text-muted">({{ __('In Days') }}) ({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Default days after which generated AI Images will be deleted, use 0 for never delete. Subscribers can overwrite this baed on their subscription plans') }}"></i></h6>
-													<input type="number" class="form-control @error('default-duration') is-danger @enderror" id="default-duration" name="default-duration" value="{{ config('settings.default_duration') }}" required>
-													@error('default-duration')
-														<p class="text-danger">{{ $errors->first('default-duration') }}</p>
-													@enderror
 												</div>								
 											</div>
 
@@ -616,6 +812,10 @@
 													<select id="stable-diffusion-engine" name="stable-diffusion-engine" class="form-select" data-placeholder="{{ __('Set Stable Diffusion Engine ID') }}">
 														<option value='stable-diffusion-v1-6' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-v1-6') selected @endif>{{ __('Stable Diffusion v1.6') }}</option>
 														<option value='stable-diffusion-xl-1024-v1-0' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-1024-v1-0') selected @endif> {{ __('SDXL v1.0') }}</option>																															
+														<option value='stable-diffusion-xl-beta-v2-2-2' @if (config('settings.image_stable_diffusion_engine') == 'stable-diffusion-xl-beta-v2-2-2') selected @endif> {{ __('SDXL v2.2.2 Beta') }}</option>		
+														<option value='sd3' @if (config('settings.image_stable_diffusion_engine') == 'sd3') selected @endif> {{ __('Stable Diffusion 3.0') }}</option>		
+														<option value='sd3-turbo' @if (config('settings.image_stable_diffusion_engine') == 'sd3-turbo') selected @endif> {{ __('Stable Diffusion 3.0 Turbo') }}</option>		
+														<option value='core' @if (config('settings.image_stable_diffusion_engine') == 'core') selected @endif> {{ __('Stable Image Core') }}</option>		
 													</select>
 												</div>
 											</div>
@@ -625,14 +825,14 @@
 								</div>
 
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-waveform-lines text-info fs-14 mr-2"></i>{{ __('AI Voiceover Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
 
 										<div class="row">
 
-											<div class="col-lg-6 col-md-6 col-sm-12">
+											<div class="col-lg-12 col-md-12 col-sm-12">
 												<div class="input-box">
 													<h6>{{ __('AI Voiceover Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 													<div class="form-group">
@@ -653,6 +853,22 @@
 														<option value="disable" @if ( config('settings.voiceover_ssml_effect')  == 'disable') selected @endif>{{ __('Disable All') }}</option>
 													</select>
 												</div> <!-- END EFFECTS -->							
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
+												<!-- STORAGE OPTION -->
+												<div class="input-box">	
+													<h6>{{ __('Default Storage for AI Voiceovers') }}</h6>
+													<select id="set-storage-option" name="set-storage-option" class="form-select" data-placeholder="{{ __('Select Default Storage for AI Voiceover') }}">			
+														<option value="local" @if ( config('settings.voiceover_default_storage')  == 'local') selected @endif>{{ __('Local Server Storage') }}</option>
+														<option value="aws" @if ( config('settings.voiceover_default_storage')  == 'aws') selected @endif>Amazon Web Services</option>
+														<option value="wasabi" @if ( config('settings.voiceover_default_storage')  == 'wasabi') selected @endif>Wasabi Cloud</option>
+														<option value="gcp" @if ( config('settings.voiceover_default_storage')  == 'gcp') selected @endif>{{ __('Google Cloud Platform') }}</option>
+														<option value="storj" @if ( config('settings.voiceover_default_storage')  == 'storj') selected @endif>{{ __('Storj') }}</option>
+														<option value="dropbox" @if ( config('settings.voiceover_default_storage')  == 'dropbox') selected @endif>{{ __('Dropbox') }}</option>
+														<option value="r2" @if ( config('settings.voiceover_default_storage')  == 'r2') selected @endif>{{ __('Cloudflare R2') }}</option>
+													</select>
+												</div> <!-- END STORAGE OPTION -->							
 											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
@@ -711,47 +927,20 @@
 														@enderror
 													</div> 
 												</div>							
-											</div>	
-											
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<!-- STORAGE OPTION -->
-												<div class="input-box">	
-													<h6>{{ __('Default Storage for AI Voiceovers') }}</h6>
-													<select id="set-storage-option" name="set-storage-option" class="form-select" data-placeholder="{{ __('Select Default Storage for AI Voiceover') }}">			
-														<option value="local" @if ( config('settings.voiceover_default_storage')  == 'local') selected @endif>{{ __('Local Server Storage') }}</option>
-														<option value="aws" @if ( config('settings.voiceover_default_storage')  == 'aws') selected @endif>Amazon Web Services</option>
-														<option value="wasabi" @if ( config('settings.voiceover_default_storage')  == 'wasabi') selected @endif>Wasabi Cloud</option>
-														<option value="gcp" @if ( config('settings.voiceover_default_storage')  == 'gcp') selected @endif>{{ __('Google Cloud Platform') }}</option>
-														<option value="storj" @if ( config('settings.voiceover_default_storage')  == 'storj') selected @endif>{{ __('Storj') }}</option>
-														<option value="dropbox" @if ( config('settings.voiceover_default_storage')  == 'dropbox') selected @endif>{{ __('Dropbox') }}</option>
-													</select>
-												</div> <!-- END STORAGE OPTION -->							
-											</div>
-				
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<!-- STORAGE OPTION -->
-												<div class="input-box">	
-													<h6>{{ __('Delete AI Voiceover Result After') }} <span class="text-muted">({{ __('In Days') }}) ({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Default days after which generated AI Voiceovers will be deleted, use 0 for never delete. Subscribers can overwrite this baed on their subscription plans') }}"></i></h6>
-													<input type="number" class="form-control @error('voiceover-default-duration') is-danger @enderror" id="voiceover-default-duration" name="voiceover-default-duration" value="{{ config('settings.voiceover_default_duration') }}">
-													@error('voiceover-default-duration')
-														<p class="text-danger">{{ $errors->first('voiceover-default-duration') }}</p>
-													@enderror
-												</div> <!-- END STORAGE OPTION -->							
-											</div>
-				
+											</div>					
 										</div>		
 									</div>
 								</div>
 
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-folder-music text-info fs-14 mr-2"></i>{{ __('AI Speech to Text Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
 
 										<div class="row">
 
-											<div class="col-lg-6 col-md-6 col-sm-12">
+											<div class="col-lg-12 col-md-12 col-sm-12">
 												<div class="input-box">
 													<h6>{{ __('AI Speech to Text Feature') }} <span class="text-muted">({{ __('For User & Subscriber Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 													<div class="form-group">
@@ -788,18 +977,8 @@
 														<option value="gcp" @if ( config('settings.whisper_default_storage')  == 'gcp') selected @endif>{{ __('Google Cloud Platform') }}</option>
 														<option value="storj" @if ( config('settings.whisper_default_storage')  == 'storj') selected @endif>{{ __('Storj') }}</option>
 														<option value="dropbox" @if ( config('settings.whisper_default_storage')  == 'dropbox') selected @endif>{{ __('Dropbox') }}</option>
+														<option value="r2" @if ( config('settings.whisper_default_storage')  == 'r2') selected @endif>{{ __('Cloudflare R2') }}</option>
 													</select>
-												</div> <!-- END STORAGE OPTION -->							
-											</div>
-				
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<!-- STORAGE OPTION -->
-												<div class="input-box">	
-													<h6>{{ __('Delete AI Speech to Text Result After') }} <span class="text-muted">({{ __('In Days') }}) ({{ __('For All Groups') }})</span><span class="text-required"><i class="fa-solid fa-asterisk"></i></span><i class="ml-3 text-dark fs-13 fa-solid fa-circle-info" data-tippy-content="{{ __('Default days after which transcribed AI Speech to Text will be deleted, use 0 for never delete. Subscribers can overwrite this baed on their subscription plans') }}"></i></h6>
-													<input type="number" class="form-control @error('whisper-default-duration') is-danger @enderror" id="whisper-default-duration" name="whisper-default-duration" value="{{ config('settings.whisper_default_duration') }}">
-													@error('whisper-default-duration')
-														<p class="text-danger">{{ $errors->first('whisper-default-duration') }}</p>
-													@enderror
 												</div> <!-- END STORAGE OPTION -->							
 											</div>								
 										</div>		
@@ -807,7 +986,7 @@
 								</div>
 
 
-								<div class="card border-0 special-shadow ">							
+								<div class="card shadow-0 ">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-sliders text-info fs-14 mr-2"></i>{{ __('Miscellaneous') }}</h6>
@@ -837,7 +1016,7 @@
 							<form id="api-features-form" action="{{ route('admin.davinci.configs.store.api') }}" method="POST" enctype="multipart/form-data">
 								@csrf
 
-								<div class="card border-0 special-shadow mt-0 mb-7">							
+								<div class="card shadow-0 mt-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/openai-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('OpenAI') }}</h6>
@@ -906,8 +1085,60 @@
 										</div>	
 									</div>
 								</div>
+
+								<div class="card shadow-0 mb-7">							
+									<div class="card-body">
+
+										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/anthropic.jpeg')}}" class="fw-2 mr-2" alt="">{{ __('Anthropic') }}</h6>
+
+										<div class="row">
+											<div class="col-lg-12 col-sm-12 no-gutters">
+												<div class="row">							
+													<div class="col-sm-12">
+														<div class="input-box">								
+															<h6>{{ __('Anthropic API Key') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+															<div class="form-group">							    
+																<input type="text" class="form-control @error('anthropic-api-key') is-danger @enderror" id="anthropic-api-key" name="anthropic-api-key" value="{{ config('anthropic.api_key') }}" autocomplete="off">
+																@error('anthropic-api-key')
+																	<p class="text-danger">{{ $errors->first('anthropic-api-key') }}</p>
+																@enderror												
+															</div> 
+														</div> 
+													</div>
+												</div>												
+											</div>							
+										</div>
+			
+									</div>
+								</div>
+
+								<div class="card shadow-0 mb-7">							
+									<div class="card-body">
+
+										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/gcp-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Google Gemini') }}</h6>
+
+										<div class="row">
+											<div class="col-lg-12 col-sm-12 no-gutters">
+												<div class="row">							
+													<div class="col-sm-12">
+														<div class="input-box">								
+															<h6>{{ __('Gemini API Key') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+															<div class="form-group">							    
+																<input type="text" class="form-control @error('gemini-api-key') is-danger @enderror" id="gemini-api-key" name="gemini-api-key" value="{{ config('gemini.api_key') }}" autocomplete="off">
+																@error('gemini-api-key')
+																	<p class="text-danger">{{ $errors->first('gemini-api-key') }}</p>
+																@enderror												
+															</div> 
+														</div> 
+													</div>
+												</div>												
+											</div>							
+										</div>
+			
+									</div>
+								</div>
 								
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/stability-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Stable Diffusion') }}</h6>
@@ -954,7 +1185,7 @@
 									</div>
 								</div>	
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/azure-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Azure Voiceover Settings') }}</h6>
@@ -1016,7 +1247,7 @@
 									</div>
 								</div>
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/elevenlabs-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('ElevenLabs Voiceover Settings') }}</h6>
@@ -1047,7 +1278,7 @@
 									</div>
 								</div>	
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/gcp-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('GCP Voiceover Settings') }}</h6>
@@ -1075,7 +1306,7 @@
 											</div>	
 											<div class="col-lg-6 col-md-6 col-sm-12">								
 												<div class="input-box">								
-													<h6>GCP Storage Bucket Name <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<h6>{{ __('GCP Storage Bucket Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 													<div class="form-group">							    
 														<input type="text" class="form-control @error('gcp-bucket') is-danger @enderror" id="gcp-bucket" name="gcp-bucket" value="{{ config('services.gcp.bucket') }}" autocomplete="off">
 														@error('gcp-bucket')
@@ -1089,11 +1320,30 @@
 									</div>
 								</div>	
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/aws-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Amazon Web Services') }}</h6>
 
 										<div class="row">
+											<div class="col-md-6 col-sm-12">
+												<div class="form-group mb-3">
+													<label class="custom-switch">
+														<input type="checkbox" name="enable-aws-std" class="custom-switch-input" @if ( config('settings.enable.aws_std')  == 'on') checked @endif>
+														<span class="custom-switch-indicator"></span>
+														<span class="custom-switch-description">{{ __('Activate AWS Standard Voices') }}</span>
+													</label>
+												</div>
+											</div>	
+											<div class="col-md-6 col-sm-12">
+												<div class="form-group mb-3">
+													<label class="custom-switch">
+														<input type="checkbox" name="enable-aws-nrl" class="custom-switch-input" @if ( config('settings.enable.aws_nrl')  == 'on') checked @endif>
+														<span class="custom-switch-indicator"></span>
+														<span class="custom-switch-description">{{ __('Activate AWS Neural Voices') }}</span>
+													</label>
+												</div>
+											</div>	
+
 											<div class="col-lg-6 col-md-6 col-sm-12">								
 												<!-- ACCESS KEY -->
 												<div class="input-box">								
@@ -1173,7 +1423,7 @@
 									</div>
 								</div>	
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/storj-ssm.png')}}" class="fw-2 mr-2" alt="">{{ __('Storj Cloud') }}</h6>
 
@@ -1222,7 +1472,7 @@
 									</div>
 								</div>
 
-								<div class="card border-0 special-shadow mb-7">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/dropbox-ssm.png')}}" class="fw-2 mr-2" alt="">{{ __('Dropbox') }}</h6>
 
@@ -1271,7 +1521,7 @@
 									</div>
 								</div>
 
-								<div class="card border-0 special-shadow">							
+								<div class="card shadow-0 mb-7">							
 									<div class="card-body">
 										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/wasabi-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Wasabi Cloud Storage') }}</h6>
 
@@ -1326,7 +1576,7 @@
 														<option value="us-east-2" @if ( config('services.wasabi.region')  == 'us-east-2') selected @endif>{{ __('US N.Virginia us-east-2') }}</option>
 														<option value="ap-northeast-1" @if ( config('services.wasabi.region')  == 'ap-northeast-1') selected @endif>{{ __('Asia Pacific Tokyo ap-northeast-1') }}</option>
 														<option value="ap-northeast-2" @if ( config('services.wasabi.region')  == 'ap-northeast-2') selected @endif>{{ __('Asia Pacific Osaka ap-northeast-2') }}</option>
-														<option value="ap-sotheast-1" @if ( config('services.wasabi.region')  == 'ap-sotheast-1') selected @endif>{{ __('Asia Pacific Singapore ap-sotheast-1') }}</option>
+														<option value="ap-southeast-1" @if ( config('services.wasabi.region')  == 'ap-southeast-1') selected @endif>{{ __('Asia Pacific Singapore ap-southeast-1') }}</option>
 														<option value="ap-southeast-2" @if ( config('services.wasabi.region')  == 'ap-southeast-2') selected @endif>{{ __('Asia Pacific Sydney ap-southeast-2') }}</option>
 														<option value="ca-central-1" @if ( config('services.wasabi.region')  == 'ca-central-1') selected @endif>{{ __('Canada Toronto ca-central-1') }}</option>
 														<option value="eu-central-1" @if ( config('services.wasabi.region')  == 'eu-central-1') selected @endif>{{ __('Europe Amsterdam eu-central-1') }}</option>
@@ -1342,6 +1592,122 @@
 									</div>
 								</div>
 
+								<div class="card shadow-0 mb-7">							
+									<div class="card-body">
+										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/cloudflare-sm.png')}}" class="fw-2 mr-2" alt="">{{ __('Cloudflare R2 Storage') }}</h6>
+
+										<div class="row">
+											<div class="col-lg-6 col-md-6 col-sm-12">								
+												<!-- ACCESS KEY -->
+												<div class="input-box">								
+													<h6>{{ __('Cloudflare R2 Access Key') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('set-r2-access-key') is-danger @enderror" id="r2-access-key" name="set-r2-access-key" value="{{ config('services.r2.key') }}" autocomplete="off">
+														@error('set-r2-access-key')
+															<p class="text-danger">{{ $errors->first('set-r2-access-key') }}</p>
+														@enderror
+													</div> 
+												</div> <!-- END ACCESS KEY -->
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">
+												<!-- SECRET ACCESS KEY -->
+												<div class="input-box">								
+													<h6>{{ __('Cloudflare R2 Secret Access Key') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('set-r2-secret-access-key') is-danger @enderror" id="r2-secret-access-key" name="set-r2-secret-access-key" value="{{ config('services.r2.secret') }}" autocomplete="off">
+														@error('set-r2-secret-access-key')
+															<p class="text-danger">{{ $errors->first('set-r2-secret-access-key') }}</p>
+														@enderror
+													</div> 
+												</div> <!-- END SECRET ACCESS KEY -->
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">								
+												<div class="input-box">								
+													<h6>{{ __('Cloudflare R2 Bucket Name') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('set-r2-bucket') is-danger @enderror" id="r2-bucket" name="set-r2-bucket" value="{{ config('services.r2.bucket') }}" autocomplete="off">
+														@error('set-r2-bucket')
+															<p class="text-danger">{{ $errors->first('set-r2-bucket') }}</p>
+														@enderror
+													</div> 
+												</div> 
+											</div>		
+											
+											<div class="col-lg-6 col-md-6 col-sm-12">								
+												<div class="input-box">								
+													<h6>{{ __('Cloudflare R2 Endpoint') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('set-r2-endpoint') is-danger @enderror" id="r2-endpoint" name="set-r2-endpoint" value="{{ config('services.r2.endpoint') }}" autocomplete="off">
+														@error('set-r2-endpoint')
+															<p class="text-danger">{{ $errors->first('set-r2-endpoint') }}</p>
+														@enderror
+													</div> 
+												</div> 
+											</div>
+
+											<div class="col-lg-6 col-md-6 col-sm-12">								
+												<div class="input-box">								
+													<h6>{{ __('Cloudflare R2 Public URL') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('set-r2-url') is-danger @enderror" id="r2-url" name="set-r2-url" value="{{ config('services.r2.url') }}" autocomplete="off">
+														@error('set-r2-url')
+															<p class="text-danger">{{ $errors->first('set-r2-url') }}</p>
+														@enderror
+													</div> 
+												</div> 
+											</div>
+				
+										</div>
+			
+									</div>
+								</div>
+
+								<div class="card shadow-0 mb-7">							
+									<div class="card-body">
+										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/serper.png')}}" class="fw-2 mr-2" alt="">{{ __('Serper Settings') }}</h6>
+
+										<div class="row">
+											<div class="col-md-6 col-sm-12">
+												<div class="input-box">								
+													<h6>{{ __('Serper API Key') }} <span class="text-muted">({{ __('Required for Real-Time Internet Access') }})</span></h6>
+													<div class="form-group">							    
+														<input type="text" class="form-control @error('set-serper-api') is-danger @enderror" id="set-serper-api" name="set-serper-api" value="{{ config('services.serper.key') }}" autocomplete="off">
+														@error('set-serper-api')
+															<p class="text-danger">{{ $errors->first('set-serper-api') }}</p>
+														@enderror
+													</div> 												
+												</div> 
+											</div>
+										</div>			
+									</div>
+								</div>
+
+								<div class="card shadow-0">							
+									<div class="card-body">
+										<h6 class="fs-12 font-weight-bold mb-4"><img src="{{URL::asset('img/csp/plagiarism.png')}}" class="fw-2 mr-2" alt="">{{ __('Plagiarism Check Settings') }}</h6>
+
+										@if ($type == 'Regular License' || $type == '')
+											<p class="fs-14 text-center" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem;">{{ __('Extended License is required in order to have access to these features') }}</p>
+										@else
+											<div class="row">
+												<div class="col-md-6 col-sm-12">
+													<div class="input-box">								
+														<h6>{{ __('Plagiarism Check API Token') }}</h6>
+														<div class="form-group">							    
+															<input type="text" class="form-control @error('set-plagiarism-api') is-danger @enderror" id="set-plagiarism-api" name="set-plagiarism-api" value="{{ config('services.plagiarism.key') }}" autocomplete="off">
+															@error('set-plagiarism-api')
+																<p class="text-danger">{{ $errors->first('set-plagiarism-api') }}</p>
+															@enderror
+														</div> 												
+													</div> 
+												</div>
+											</div>
+										@endif			
+									</div>
+								</div>
+
 								<!-- SAVE CHANGES ACTION BUTTON -->
 								<div class="border-0 text-center mb-2 mt-1">
 									<button type="button" class="btn ripple btn-primary" style="min-width: 200px;" id="api-settings">{{ __('Save') }}</button>							
@@ -1354,12 +1720,12 @@
 								@csrf
 
 								@if ($type == 'Regular License' || $type == '')
-									<p class="fs-14" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem;">{{ __('Extended License is required in order to have access to these features') }}</p>
+									<p class="fs-14 text-center" style="background:#FFE2E5; color:#ff0000; padding:1rem 2rem; border-radius: 0.5rem;">{{ __('Extended License is required in order to have access to these features') }}</p>
 								@else
-									<div class="card border-0 special-shadow mt-0 mb-7">							
+									<div class="card shadow-0 mt-0 mb-7">							
 										<div class="card-body">
 
-											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-video text-danger fs-14 mr-2"></i>{{ __('AI Video Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
+											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-video text-danger fs-14 mr-2"></i>{{ __('AI Video Settings') }} <span class="text-muted">({{ __('For All Groups') }}) (Stable Diffusion)</span></h6>
 
 											<div class="row">
 												<div class="col-lg-6 col-md-6 col-sm-12">
@@ -1376,7 +1742,7 @@
 
 												<div class="col-lg-6 col-md-6 col-sm-12">
 													<div class="input-box">
-														<h6>{{ __('AI Text to Video Feature Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+														<h6>{{ __('AI Image to Video Feature Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 														<div class="form-group mt-3">
 															<label class="custom-switch">
 																<input type="checkbox" name="video-user-access" class="custom-switch-input" @if ( config('settings.video_user_access')  == 'allow') checked @endif>
@@ -1401,10 +1767,10 @@
 										</div>
 									</div>
 
-									<div class="card border-0 special-shadow mt-0 mb-7">							
+									<div class="card shadow-0 mt-0 mb-7">							
 										<div class="card-body">
 
-											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-user-music text-danger fs-14 mr-2"></i>{{ __('Voice Cloning Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
+											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-user-music text-danger fs-14 mr-2"></i>{{ __('Voice Cloning Settings') }} <span class="text-muted">({{ __('For All Groups') }}) (ElevenLabs)</span></h6>
 
 											<div class="row">
 
@@ -1430,12 +1796,24 @@
 															</label>
 														</div>
 													</div>
-												</div>				
+												</div>	
+												
+												<div class="col-md-6 col-sm-12">
+													<div class="input-box">								
+														<h6>{{ __('Voice Clone Limit') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span></h6>
+														<div class="form-group">							    
+															<input type="text" class="form-control @error('voice-clone-limit') is-danger @enderror" id="voice-clone-limit" name="voice-clone-limit" value="{{ config('settings.voice_clone_limit') }}" autocomplete="off">
+															@error('voice-clone-limit')
+																<p class="text-danger">{{ $errors->first('voice-clone-limit') }}</p>
+															@enderror
+														</div> 												
+													</div> 
+												</div>
 											</div>		
 										</div>
 									</div>
 
-									<div class="card border-0 special-shadow mt-0">							
+									<div class="card shadow-0 mt-0 mb-7">							
 										<div class="card-body">
 
 											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-photo-film-music text-danger fs-14 mr-2"></i>{{ __('Sound Studio Settings') }} <span class="text-muted">({{ __('For All Groups') }})</span></h6>
@@ -1500,6 +1878,80 @@
 														</div> 		
 													</div>
 												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">
+														<a href="{{ route('admin.studio') }}" class="btn btn-primary ripple mt-4 pl-6 pr-6">{{ __('Default Background Audio Tracks') }}</a>	
+													</div>
+												</div>												
+											</div>		
+										</div>
+									</div>
+
+									<div class="card shadow-0 mt-0 mb-7">							
+										<div class="card-body">
+
+											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-shield-check text-danger fs-14 mr-2"></i>{{ __('AI Plagiarism Checker Settings') }} <span class="text-muted">({{ __('For All Groups') }}) (Plagiarism Check Org)</span></h6>
+
+											<div class="row">
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">
+														<h6>{{ __('AI Plagiarism Checker Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+														<div class="form-group mt-3">
+															<label class="custom-switch">
+																<input type="checkbox" name="plagiarism-checker-feature-user" class="custom-switch-input" @if ( config('settings.plagiarism_checker_feature_user')  == 'allow') checked @endif>
+																<span class="custom-switch-indicator"></span>
+															</label>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">
+														<h6>{{ __('AI Plagiarism Checker Feature Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+														<div class="form-group mt-3">
+															<label class="custom-switch">
+																<input type="checkbox" name="plagiarism-checker-user-access" class="custom-switch-input" @if ( config('settings.plagiarism_checker_user_access')  == 'allow') checked @endif>
+																<span class="custom-switch-indicator"></span>
+															</label>
+														</div>
+													</div>
+												</div>				
+											</div>		
+										</div>
+									</div>
+
+									<div class="card shadow-0 mt-0">							
+										<div class="card-body">
+
+											<h6 class="fs-12 font-weight-bold mb-4"><i class="fa-sharp fa-solid fa-user-secret text-danger fs-14 mr-2"></i>{{ __('AI Content Detector Settings') }} <span class="text-muted">({{ __('For All Groups') }}) (Plagiarism Check Org)</span></h6>
+
+											<div class="row">
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">
+														<h6>{{ __('AI Content Detector Feature') }} <span class="text-muted">({{ __('For All Groups') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+														<div class="form-group mt-3">
+															<label class="custom-switch">
+																<input type="checkbox" name="ai-detector-feature-user" class="custom-switch-input" @if ( config('settings.ai_detector_feature_user')  == 'allow') checked @endif>
+																<span class="custom-switch-indicator"></span>
+															</label>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-lg-6 col-md-6 col-sm-12">
+													<div class="input-box">
+														<h6>{{ __('AI Content Detector Feature Access') }} <span class="text-muted">({{ __('For Non-Subscribers') }})</span> <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+														<div class="form-group mt-3">
+															<label class="custom-switch">
+																<input type="checkbox" name="ai-detector-user-access" class="custom-switch-input" @if ( config('settings.ai_detector_user_access')  == 'allow') checked @endif>
+																<span class="custom-switch-indicator"></span>
+															</label>
+														</div>
+													</div>
+												</div>				
 											</div>		
 										</div>
 									</div>
@@ -1521,8 +1973,29 @@
 @endsection
 
 @section('js')
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.full.min.js"></script> 
 	<script src="{{URL::asset('js/admin-config.js')}}"></script>
 	<script type="text/javascript">
+		let list = "{{ config('settings.voiceover_free_tier_vendors') }}"
+		list = list.split(', ')
+
+		let models = "{{ config('settings.free_tier_models') }}"
+		models = models.split(', ')
+
+		$(function(){
+			$("#voiceover-vendors").select2({
+				theme: "bootstrap-5",
+				containerCssClass: "select2--small",
+				dropdownCssClass: "select2--small",
+			}).val(list).trigger('change.select2');
+
+			$("#models-list").select2({
+				theme: "bootstrap-5",
+				containerCssClass: "select2--small",
+				dropdownCssClass: "select2--small",
+			}).val(models).trigger('change.select2');
+		});
+
 		$('#general-settings').on('click',function(e) {
 
 			const form = document.getElementById("general-features-form");

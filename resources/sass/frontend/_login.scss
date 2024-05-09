@@ -21,13 +21,17 @@
       justify-content: center;
 
       &:hover, &:focus {
-         border-color: $primaryTextColor!important;
-         background-color: $primaryTextColor;
+         border-color: #000!important;
+         background-color: #000;
          color: #FFF!important;
          box-shadow: 0 1px 3px rgba(33, 33, 33, 0.5) !important;
       }
    }
 }
+
+.login-background {
+   background: #FFF;
+ }
 
 #login-google {
    color: #728097;

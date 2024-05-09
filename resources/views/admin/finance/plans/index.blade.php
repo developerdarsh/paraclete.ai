@@ -37,16 +37,13 @@
 					<table id='subscriptionPlanTable' class='table' width='100%'>
 							<thead>
 								<tr>
-									<th width="10%">{{ __('Plan Name') }}</th>
-									<th width="7%">{{ __('Status') }}</th>
-									<th width="5%">{{ __('Subscribers') }}</th>
-									<th width="7%">{{ __('Words') }}</th>																										
-									<th width="7%">{{ __('Images') }}</th>																										
-									<th width="7%">{{ __('Characters') }}</th>																										
-									<th width="7%">{{ __('Minutes') }}</th>																										
-									<th width="7%">{{ __('Frequency') }}</th>																		
-									<th width="5%">{{ __('Featured') }}</th>
-									<th width="5%">{{ __('Free') }}</th>
+									<th width="7%">{{ __('Plan Name') }}</th>
+									<th width="2%">{{ __('Status') }}</th>
+									<th width="2%">{{ __('Subscribers') }}</th>
+									<th width="22%">{{ __('GPT 4 / GPT 4T / GPT 3.5T') }} / {{ __('DE Images') }} / {{ __('SD Images') }} / {{ __('Characters') }} / {{ __('Minutes') }}</th>																									
+									<th width="3%">{{ __('Frequency') }}</th>																		
+									<th width="2%">{{ __('Featured') }}</th>
+									<th width="2%">{{ __('Free') }}</th>
 									<th width="6%">{{ __('Created On') }}</th>
 									<th width="7%">{{ __('Actions') }}</th>
 								</tr>
@@ -110,26 +107,8 @@
 						searchable: true
 					},				
 					{
-						data: 'custom-words',
-						name: 'custom-words',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'custom-images',
-						name: 'custom-images',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'custom-characters',
-						name: 'custom-characters',
-						orderable: true,
-						searchable: true
-					},
-					{
-						data: 'custom-minutes',
-						name: 'custom-minutes',
+						data: 'custom-credits',
+						name: 'custom-credits',
 						orderable: true,
 						searchable: true
 					},
@@ -186,7 +165,7 @@
 						$.ajax({
 							headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
 							method: 'post',
-							url: 'plan/delete',
+							url: 'plan/subscription/delete',
 							data: formData,
 							processData: false,
 							contentType: false,

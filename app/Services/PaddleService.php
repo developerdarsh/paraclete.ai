@@ -5,17 +5,14 @@ namespace App\Services;
 use App\Traits\ConsumesExternalServiceTrait;
 use Illuminate\Http\Request;
 use Spatie\Backup\Listeners\Listener;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use App\Services\Statistics\UserService;
-use App\Events\PaymentReferrerBonus;
-use App\Events\PaymentProcessed;
 use App\Models\Payment;
 use App\Models\Subscriber;
 use App\Models\PrepaidPlan;
 use App\Models\SubscriptionPlan;
-use App\Models\User;
+use App\Services\HelperService;
 use Carbon\Carbon;
 
 class PaddleService 
@@ -87,41 +84,9 @@ class PaddleService
 
         if ($payment->success == true) {
             
-            $duration = $id->payment_frequency;
-            $days = ($duration == 'monthly') ? 31 : 365;
-    
-            $subscription = Subscriber::create([
-                'user_id' => auth()->user()->id,
-                'plan_id' => $id->id,
-                'status' => 'Pending',
-                'created_at' => now(),
-                'gateway' => 'Paddle',
-                'frequency' => $id->payment_frequency,
-                'plan_name' => $id->plan_name,
-                'words' => $id->words,
-                'images' => $id->images,
-                'characters' => $id->characters,
-                'minutes' => $id->minutes,
-                'subscription_id' => $order_id,
-                'active_until' => Carbon::now()->addDays($days),
-            ]);       
-    
-    
-            $record_payment = new Payment();
-            $record_payment->user_id = auth()->user()->id;
-            $record_payment->order_id = $order_id;
-            $record_payment->plan_id = $id->id;
-            $record_payment->plan_name = $id->plan_name;
-            $record_payment->frequency = $id->payment_frequency;
-            $record_payment->price = $id->price;
-            $record_payment->currency = $id->currency;
-            $record_payment->gateway = 'Paddle';
-            $record_payment->status = 'pending';
-            $record_payment->words = $id->words;
-            $record_payment->images = $id->images;
-            $record_payment->characters = $id->characters;
-            $record_payment->minutes = $id->minutes;
-            $record_payment->save();
+            HelperService::registerRecurringSubscriber($id, 'Paddle', 'Pending', $order_id);
+     
+            HelperService::registerRecurringPayment($id, $order_id, 'Paddle', 'pending');
             
             $redirect = $payment->response->url;
             $plan_name = $id->plan_name;
@@ -158,9 +123,6 @@ class PaddleService
         
         session()->put('type', $type);
         session()->put('plan_id', $id);
-        $listener = new Listener();
-        $process = $listener->download();
-        if (!$process['status']) return;
         
         $params = [
             'vendor_id' => config('services.paddle.vendor_id'),
@@ -190,40 +152,13 @@ class PaddleService
             if ($type == 'lifetime') {
 
                 $days = 18250;
+
+                HelperService::registerSubscriber($id, 'Paddle', 'Pending', $order_id, $days);
     
-                $subscription = Subscriber::create([
-                    'user_id' => auth()->user()->id,
-                    'plan_id' => $id->id,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'gateway' => 'Paddle',
-                    'frequency' => 'lifetime',
-                    'plan_name' => $id->plan_name,
-                    'words' => $id->words,
-                    'images' => $id->images,
-                    'characters' => $id->characters,
-                    'minutes' => $id->minutes,
-                    'subscription_id' => $order_id,
-                    'active_until' => Carbon::now()->addDays($days),
-                ]);  
             }
 
-            $record_payment = new Payment();
-            $record_payment->user_id = auth()->user()->id;
-            $record_payment->order_id = $order_id;
-            $record_payment->plan_id = $id->id;
-            $record_payment->plan_name = $id->plan_name;
-            $record_payment->frequency = $type;
-            $record_payment->price = $id->price;
-            $record_payment->currency = $id->currency;
-            $record_payment->gateway = 'Paddle';
-            $record_payment->status = 'pending';
-            $record_payment->words = $id->words;
-            $record_payment->images = $id->images;
-            $record_payment->characters = $id->characters;
-            $record_payment->minutes = $id->minutes;
-            $record_payment->save();
-            
+            HelperService::registerPayment($type, $id->id, $order_id, $id->price, 'Paddle', 'pending');
+    
             $redirect = $payment->response->url;
             $plan_name = $id->plan_name;
             return view('user.plans.paddle-checkout', compact('redirect', 'plan_name'));

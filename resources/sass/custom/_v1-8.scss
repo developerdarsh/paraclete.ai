@@ -326,7 +326,7 @@
 
 	.card-footer {
 		border-top: 1px solid #ebecf1!important;
-		height: 75px!important;
+		min-height: 75px!important;
 	}
  } 
 
@@ -414,6 +414,6 @@
 .modal-body,
 #create-new-chat {
 	.browse-file {
-		margin-right: 80px;
+		margin-right: 100px;
 	}
 } 

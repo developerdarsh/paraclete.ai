@@ -20,7 +20,10 @@ class ChatHistory extends Model
         'response',
         'prompt',
         'words',
-        'images'
+        'images',
+        'model',
+        'input_tokens',
+        'output_tokens',
     ];
 
 

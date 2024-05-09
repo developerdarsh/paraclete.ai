@@ -23,5 +23,7 @@ class Template extends Model
         'package',
         'fields',
         'new',
+        'model',
+        'model_mode'
     ];
 }

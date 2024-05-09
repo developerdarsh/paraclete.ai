@@ -21,6 +21,9 @@ return new class extends Migration
             $table->longText('prompt')->nullable();  
             $table->integer('words')->nullable(); 
             $table->longText('images')->nullable();
+            $table->string('model')->nullable();
+            $table->integer('input_tokens')->default(0);
+            $table->integer('output_tokens')->default(0);
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

@@ -2,12 +2,12 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7"> 
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center"> 
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Edit Chat Prompt') }}</h4>
 			<ol class="breadcrumb mb-2">
-				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-microchip-ai mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
-				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Davinci Management') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-brain-circuit mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
+				<li class="breadcrumb-item"><a href="{{ route('admin.davinci.dashboard') }}"> {{ __('Chat Settings') }}</a></li>
 				<li class="breadcrumb-item" aria-current="page"><a href="#"> {{ __('Chats Prompts') }}</a></li>
 				<li class="breadcrumb-item active" aria-current="page"><a href="#"> {{ __('Edit Chat Prompt') }}</a></li>
 			</ol>
@@ -17,13 +17,13 @@
 @endsection
 
 @section('content')						
-	<div class="row">
+	<div class="row justify-content-center">
 		<div class="col-lg-8 col-md-12 col-xm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Edit Chat Prompt') }}</h3>
 				</div>
-				<div class="card-body pt-5">									
+				<div class="card-body pt-5 pb-0">									
 					<form action="{{ route('admin.davinci.chat.prompt.update', $prompt->id) }}" method="POST" enctype="multipart/form-data">
 						@method('PUT')
 						@csrf
@@ -81,8 +81,8 @@
 						<div class="modal-footer d-inline">
 						  <div class="row text-center">
 							<div class="col-md-12">
-								<a href="{{ route('admin.davinci.chat.prompt') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
-							  <button type="submit" class="btn btn-primary">{{ __('Update') }}</button>
+								<a href="{{ route('admin.davinci.chat.prompt') }}" class="btn btn-cancel mr-2 pl-7 pr-7 ripple">{{ __('Cancel') }}</a>
+							  <button type="submit" class="btn btn-primary pl-7 pr-7 ripple">{{ __('Update') }}</button>
 							</div>
 						  </div>
 						  

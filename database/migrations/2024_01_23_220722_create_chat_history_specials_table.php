@@ -20,6 +20,10 @@ return new class extends Migration
             $table->foreignIdFor(ChatSpecial::class)->onDelete('cascade');
             $table->string("role");
             $table->text("content");
+            $table->string("model")->nullable();
+            $table->integer('input_tokens')->default(0);
+            $table->integer('output_tokens')->default(0);
+            $table->integer('words')->default(0);
             $table->timestamps();
         });
     }

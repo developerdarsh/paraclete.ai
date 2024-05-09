@@ -32,17 +32,57 @@
 						<h6 class="font-weight-bold fs-12">{{ auth()->user()->job_role }}</h6>
 					</div>
 				</div>
-				<div class="card-footer p-0">								
+				<div class="card-footer p-0">	
 					<div class="row text-center pt-4 pb-4">
 						<div class="col-sm">
-							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_words == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableWords() }} @endif</h4>
-							<h6 class="fs-12">{{ __('Words Left') }}</h6>
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gpt_4_turbo_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableGPT4TWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('GPT 4 Turbo') }} {{ __('Words') }}</h6>
 						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gpt_4_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableGPT4Words() }} @endif</h4>
+							<h6 class="fs-12">{{ __('GPT 4') }} {{ __('Words') }}</h6>
+						</div>
+					</div>							
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('GPT 3.5 Turbo') }} {{ __('Words') }}</h6>
+						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->fine_tune_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableFineTuneWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Fine Tune') }} {{ __('Words') }}</h6>
+						</div>
+					</div>
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->claude_3_opus_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableClaudeOpusWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Claude 3 Opus') }} {{ __('Words') }}</h6>
+						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->claude_3_sonnet_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableClaudeSonnetWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Claude 3 Sonnet') }} {{ __('Words') }}</h6>
+						</div>
+					</div>
+					<div class="row text-center pt-4 pb-4">
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->claude_3_haiku_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableClaudeHaikuWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Claude 3 Haiku') }} {{ __('Words') }}</h6>
+						</div>
+						<div class="col-sm">
+							<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->gemini_pro_credits == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableGeminiProWords() }} @endif</h4>
+							<h6 class="fs-12">{{ __('Gemini Pro') }} {{ __('Words') }}</h6>
+						</div>
+					</div>
+					<div class="row text-center pt-4 pb-4">
 						@role('user|subscriber|admin')
 							@if (config('settings.image_feature_user') == 'allow')
 								<div class="col-sm">
-									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">@if (auth()->user()->available_images == -1) {{ __('Unlimited') }} @else {{ App\Services\HelperService::userAvailableImages() }} @endif</h4>
-									<h6 class="fs-12">{{ __('Images Left') }}</h6>
+									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableDEImages() }}</h4>
+									<h6 class="fs-12">{{ __('Dalle Images Left') }}</h6>
+								</div>
+								<div class="col-sm">
+									<h4 class="mb-3 mt-1 font-weight-800 text-primary fs-16">{{ App\Services\HelperService::userAvailableSDImages() }}</h4>
+									<h6 class="fs-12">{{ __('SD Images Left') }}</h6>
 								</div>
 							@endif
 						@endrole
@@ -177,10 +217,10 @@
 								<div class="input-box">
 									<label class="form-label fs-12">{{ __('Change Avatar') }}</label>
 									<div class="input-group file-browser">									
-										<input type="text" class="form-control border-right-0 browse-file" placeholder="choose" style="margin-right: 80px;" readonly>
+										<input type="text" class="form-control border-right-0 browse-file" placeholder="{{ __('Choose your avatar...') }}" style="margin-right: 80px;" readonly>
 										<label class="input-group-btn">
 											<span class="btn btn-primary special-btn">
-												{{ __('Browse') }} <input type="file" name="profile_photo" style="display: none;">
+												{{ __('Browse') }} <input type="file" name="profile_photo" style="display: none;" accept="image/png, image/jpeg, image/webp"> 
 											</span>
 										</label>
 									</div>
@@ -259,8 +299,8 @@
 							</div>
 						</div>
 						<div class="card-footer border-0 text-right mb-2 pr-0">
-							<a href="{{ route('user.profile') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Update') }}</button>							
+							<a href="{{ route('user.profile') }}" class="btn ripple btn-cancel mr-2 pl-7 pr-7">{{ __('Cancel') }}</a>
+							<button type="submit" class="btn ripple btn-primary pl-7 pr-7">{{ __('Update') }}</button>							
 						</div>					
 					</div>				
 				</div>

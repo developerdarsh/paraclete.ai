@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use App\Models\FrontendFeature;
-use App\Models\FrontendExtra;
 use App\Models\FrontendStep;
 use App\Models\FrontendTool;
 use DataTables;
@@ -63,6 +62,7 @@ class FrontendSectionController extends Controller
                     ->addColumn('actions', function($row){
                         $actionBtn = '<div>                                            
                                             <a href="'. route("admin.settings.tool.edit", $row["id"] ). '"><i class="fa-solid fa-pencil-square table-action-buttons edit-action-button" title="'. __('Edit Tool') .'"></i></a>
+                                            <a class="deleteButton" id="'. $row["id"] .'" href="#"><i class="fa-solid fa-trash-xmark table-action-buttons delete-action-button" title="'. __('Delete Tool') .'"></i></a>
                                         </div>';
                         return $actionBtn;
                     })
@@ -136,6 +136,17 @@ class FrontendSectionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function createTools()
+    {
+        return view('admin.frontend.section.tool.create');
+    }
+
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function createFeatures()
     {
         return view('admin.frontend.section.feature.create');
@@ -164,6 +175,64 @@ class FrontendSectionController extends Controller
 
         toastr()->success(__('Step successfully created'));
         return redirect()->route('admin.settings.step');
+    }
+
+
+     /**
+     * Update the specified tool
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function storeTools(Request $request)
+    {   
+        request()->validate([
+            'title' => 'required',
+            'description' => 'required',
+        ]);      
+
+        $status = (request('activate') == 'on') ? true : false;
+
+        $code = 'T' . strtoupper(Str::random(5));
+
+        $tool = new FrontendTool([
+            'tool_code' => $code,
+            'tool_name' => request('name'),
+            'title_meta' => request('subname'),
+            'status' => $status,
+            'title' => request('title'),
+            'description' => request('description'),
+            'image_footer' => request('footer'),
+        ]); 
+
+        $tool->save();
+
+        if (request()->has('logo')) {
+        
+            try {
+                request()->validate([
+                    'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:10048'
+                ]);
+                
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'PHP FileInfo is disabled: ' . $e->getMessage());
+            }
+            
+            $image = request()->file('logo');
+
+            $name = Str::random(5);
+
+          
+            $filePath = '/img/frontend/features/' . $name . '.' . $image->getClientOriginalExtension();
+            
+            $this->uploadImage($image, 'img/frontend/features/', 'public', $name);
+            
+            $tool->image = $filePath;
+            $tool->save();
+        }
+
+        toastr()->success(__('AI Tool has been successfully created'));
+        return redirect()->route('admin.settings.tool');     
     }
 
 
@@ -378,6 +447,31 @@ class FrontendSectionController extends Controller
         if ($request->ajax()) {
 
             $result = FrontendStep::find(request('id'));
+
+            if($result) {
+
+                $result->delete();
+
+                return response()->json('success');
+
+            } else{
+                return response()->json('error');
+            } 
+        }      
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function deleteTools(Request $request)
+    {  
+        if ($request->ajax()) {
+
+            $result = FrontendTool::find(request('id'));
 
             if($result) {
 

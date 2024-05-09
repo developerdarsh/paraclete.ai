@@ -30,22 +30,62 @@
 							<div class="text-center p-2">
 								<div class="d-flex w-100">
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_words == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words + $user->available_words_prepaid) }} @endif</h4>
-										<h6 class="fs-12 mb-3">{{ __('Words Left') }}</h6>
-									</div>			
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->gpt_4_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->gpt_4_credits + $user->gpt_4_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('GPT 4 Model Words') }}</h6>
+									</div>		
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_images == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_images + $user->available_images_prepaid) }} @endif</h4>
-										<h6 class="fs-12 mb-3">{{ __('Images Left') }}</h6>
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->gpt_4_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->gpt_4_turbo_credits + $user->gpt_4_turbo_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('GPT 4 Turbo Model Words') }}</h6>
+									</div>	
+								</div>
+								<div class="d-flex w-100">
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->gpt_3_turbo_credits + $user->gpt_3_turbo_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('GPT 3.5 Turbo Model Words') }}</h6>
+									</div>	
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->fine_tune_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->fine_tune_credits + $user->fine_tune_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Fine Tune Model Words') }}</h6>
+									</div>										
+								</div>
+								<div class="d-flex w-100">
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->claude_3_opus_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->claude_3_opus_credits + $user->claude_3_opus_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Claude 3 Opus Model Words') }}</h6>
+									</div>	
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->claude_3_sonnet_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->claude_3_sonnet_credits + $user->claude_3_sonnet_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Claude 3 Sonnet Model Words') }}</h6>
+									</div>											
+								</div>
+								<div class="d-flex w-100">
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->claude_3_haiku_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->claude_3_haiku_credits + $user->claude_3_haiku_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Claude 3 Haiku Model Words') }}</h6>
+									</div>
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->gemini_pro_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->gemini_pro_credits + $user->gemini_pro_credits_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Gemini Pro Model Words') }}</h6>
+									</div>									
+								</div>
+								<div class="d-flex w-100">
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->available_dalle_images == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_dalle_images + $user->available_dalle_images_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Dalle Images Left') }}</h6>
+									</div>	
+									<div class="flex w-100">
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->available_sd_images == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_sd_images + $user->available_sd_images_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('SD Images Left') }}</h6>
 									</div>	
 								</div>	
 								<div class="d-flex w-100">
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_chars == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_chars + $user->available_chars_prepaid) }} @endif</h4>
-										<h6 class="fs-12 mb-3">{{ __('Characters Left') }}</h6>
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->available_chars == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_chars + $user->available_chars_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Characters Left') }}</h6>
 									</div>			
 									<div class="flex w-100">
-										<h4 class="mb-3 mt-3 font-weight-800 fs-16">@if ($user->available_minutes == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_minutes + $user->available_minutes_prepaid) }} @endif</h4>
-										<h6 class="fs-12 mb-3">{{ __('Minutes Left') }}</h6>
+										<h4 class="mb-3 mt-3 font-weight-bold fs-14">@if ($user->available_minutes == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_minutes + $user->available_minutes_prepaid) }} @endif</h4>
+										<h6 class="fs-11 mb-3 text-muted">{{ __('Minutes Left') }}</h6>
 									</div>	
 								</div>
 							</div>
@@ -265,7 +305,7 @@
 						<div class="card-body">
 							<div class="mb-3">
 								@if ($user_subscription == '')
-									<span class="fs-12 text-muted">{{ __('Total words available') }}: @if ($user->available_words == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }} {{ number_format($user->available_words_prepaid) }}. </span>
+									<span class="fs-12 text-muted">{{ __('Total GPT 3.5 Turbo words available') }}: @if ($user->gpt_3_turbo_credits == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }} {{ number_format($user->available_words_prepaid) }}. </span>
 								@else
 									<span class="fs-12 text-muted">{{ __('Total words available via subscription plan') }}: @if ($user->available_words == -1) {{ __('Unlimited') }} @else {{ number_format($user->available_words) }} @endif.</span> <span class="fs-12 text-muted">{{ __('Total prepaid words available ') }}: {{ number_format($user->available_words_prepaid) }}. </span>
 								@endif

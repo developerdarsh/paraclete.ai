@@ -2,8 +2,8 @@
 
 @section('page-header')
 	<!-- PAGE HEADER -->
-	<div class="page-header mt-5-7"> 
-		<div class="page-leftheader">
+	<div class="page-header mt-5-7 justify-content-center"> 
+		<div class="page-leftheader text-center">
 			<h4 class="page-title mb-0">{{ __('Edit Prepaid Plan') }}</h4>
 			<ol class="breadcrumb mb-2">
 				<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-sack-dollar mr-2 fs-12"></i>{{ __('Admin') }}</a></li>
@@ -17,8 +17,8 @@
 @endsection
 
 @section('content')						
-	<div class="row">
-		<div class="col-lg-10 col-md-12 col-sm-12">
+	<div class="row justify-content-center">
+		<div class="col-lg-8 col-md-10 col-sm-12">
 			<div class="card border-0">
 				<div class="card-header">
 					<h3 class="card-title">{{ __('Edit Prepaid Plan') }}</h3>
@@ -99,38 +99,93 @@
 							<div class="card-body">
 								<h6 class="fs-12 font-weight-bold mb-5"><i class="fa-solid fa-box-circle-check text-info fs-14 mr-1 fw-2"></i>{{ __('Included Features') }}</h6>
 
-								<div class="row">
-									<div class="col-lg-12 col-md-12 col-sm-12">							
+								<div class="row">								
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
 										<div class="input-box">								
-											<h6>{{ __('Total Words included in Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('GPT 4 Turbo Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<div class="form-group">							    
-												<input type="number" class="form-control" id="words" name="words" value="{{ $id->words }}" required>
-												<span class="text-muted fs-10">{{ __('Each text generation task will count total input by user and output words by openai') }}</span>
+												<input type="number" class="form-control" id="gpt_4_turbo" min=0 name="gpt_4_turbo" value="{{ $id->gpt_4_turbo_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
 											</div> 
-											@error('words')
-												<p class="text-danger">{{ $errors->first('words') }}</p>
-											@enderror
 										</div> 						
 									</div>
 
-									<div class="col-lg-12 col-md-12 col-sm-12">							
+									<div class="col-lg-6 col-md-12 col-sm-12">							
 										<div class="input-box">								
-											<h6>{{ __('Total Images included in Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('GPT 4 Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<div class="form-group">							    
-												<input type="number" class="form-control" id="images" name="images" value="{{ $id->images }}" required>
-												<span class="text-muted fs-10">{{ __('Valid for all images sizes') }}</span>
+												<input type="number" class="form-control" id="gpt_4" min=0 name="gpt_4" value="{{ $id->gpt_4_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
 											</div> 
-											@error('images')
-												<p class="text-danger">{{ $errors->first('images') }}</p>
-											@enderror
 										</div> 						
 									</div>
 
-									<div class="col-lg-12 col-md-12 col-sm-12">							
+									<div class="col-lg-6 col-md-12 col-sm-12">							
 										<div class="input-box">								
-											<h6>{{ __('Total Characters included in Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('GPT 3.5 Turbo Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<div class="form-group">							    
-												<input type="number" class="form-control" id="characters" name="characters" value="{{ $id->characters }}" required>
+												<input type="number" class="form-control" id="gpt_3_turbo" min=0 name="gpt_3_turbo" value="{{ $id->gpt_3_turbo_credits_prepaid }}" required>
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
+											</div> 
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Fine Tuned Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="fine_tune" min=0 name="fine_tune" value="{{ $id->fine_tune_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
+											</div> 
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Claude 3 Opus Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="claude_3_opus" min=0 name="claude_3_opus" value="{{ $id->claude_3_opus_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
+											</div> 
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Claude 3 Sonnet Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="claude_3_sonnet" min=0 name="claude_3_sonnet" value="{{ $id->claude_3_sonnet_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
+											</div> 
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Claude 3 Haiku Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="claude_3_haiku" min=0 name="claude_3_haiku" value="{{ $id->claude_3_haiku_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
+											</div> 
+										</div> 						
+									</div>		
+									
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Gemini Pro Model Credits') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="gemini_pro" min=0 name="gemini_pro" value="{{ $id->gemini_pro_credits_prepaid }}">
+												<span class="text-muted fs-10">{{ __('For AI Templates and AI Chat features') }}</span>
+											</div> 
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Characters Included') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="characters" name="characters" value="{{ $id->characters }}">
 												<span class="text-muted fs-10">{{ __('For AI Voiceover feature') }}</span>
 											</div> 
 											@error('characters')
@@ -139,9 +194,35 @@
 										</div> 						
 									</div>
 
-									<div class="col-lg-12 col-md-12 col-sm-12">							
+									<div class="col-lg-6 col-md-12 col-sm-12">							
 										<div class="input-box">								
-											<h6>{{ __('Total Minutes included in Plan') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<h6>{{ __('Dalle Images Included') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="dalle_images" name="dalle_images" value="{{ $id->dalle_images }}" required>
+												<span class="text-muted fs-10">{{ __('Valid for all images sizes') }}</span>
+											</div> 
+											@error('dalle_images')
+												<p class="text-danger">{{ $errors->first('dalle_images') }}</p>
+											@enderror
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Stable Diffusion Images Included') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="number" class="form-control" id="sd_images" name="sd_images" value="{{ $id->sd_images }}" required>
+												<span class="text-muted fs-10">{{ __('Valid for all images sizes') }}</span>
+											</div> 
+											@error('sd_images')
+												<p class="text-danger">{{ $errors->first('sd_images') }}</p>
+											@enderror
+										</div> 						
+									</div>
+
+									<div class="col-lg-6 col-md-12 col-sm-12">							
+										<div class="input-box">								
+											<h6>{{ __('Minutes Included') }} <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
 											<div class="form-group">							    
 												<input type="number" class="form-control" id="minutes" name="minutes" value="{{ $id->minutes }}" required>
 												<span class="text-muted fs-10">{{ __('For AI Speech to Text feature') }}</span>
@@ -157,9 +238,9 @@
 
 
 						<!-- ACTION BUTTON -->
-						<div class="border-0 text-right mb-2 mt-1">
-							<a href="{{ route('admin.finance.prepaid') }}" class="btn btn-cancel mr-2">{{ __('Cancel') }}</a>
-							<button type="submit" class="btn btn-primary">{{ __('Save') }}</button>							
+						<div class="border-0 text-center mb-2 mt-1">
+							<a href="{{ route('admin.finance.prepaid') }}" class="btn btn-cancel ripple mr-2 pl-7 pr-7">{{ __('Return') }}</a>
+							<button type="submit" class="btn btn-primary ripple pl-7 pr-7">{{ __('Save') }}</button>							
 						</div>				
 
 					</form>					

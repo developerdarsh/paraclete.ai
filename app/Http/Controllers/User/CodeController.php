@@ -14,6 +14,8 @@ use App\Models\SubscriptionPlan;
 use App\Models\Code;
 use App\Models\User;
 use App\Models\ApiKey;
+use App\Models\FineTuneModel;
+use App\Services\HelperService;
 
 
 class CodeController extends Controller
@@ -32,7 +34,19 @@ class CodeController extends Controller
      */
     public function index(Request $request)
     {   
-        return view('user.codex.index');
+        # Apply proper model based on role and subsciption
+        if (auth()->user()->group == 'user') {
+            $models = explode(',', config('settings.free_tier_models'));
+        } elseif (!is_null(auth()->user()->plan_id)) {
+            $plan = SubscriptionPlan::where('id', auth()->user()->plan_id)->first();
+            $models = explode(',', $plan->model);
+        } else {            
+            $models = explode(',', config('settings.free_tier_models'));
+        }
+
+        $fine_tunes = FineTuneModel::all();
+
+        return view('user.codex.index', compact('models', 'fine_tunes'));
     }
 
 
@@ -112,27 +126,10 @@ class CodeController extends Controller
             }   
             
             # Verify if user has enough credits
-            if (auth()->user()->available_words != -1) {
-                if ((auth()->user()->available_words + auth()->user()->available_words_prepaid) < 50) {
-                    if (!is_null(auth()->user()->member_of)) {
-                        if (auth()->user()->member_use_credits_code) {
-                            $member = User::where('id', auth()->user()->member_of)->first();
-                            if (($member->available_words + $member->available_words_prepaid) < 50) {
-                                $data['status'] = 'error';
-                                $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                                return $data;
-                            }
-                        } else {
-                            $data['status'] = 'error';
-                            $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                            return $data;
-                        }
-                        
-                    } else {
-                        $data['status'] = 'error';
-                        $data['message'] = __('Not enough word balance to proceed, subscribe or top up your word balance and try again');
-                        return $data;
-                    } 
+            $verify = HelperService::creditCheck($request->model, 50);
+            if (isset($verify['status'])) {
+                if ($verify['status'] == 'error') {
+                    return $verify;
                 }
             }
 
@@ -146,7 +143,7 @@ class CodeController extends Controller
            
 
             $complete = $open_ai->chat([
-                'model' => 'gpt-3.5-turbo',
+                'model' => $request->model,
                 'messages' => [
                     [
                         "role" => "system",
@@ -172,7 +169,7 @@ class CodeController extends Controller
                 $tokens = $response['usage']['total_tokens'];
 
                 # Update credit balance
-                $this->updateBalance($tokens);
+                HelperService::updateBalance($tokens, $request->model);
                 
                 $code = new Code();
                 $code->user_id = auth()->user()->id;
@@ -202,81 +199,6 @@ class CodeController extends Controller
            
         }
 	}
-
-
-    /**
-	*
-	* Update user word balance
-	* @param - total words generated
-	* @return - confirmation
-	*
-	*/
-    public function updateBalance($words) {  
-
-        $user = User::find(Auth::user()->id);
-
-        if (auth()->user()->available_words != -1) {
-        
-            if (Auth::user()->available_words > $words) {
-
-                $total_words = Auth::user()->available_words - $words;
-                $user->available_words = ($total_words < 0) ? 0 : $total_words;
-
-            } elseif (Auth::user()->available_words_prepaid > $words) {
-
-                $total_words_prepaid = Auth::user()->available_words_prepaid - $words;
-                $user->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-
-            } elseif ((Auth::user()->available_words + Auth::user()->available_words_prepaid) == $words) {
-
-                $user->available_words = 0;
-                $user->available_words_prepaid = 0;
-
-            } else {
-
-                if (!is_null(Auth::user()->member_of)) {
-
-                    $member = User::where('id', Auth::user()->member_of)->first();
-
-                    if ($member->available_words > $words) {
-
-                        $total_words = $member->available_words - $words;
-                        $member->available_words = ($total_words < 0) ? 0 : $total_words;
-            
-                    } elseif ($member->available_words_prepaid > $words) {
-            
-                        $total_words_prepaid = $member->available_words_prepaid - $words;
-                        $member->available_words_prepaid = ($total_words_prepaid < 0) ? 0 : $total_words_prepaid;
-            
-                    } elseif (($member->available_words + $member->available_words_prepaid) == $words) {
-            
-                        $member->available_words = 0;
-                        $member->available_words_prepaid = 0;
-            
-                    } else {
-                        $remaining = $words - $member->available_words;
-                        $member->available_words = 0;
-        
-                        $prepaid_left = $member->available_words_prepaid - $remaining;
-                        $member->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                    }
-
-                    $member->update();
-
-                } else {
-                    $remaining = $words - Auth::user()->available_words;
-                    $user->available_words = 0;
-
-                    $prepaid_left = Auth::user()->available_words_prepaid - $remaining;
-                    $user->available_words_prepaid = ($prepaid_left < 0) ? 0 : $prepaid_left;
-                }
-            }
-        }
-
-        $user->update();
-
-        return true;
-    }
 
 
     /**
@@ -312,76 +234,5 @@ class CodeController extends Controller
         }
 	}
 
-
-     /**
-	*
-	* Process media file
-	* @param - file id in DB
-	* @return - confirmation
-	*
-	*/
-	public function view(Request $request) 
-    {
-        if ($request->ajax()) {
-
-            $verify = $this->api->verify_license();
-            if($verify['status']!=true){return false;}
-
-            $image = Image::where('id', request('id'))->first(); 
-
-            if ($image) {
-                if ($image->user_id == Auth::user()->id){
-
-                    $data['status'] = 'success';
-                    $data['url'] = URL::asset($image->image);
-                    return $data;  
-        
-                } else{
-    
-                    $data['status'] = 'error';
-                    $data['message'] = __('There was an error while retrieving this image');
-                    return $data;
-                }  
-            } else {
-                $data['status'] = 'error';
-                $data['message'] = __('Image was not found');
-                return $data;
-            }
-            
-        }
-	}
-
-
-    /**
-	*
-	* Delete File
-	* @param - file id in DB
-	* @return - confirmation
-	*
-	*/
-	public function delete(Request $request) 
-    {
-        if ($request->ajax()) {
-
-            $verify = $this->api->verify_license();
-            if($verify['status']!=true){return false;}
-
-            $image = Image::where('id', request('id'))->first(); 
-
-            if ($image->user_id == auth()->user()->id){
-
-                $image->delete();
-
-                $data['status'] = 'success';
-                return $data;  
-    
-            } else{
-
-                $data['status'] = 'error';
-                $data['message'] = __('There was an error while deleting the image');
-                return $data;
-            }  
-        }
-	}
 
 }

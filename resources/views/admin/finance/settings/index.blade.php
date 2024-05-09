@@ -791,8 +791,8 @@
 										<div class="input-box">								
 											<h6>Iyzico Sandbox <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
 											<select id="iyzico_sandbox" name="iyzico_sandbox" class="form-select">			
-												<option value=true @if (config('services.iyzico.sandbox')  == true) selected @endif>{{ __('Enable') }}</option>
-												<option value=false @if (config('services.iyzico.sandbox')  == false) selected @endif>{{ __('Disable') }}</option>
+												<option value=1 @if (config('services.iyzico.sandbox')  == true) selected @endif>{{ __('Enable') }}</option>
+												<option value=0 @if (config('services.iyzico.sandbox')  == false) selected @endif>{{ __('Disable') }}</option>
 											</select>
 											@error('iyzico_sandbox')
 												<p class="text-danger">{{ $errors->first('iyzico_sandbox') }}</p>
@@ -942,6 +942,77 @@
 											</select>
 											@error('midtrans-production')
 												<p class="text-danger">{{ $errors->first('midtrans-production') }}</p>
+											@enderror
+										</div> 
+									</div>
+									
+								</div>
+	
+							</div>
+						</div>
+
+						<div class="card border-0 special-shadow">							
+							<div class="card-body">
+
+								<h6 class="fs-12 font-weight-bold mb-4"><img src="{{ URL::asset('/img/payments/2checkout.webp') }}" alt="2Checkout" class="gateway-logo"><span class="text-primary">2Checkout</span> {{ __('Payment Gateway') }} <span class="text-primary">({{ __('All Plans') }})</span></h6>
+
+								<div class="row">
+									<div class="col-md-6 col-sm-12 mb-2">
+										<div class="form-group">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-2checkout" class="custom-switch-input" @if (config('services.2checkout.enable')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use 2Checkout Prepaid</span>
+											</label>
+										</div>
+									</div>
+									<div class="col-md-6 col-sm-12">
+										<div class="form-group mb-4">
+											<label class="custom-switch">
+												<input type="checkbox" name="enable-2checkout-subscription" class="custom-switch-input" @if (config('services.2checkout.subscription')  == 'on') checked @endif>
+												<span class="custom-switch-indicator"></span>
+												<span class="custom-switch-description">Use 2Checkout Subscription</span>
+											</label>
+										</div>
+								  </div>
+								</div>
+
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<!-- SECRET ACCESS KEY -->
+										<div class="input-box">								
+											<h6>2Checkout Merchant Code<span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('2checkout_merchant_code') is-danger @enderror" id="2checkout_merchant_code" name="2checkout_merchant_code" value="{{ config('services.2checkout.merchant_code') }}" autocomplete="off">
+											</div>
+											@error('2checkout_merchant_code')
+												<p class="text-danger">{{ $errors->first('2checkout_merchant_code') }}</p>
+											@enderror
+										</div> <!-- END SECRET ACCESS KEY -->
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">								
+										<!-- ACCESS KEY -->
+										<div class="input-box">								
+											<h6>2Checkout Secret Key <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6>
+											<div class="form-group">							    
+												<input type="text" class="form-control @error('2checkout_secret_key') is-danger @enderror" id="2checkout_secret_key" name="2checkout_secret_key" value="{{ config('services.2checkout.secret_key') }}" autocomplete="off">
+											</div> 
+											@error('2checkout_secret_key')
+												<p class="text-danger">{{ $errors->first('2checkout_secret_key') }}</p>
+											@enderror
+										</div> <!-- END ACCESS KEY -->
+									</div>										
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<div class="input-box">								
+											<h6>2Checkout Sandbox <span class="text-required"><i class="fa-solid fa-asterisk"></i></span></h6> 
+											<select id="2checkout_sandbox" name="2checkout_sandbox" class="form-select">			
+												<option value=true @if (config('services.2checkout.sandbox')  == true) selected @endif>{{ __('Enable') }}</option>
+												<option value=false @if (config('services.2checkout.sandbox')  == false) selected @endif>{{ __('Disable') }}</option>
+											</select>
+											@error('2checkout_sandbox')
+												<p class="text-danger">{{ $errors->first('2checkout_sandbox') }}</p>
 											@enderror
 										</div> 
 									</div>

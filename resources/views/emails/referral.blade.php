@@ -1,10 +1,9 @@
-@component('mail::message')
-# You have been invited to join {{ config('app.name') }} by {{ ucfirst(auth()->user()->name) }}
+<x-mail::message>
 
-Join {{ config('app.name') }} to start generating your content by AI.
+{!! $email->message !!}
 
-<!-- <a href="{{ config('app.url') }}/?ref={{ auth()->user()->referral_id }}">Register Now</a> -->
-<a href="{{ config('frontend.custom_url.link') }}/?ref={{ auth()->user()->referral_id }}">Register Now</a>
-Thanks,<br>
-{{ config('app.name') }}
-@endcomponent
+<a href="{{ config('app.url') }}/?ref={{ auth()->user()->referral_id }}">Register Now</a>
+
+
+{!! $email->footer !!}
+</x-mail::message>

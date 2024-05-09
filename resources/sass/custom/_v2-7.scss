@@ -122,6 +122,7 @@
 			&:hover, &:focus {
 				background: $primaryTextActiveColor;
 				border-color: $primaryTextActiveColor;
+				transform: none;
 			}
 
 			:disabled {
@@ -689,7 +690,6 @@
 			.image-prompt {
 				background: #FFF;
 				border-radius: 5px;
-				min-height: 120px;
     			padding: 1rem;
 			}
 		}

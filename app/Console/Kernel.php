@@ -14,10 +14,10 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         'App\Console\Commands\SubscriptionCheckTaskCommand',
-        'App\Console\Commands\ImageExpirationCheckTaskCommand',
+        'App\Console\Commands\StorageClearTaskCommand',
+        'App\Console\Commands\DocumentClearTaskCommand',
         'App\Console\Commands\RenewCreditsTaskCommand',
         'App\Console\Commands\YookassaSubscriptionTaskCommand',
-        'App\Console\Commands\VideoTaskCommand',
     ];
 
     /**
@@ -31,8 +31,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('subscription:check')->daily();
         $schedule->command('subscription:renew')->daily();
         $schedule->command('yookassa:check')->daily();
-        $schedule->command('checkimage:process')->hourly();
-        $schedule->command('video:check')->everyMinute();
+        $schedule->command('document:clear')->everyMinute();
+        $schedule->command('storage:clear')->everyMinute();
     }
 
     /**
